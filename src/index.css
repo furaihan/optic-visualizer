@@ -1,0 +1,33 @@
+@import "tailwindcss";
+
+@layer base {
+  body {
+    @apply bg-slate-50 text-slate-900 overflow-hidden;
+  }
+}
+
+@layer utilities {
+  .custom-scrollbar::-webkit-scrollbar {
+    width: 5px;
+  }
+  .custom-scrollbar::-webkit-scrollbar-track {
+    @apply bg-slate-100;
+  }
+  .custom-scrollbar::-webkit-scrollbar-thumb {
+    @apply bg-slate-300 rounded-full hover:bg-slate-400 transition-colors;
+  }
+
+  .lab-grid {
+    background-image: radial-gradient(circle, #cbd5e1 1.2px, transparent 1.2px);
+    background-size: 32px 32px;
+    opacity: 0.3;
+  }
+}
+
+input[type="range"] {
+  @apply cursor-pointer;
+}
+
+input[type="range"]::-webkit-slider-thumb {
+  @apply w-3.5 h-3.5 bg-white rounded-full appearance-none shadow-md border border-slate-300 ring-2 ring-transparent active:ring-blue-500/20 transition-all;
+}

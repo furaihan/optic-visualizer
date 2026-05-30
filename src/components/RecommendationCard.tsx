@@ -1,0 +1,84 @@
+import React from 'react';
+import { ShieldCheck } from 'lucide-react';
+import { CalculationResult } from '../lib/optical';
+import { translations, Language } from '../lib/i18n';
+
+interface RecommendationCardProps {
+  result: CalculationResult;
+  lensIndex: number;
+  lang: Language;
+}
+
+export const RecommendationCard: React.FC<RecommendationCardProps> = ({ result, lensIndex, lang }) => {
+  const t = translations[lang];
+
+  // Correct volume reduction percentage calculation compared to 1.50 baseline
+  // Formula: (1 - ( (1.50 - 1) / (index - 1) )) * 100
+  const volumeReductionPercent = Math.max(0, Math.round((1 - 0.50 / (lensIndex - 1)) * 100));
+
+  const text = t.volumeReduction
+    .replace('{index}', lensIndex.toFixed(2))
+    .replace('{percent}', volumeReductionPercent.toFixed(0));
+
+  return (
+    <div className="bg-slate-900 p-5 rounded-2xl flex flex-col justify-between text-white shadow-xl relative overflow-hidden">
+      {/* AI Aesthetic Overlay/Glow */}
+      <div className="absolute top-0 right-0 w-32 h-32 bg-blue-500/10 blur-3xl -mr-16 -mt-16 pointer-events-none" />
+      
+      <div className="space-y-4 relative z-10">
+         <div className="space-y-3">
+          <div className="flex justify-between items-start">
+            <div className="flex flex-col gap-0.5">
+               <h3 className="text-[10px] font-bold text-slate-500 uppercase tracking-[0.2em]">{t.recomTitle}</h3>
+               <p className="text-[8px] text-blue-400 font-bold uppercase tracking-wider">Geometric Rule-base</p>
+            </div>
+            <div className="px-2 py-0.5 rounded-full bg-slate-800 text-slate-500 text-[8px] font-bold border border-white/5">{t.bestChoice}</div>
+          </div>
+
+          <div className="flex flex-col gap-1.5">
+            <p className="text-2xl font-black text-white italic tracking-tighter">
+              INDEX {result.recommendation?.index.toFixed(2)}
+            </p>
+            <div className="flex flex-wrap gap-1.5">
+               <span className="text-[9px] px-1.5 py-0.5 bg-white/10 rounded font-bold text-slate-300 border border-white/5">
+                 {result.recommendation?.material}
+               </span>
+               <span className="text-[9px] px-1.5 py-0.5 bg-emerald-500/20 rounded font-bold text-emerald-400 border border-emerald-500/20">
+                 -{result.recommendation?.thinness} THIN
+               </span>
+               <span className="text-[9px] px-1.5 py-0.5 bg-blue-500/20 rounded font-bold text-blue-400 border border-blue-500/20">
+                 ABBE {result.recommendation?.abbe}
+               </span>
+            </div>
+          </div>
+          
+          <div className="min-h-[40px]">
+             <p className="text-[11px] text-slate-300 font-medium leading-relaxed italic border-l-2 border-blue-500/50 pl-3 py-1">
+                {result.recommendation?.reason}
+             </p>
+          </div>
+         </div>
+
+         <div className="h-px bg-white/5" />
+
+         <div className="space-y-2">
+          <div className="flex justify-between items-start">
+            <h3 className="text-[10px] font-bold text-slate-500 uppercase tracking-[0.2em]">{t.geometricAudit}</h3>
+            <ShieldCheck size={14} className="text-emerald-500" />
+          </div>
+          <p className="text-xs font-medium leading-relaxed text-slate-200">
+             {text}
+          </p>
+         </div>
+      </div>
+      <div className="pt-4 mt-4 border-t border-white/5 flex items-center justify-between z-10 relative">
+         <span className="text-[9px] font-bold text-slate-500 uppercase">{t.volumeLabel}: {result.et < 5 ? t.volumeCompact : t.volumeElevated}</span>
+         <div className="flex gap-1">
+            {[1,2,3,4,5].map(i => (
+              <div key={i} className={`w-3.5 h-1 rounded-full ${i <= (result.et < 5 ? 4 : 2) ? 'bg-blue-500' : 'bg-slate-800'}`} />
+            ))}
+         </div>
+      </div>
+    </div>
+  );
+};
