@@ -1,7 +1,7 @@
 import React from 'react';
 import { CalculationResult, FrameParameters, LensParameters } from '../lib/optical';
 import { translations, Language } from '../lib/i18n';
-import { ArrowUpRight, ArrowDownRight, AlertTriangle, CheckCircle2, Info, ChevronDown, MoveHorizontal, Compass, Diameter } from 'lucide-react';
+import { ArrowUpRight, ArrowDownRight, AlertTriangle, CheckCircle2, Info, ChevronDown, MoveHorizontal, Compass, Diameter, Scale } from 'lucide-react';
 
 interface SummaryCardProps {
   result: CalculationResult;
@@ -23,7 +23,9 @@ export const SummaryCard: React.FC<SummaryCardProps> = ({ result, compareResult,
       protLabel: 'Tonjolan Lensa (Ant / Post)',
       protDesc: 'Sejauh mana lensa menonjol melebihi bingkai depan/belakang. Toleransi ≤ 0.5 mm dianggap rata (flush). > 2.0 mm berisiko mengenai bulu mata saat berkedip.',
       ctLabel: 'Ketebalan Tengah (CT)',
-      ctDesc: 'Ketebalan pusat lensa. Lensa minus dioptimalkan otomatis pada batas aman (biasanya 1.0 - 1.5 mm) untuk mempertahankan kekuatan mekanis minimum.'
+      ctDesc: 'Ketebalan pusat lensa. Lensa minus dioptimalkan otomatis pada batas aman (biasanya 1.0 - 1.5 mm) untuk mempertahankan kekuatan mekanis minimum.',
+      weightLabel: 'Estimasi Berat Lensa',
+      weightDesc: 'Berat estimasi per lensa tunggal setelah diasah agar pas ke dalam bingkai. Dihitung berdasarkan volume akhir lensa dan massa jenis monomer bahan.'
     },
     en: {
       title: 'Clinical & Cosmetic Reference Guide',
@@ -32,13 +34,15 @@ export const SummaryCard: React.FC<SummaryCardProps> = ({ result, compareResult,
       protLabel: 'Lens Protrusion (Ant / Post)',
       protDesc: 'How much the lens projects beyond the frame front or back. Tolerance ≤ 0.5 mm is flush. Protrusion > 2.0 mm may touch lashes during blinking.',
       ctLabel: 'Center Thickness (CT)',
-      ctDesc: 'Thickness at optical center. Minus lenses are optimized to safe lower limits (usually 1.0 - 1.5 mm) to retain structural strength.'
+      ctDesc: 'Thickness at optical center. Minus lenses are optimized to safe lower limits (usually 1.0 - 1.5 mm) to retain structural strength.',
+      weightLabel: 'Estimated Lens Weight',
+      weightDesc: 'Estimated weight of a single edged lens. Values < 10g are highly comfortable for continuous wear. Computed based on final lens volume and material density.'
     }
   };
 
   const currentNotes = notes[lang] || notes.en;
 
-  const getDeltaElement = (key: 'et' | 'ct' | 'anteriorProtrusion' | 'posteriorProtrusion') => {
+  const getDeltaElement = (key: 'et' | 'ct' | 'anteriorProtrusion' | 'posteriorProtrusion' | 'weight') => {
     if (!compareResult) return null;
     const currVal = result[key];
     const prevVal = compareResult[key];
@@ -115,9 +119,17 @@ export const SummaryCard: React.FC<SummaryCardProps> = ({ result, compareResult,
     return { label: t.flush, color: 'bg-emerald-50 text-emerald-700 border border-emerald-100', icon: CheckCircle2, iconColor: 'text-emerald-500' };
   };
 
+  const getWeightStatus = (w: number) => {
+    if (w > 15) return { label: lang === 'id' ? 'Berat' : 'Heavy', color: 'bg-rose-50 text-rose-700 border border-rose-100' };
+    if (w > 10) return { label: lang === 'id' ? 'Sedang' : 'Moderate', color: 'bg-amber-50 text-amber-700 border border-amber-100' };
+    if (w > 5) return { label: lang === 'id' ? 'Ringan' : 'Light', color: 'bg-emerald-50 text-emerald-700 border border-emerald-100' };
+    return { label: lang === 'id' ? 'Sangat Ringan' : 'Ultralight', color: 'bg-blue-50 text-blue-700 border border-blue-100' };
+  };
+
   const etStatus = getETStatus(result.et);
   const antStatus = getProtrusionStatus(result.anteriorProtrusion);
   const postStatus = getProtrusionStatus(result.posteriorProtrusion);
+  const weightStatus = getWeightStatus(result.weight);
 
   const isAnteriorUnsafe = result.anteriorProtrusion > 1.5;
   const isPosteriorUnsafe = result.posteriorProtrusion > 2.0;
@@ -177,7 +189,7 @@ export const SummaryCard: React.FC<SummaryCardProps> = ({ result, compareResult,
         </div>
       )}
 
-      <div className="bg-slate-200/60 border border-slate-200 rounded-2xl grid grid-cols-2 md:grid-cols-4 gap-px overflow-hidden shadow-sm">
+      <div className="bg-slate-200/60 border border-slate-200 rounded-2xl grid grid-cols-2 lg:grid-cols-5 gap-px overflow-hidden shadow-sm">
         <StatItem 
           label={t.edgeThick} 
           value={result.et} unit="mm"
@@ -205,6 +217,13 @@ export const SummaryCard: React.FC<SummaryCardProps> = ({ result, compareResult,
           status={postStatus.label} statusColor={postStatus.color}
           icon={postStatus.icon} iconColor={postStatus.iconColor}
           resultKey="posteriorProtrusion"
+        />
+        <StatItem 
+          label={t.lensWeight} 
+          value={result.weight} unit="g"
+          status={weightStatus.label} statusColor={weightStatus.color}
+          icon={Scale} iconColor="text-indigo-500"
+          resultKey="weight"
         />
       </div>
 
@@ -260,7 +279,7 @@ export const SummaryCard: React.FC<SummaryCardProps> = ({ result, compareResult,
         </button>
 
         {showGuide && (
-          <div className="p-4 border-t border-slate-100 bg-white grid gap-4 sm:grid-cols-3 text-xs text-slate-600 leading-normal">
+          <div className="p-4 border-t border-slate-100 bg-white grid gap-4 sm:grid-cols-2 lg:grid-cols-4 text-xs text-slate-600 leading-normal">
             <div className="space-y-1 bg-slate-50/40 p-3 rounded-lg border border-slate-100">
               <h5 className="font-bold text-slate-800 flex items-center gap-1.5">
                 <span className="w-1.5 h-1.5 rounded-full bg-blue-500"></span>
@@ -283,6 +302,14 @@ export const SummaryCard: React.FC<SummaryCardProps> = ({ result, compareResult,
                 {currentNotes.protLabel}
               </h5>
               <p className="text-slate-500 pl-3 leading-relaxed mt-1 text-[11px]">{currentNotes.protDesc}</p>
+            </div>
+
+            <div className="space-y-1 bg-slate-50/40 p-3 rounded-lg border border-slate-100">
+              <h5 className="font-bold text-slate-800 flex items-center gap-1.5">
+                <span className="w-1.5 h-1.5 rounded-full bg-violet-500"></span>
+                {currentNotes.weightLabel}
+              </h5>
+              <p className="text-slate-500 pl-3 leading-relaxed mt-1 text-[11px]">{currentNotes.weightDesc}</p>
             </div>
           </div>
         )}

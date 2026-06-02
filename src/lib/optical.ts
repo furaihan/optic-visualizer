@@ -36,6 +36,8 @@ export interface CalculationResult {
   s2: number; // Sagitta back
   decentration: number;
   y: number; // Half diameter for max thickness calc
+  weight: number; // Estimated lens weight in grams
+  density: number; // Material density in g/cm³
   recommendation?: {
     index: number;
     material: string;
@@ -196,6 +198,31 @@ export function calculateLens(
       recReason += " Note: Large eye size increases edge thickness; higher index recommended.";
   }
 
+  // 8. Density mapping and weight estimation
+  let density = 1.32;
+  if (index <= 1.52) {
+    density = 1.32; // CR-39
+  } else if (index <= 1.57) {
+    density = 1.24; // 1.56 Mid-Index
+  } else if (index <= 1.62) {
+    density = 1.30; // 1.60/1.61 High-Index MR-8
+  } else if (index <= 1.69) {
+    density = 1.35; // 1.67 MR-10
+  } else {
+    density = 1.47; // 1.74 MR-174
+  }
+
+  // Volume approximation of edged lens using elliptical cylinder:
+  // Area_ellipse (mm2) = Math.PI * (a / 2) * (b / 2)
+  // Avg thickness (mm) = (ct + et) / 2
+  // Vol (mm3) = Area_ellipse * Avg thickness
+  // Vol (cm3) = Vol (mm3) / 1000
+  // Weight (g) = Vol (cm3) * density
+  const areaMm2 = Math.PI * (a / 2) * (frame.b / 2);
+  const avgThickMm = (ct + et) / 2;
+  const volumeCm3 = (areaMm2 * avgThickMm) / 1000;
+  const weight = volumeCm3 * density;
+
   return {
     ct,
     et,
@@ -208,6 +235,8 @@ export function calculateLens(
     s2,
     decentration,
     y,
+    weight,
+    density,
     recommendation: {
       index: recIndex,
       material: recMaterial,

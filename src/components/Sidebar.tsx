@@ -1,7 +1,11 @@
 import React from 'react';
 import { LensParameters, FrameParameters, PatientParameters, FrameType } from '../lib/optical';
-import { translations, Language } from '../lib/i18n';
-import { Layers, Frame, User, Minus, Plus, Search, Settings, ChevronDown } from 'lucide-react';
+import { translations, Language, getTooltipByLabel } from '../lib/i18n';
+import { Layers, Frame, User, Minus, Plus, Search, Settings, ChevronDown, HelpCircle, Info, Eye, Ruler, Aperture, Gauge, Zap, ToggleRight, Copy, ArrowRight, Lightbulb, AlertCircle } from 'lucide-react';
+import { Input } from './ui/input';
+import { Label } from './ui/label';
+import { Button } from './ui/button';
+import { Tooltip, TooltipTrigger, TooltipContent, TooltipProvider } from './ui/tooltip';
 
 interface SidebarProps {
   lens: LensParameters;
@@ -20,6 +24,8 @@ interface SidebarProps {
   setFrameType: (t: FrameType) => void;
   lang: Language;
   isMobile?: boolean;
+  highlightedLimit: 'a' | 'b' | 'dbl' | 'ed' | null;
+  setHighlightedLimit: (val: 'a' | 'b' | 'dbl' | 'ed' | null) => void;
 }
 
 interface ControlProps {
@@ -31,9 +37,39 @@ interface ControlProps {
   onChange: (v: number) => void;
   unit: string;
   lang: Language;
+  icon?: React.ReactNode;
 }
 
-const Control: React.FC<ControlProps> = ({ label, value, min, max, step, onChange, unit, lang }) => {
+interface LabelWithTooltipProps {
+  label: string;
+  lang: Language;
+  className?: string;
+  isUppercaseHeader?: boolean;
+  icon?: React.ReactNode;
+}
+
+const LabelWithTooltip: React.FC<LabelWithTooltipProps> = ({ label, lang, className, isUppercaseHeader = false, icon }) => {
+  const tooltipText = getTooltipByLabel(label, lang);
+  if (!tooltipText) {
+    return <span className={className}>{icon && <span className="mr-1.5">{icon}</span>}{label}</span>;
+  }
+  return (
+    <Tooltip>
+      <TooltipTrigger render={<span className={`inline-flex items-center gap-1 cursor-help hover:text-blue-600 dark:hover:text-blue-400 transition-colors ${className || ''}`} />}>
+        <div className="flex items-center gap-1">
+          {icon && <span className="shrink-0">{icon}</span>}
+          <span className={isUppercaseHeader ? "font-bold uppercase tracking-wider text-[10px] text-slate-500" : "font-semibold text-slate-700"}>{label}</span>
+        </div>
+        <HelpCircle size={10} className="text-slate-400 shrink-0" />
+      </TooltipTrigger>
+      <TooltipContent className="p-2.5 max-w-[220px] text-[10.5px] font-sans font-medium leading-normal bg-slate-900 border border-slate-800 text-slate-100 rounded-lg shadow-xl shrink-0 z-50">
+        {tooltipText}
+      </TooltipContent>
+    </Tooltip>
+  );
+};
+
+const Control: React.FC<ControlProps> = ({ label, value, min, max, step, onChange, unit, lang, icon }) => {
   const [typedVal, setTypedVal] = React.useState(value.toString());
 
   React.useEffect(() => {
@@ -53,7 +89,7 @@ const Control: React.FC<ControlProps> = ({ label, value, min, max, step, onChang
 
   const handleTypedChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const raw = e.target.value;
-    setTypedVal(raw); // Allow typing negative numbers, decimals freely
+    setTypedVal(raw);
   };
 
   const handleBlur = () => {
@@ -78,26 +114,26 @@ const Control: React.FC<ControlProps> = ({ label, value, min, max, step, onChang
   return (
     <div className="space-y-1">
       <div className="flex justify-between items-center text-[11px] py-1">
-        <label className="text-slate-600 font-medium pr-1 select-none leading-tight">{label}</label>
-        <div className="flex items-center gap-1 shrink-0">
-          <div className="flex items-center border border-slate-200 rounded overflow-hidden shadow-sm bg-white">
+        <LabelWithTooltip label={label} lang={lang} className="pr-1 select-none leading-tight" icon={icon} />
+        <div className="flex items-center gap-1.5 shrink-0">
+          <div className="flex items-center border border-slate-200 rounded-lg overflow-hidden bg-white shadow-sm h-8">
             <button 
-              onClick={() => commitVal(parseFloat((value - step).toFixed(10)))}
-              className="w-8 h-8 flex items-center justify-center bg-slate-50 hover:bg-slate-100 text-slate-500 hover:text-slate-800 transition-colors border-r border-slate-200 active:bg-slate-200 cursor-pointer"
+              onClick={() => commitVal(value - step)}
+              className="w-8 h-8 flex items-center justify-center bg-slate-50 hover:bg-slate-100 text-slate-500 hover:text-slate-800 transition-colors active:bg-slate-200 cursor-pointer"
               title="Decrease"
             >
               <Minus size={11} strokeWidth={3} />
             </button>
-            <input
+            <Input 
               type="text"
               value={typedVal}
               onChange={handleTypedChange}
               onBlur={handleBlur}
               onKeyDown={handleKeyDown}
-              className={`${inputWidthClass} text-center text-[11px] font-mono font-bold text-blue-600 border-r border-slate-200 py-1.5 outline-none focus:bg-blue-50`}
+              className={`border-0 focus:ring-0 focus:border-0 rounded-none bg-white text-center font-mono text-xs font-bold text-slate-800 p-0 h-8 ${inputWidthClass}`}
             />
             <button 
-              onClick={() => commitVal(parseFloat((value + step).toFixed(10)))}
+              onClick={() => commitVal(value + step)}
               className="w-8 h-8 flex items-center justify-center bg-slate-50 hover:bg-slate-100 text-slate-500 hover:text-slate-800 transition-colors active:bg-slate-200 cursor-pointer"
               title="Increase"
             >
@@ -109,12 +145,15 @@ const Control: React.FC<ControlProps> = ({ label, value, min, max, step, onChang
       </div>
 
       {label.includes("(BC)") && (
-        <div className="text-[10px] text-slate-500 leading-normal mt-1 bg-blue-50/50 p-2 rounded-lg border border-blue-100/30">
-          {lang === 'id' ? (
-            <span>💡 Rekomendasi: <strong>4.00 - 8.00 D</strong>. Base datar direferensikan untuk lensa minus tinggi, base cembung untuk plus.</span>
-          ) : (
-            <span>💡 Recommended: <strong>4.00 - 8.00 D</strong>. Flatter curves suit high minus, steeper curves suit high plus lenses.</span>
-          )}
+        <div className="text-[10px] text-slate-500 leading-normal mt-1 bg-blue-50/50 p-2 rounded-lg border border-blue-100/30 flex gap-2">
+          <Lightbulb size={14} className="text-blue-500 shrink-0 mt-0.5" />
+          <span>
+            {lang === 'id' ? (
+              <span><strong>Rekomendasi:</strong> 4.00 - 8.00 D. Base datar untuk lensa minus tinggi, base cembung untuk plus.</span>
+            ) : (
+              <span><strong>Recommended:</strong> 4.00 - 8.00 D. Flatter curves suit high minus, steeper curves suit high plus.</span>
+            )}
+          </span>
         </div>
       )}
     </div>
@@ -131,11 +170,23 @@ export const Sidebar: React.FC<SidebarProps> = ({
   frameType, setFrameType,
   lang,
   isMobile = false,
+  highlightedLimit,
+  setHighlightedLimit,
 }) => {
   const t = translations[lang];
   const indices = [1.5, 1.56, 1.6, 1.67, 1.74];
 
-  // Section collapse state
+  const framePD = frame.a + frame.dbl;
+  const decentration = Math.abs(framePD - patient.pd) / 2;
+  const decentrationV = Math.abs(patient.fittingHeight - frame.b / 2);
+  const decentrationCombined = Math.sqrt(decentration * decentration + decentrationV * decentrationV);
+  const requiredBlank = frame.ed + 2 * decentrationCombined + 2;
+
+  const isExceedingA = frame.a < 35 || frame.a > 65 || requiredBlank > 80;
+  const isExceedingB = frame.b < 20 || frame.b > 55 || patient.fittingHeight > frame.b - 2 || patient.fittingHeight < 5;
+  const isExceedingDbl = frame.dbl < 10 || frame.dbl > 28;
+  const isExceedingEd = frame.ed < frame.a || frame.ed > 75;
+
   const [openGroup, setOpenGroup] = React.useState<Record<string, boolean>>({
     lens: true,
     frame: true,
@@ -169,8 +220,6 @@ export const Sidebar: React.FC<SidebarProps> = ({
     );
   };
 
-
-
   if (isMobile) {
     return (
       <div className="space-y-4 px-4 py-3 bg-white rounded-2xl border border-slate-200/60 shadow-sm max-w-xl mx-auto">
@@ -178,23 +227,26 @@ export const Sidebar: React.FC<SidebarProps> = ({
           <Control 
             label={t.sphere} unit=" D" min={-20} max={20} step={0.25}
             value={lens.sph} onChange={(v: number) => setLens({ ...lens, sph: v })} lang={lang}
+            icon={<Aperture size={13} className="text-blue-500" />}
           />
           <Control 
             label={t.cylinder} unit=" D" min={-10} max={0} step={0.25}
             value={lens.cyl} onChange={(v: number) => setLens({ ...lens, cyl: v })} lang={lang}
+            icon={<Gauge size={13} className="text-blue-500" />}
           />
           <Control 
             label={t.axis} unit="°" min={0} max={180} step={1}
             value={lens.axis} onChange={(v: number) => setLens({ ...lens, axis: v })} lang={lang}
+            icon={<Zap size={13} className="text-blue-500" />}
           />
-          <div className="space-y-1.5">
-            <label className="text-slate-600 text-[11px] font-medium">{t.refractiveIndex}</label>
+          <div className="space-y-1.5 flex flex-col">
+            <LabelWithTooltip label={t.refractiveIndex} lang={lang} className="text-[11px]" icon={<Eye size={13} className="text-blue-500" />} />
             <div className="grid grid-cols-5 gap-1">
               {indices.map(idx => (
                 <button
                   key={idx}
                   onClick={() => setLens({ ...lens, index: idx })}
-                  className={`py-1.5 rounded text-[10px] font-bold transition-all border ${
+                  className={`py-1.5 rounded text-[10px] font-bold transition-all border cursor-pointer ${
                     lens.index === idx 
                       ? 'bg-blue-600 border-blue-600 text-white shadow-sm' 
                       : 'bg-slate-50 border-slate-200 text-slate-500'
@@ -208,58 +260,131 @@ export const Sidebar: React.FC<SidebarProps> = ({
           <Control 
             label={t.baseCurve} unit=" D" min={0.25} max={12} step={0.25}
             value={lens.baseCurve} onChange={(v: number) => setLens({ ...lens, baseCurve: v })} lang={lang}
+            icon={<Aperture size={13} className="text-blue-500" />}
           />
         </InputGroup>
 
         <InputGroup title={t.frameGeometry} icon={Frame} iconColor="text-emerald-500" groupKey="frame">
           <div className="grid grid-cols-2 gap-3">
-            <div>
-              <label className="text-[10px] text-slate-500 block mb-1">{t.aSize}</label>
-              <input 
+            <div className="flex flex-col">
+              <div className="flex items-center justify-between mb-1">
+                <LabelWithTooltip label={t.aSize} lang={lang} className="" isUppercaseHeader icon={<Ruler size={11} className="text-emerald-500" />} />
+                <button
+                  type="button"
+                  onMouseEnter={() => setHighlightedLimit('a')}
+                  onMouseLeave={() => setHighlightedLimit(null)}
+                  onClick={() => setHighlightedLimit(highlightedLimit === 'a' ? null : 'a')}
+                  className={`p-1 rounded-full transition-all cursor-pointer ${
+                    isExceedingA 
+                      ? 'text-amber-500 hover:text-amber-600 animate-pulse bg-amber-500/10' 
+                      : 'text-slate-300 hover:text-slate-400'
+                  }`}
+                  title={isExceedingA ? (lang === 'id' ? "Batas struktural terlampaui! Sorot untuk melihat detail visual." : "Structural limit exceeded! Hover to see visual details.") : "Ergonomic Limits: 35-65mm."}
+                >
+                  <AlertCircle size={11} />
+                </button>
+              </div>
+              <Input 
                 type="number" value={frame.a} onChange={(e) => setFrame({...frame, a: parseFloat(e.target.value)})}
-                className="w-full text-center text-xs font-mono font-bold text-blue-600 bg-white border border-slate-200 rounded py-1.5 outline-none focus:bg-blue-50 focus:border-blue-300 transition-colors shadow-sm"
+                className={`w-full text-center text-xs font-mono font-bold bg-white border ${
+                  isExceedingA ? 'border-amber-500 text-amber-600 focus:ring-amber-500' : 'border-slate-200 text-blue-600'
+                }`}
               />
             </div>
-            <div>
-              <label className="text-[10px] text-slate-500 block mb-1">{t.bSize}</label>
-              <input 
+            <div className="flex flex-col">
+              <div className="flex items-center justify-between mb-1">
+                <LabelWithTooltip label={t.bSize} lang={lang} className="" isUppercaseHeader icon={<Ruler size={11} className="text-emerald-500" />} />
+                <button
+                  type="button"
+                  onMouseEnter={() => setHighlightedLimit('b')}
+                  onMouseLeave={() => setHighlightedLimit(null)}
+                  onClick={() => setHighlightedLimit(highlightedLimit === 'b' ? null : 'b')}
+                  className={`p-1 rounded-full transition-all cursor-pointer ${
+                    isExceedingB 
+                      ? 'text-amber-500 hover:text-amber-600 animate-pulse bg-amber-500/10' 
+                      : 'text-slate-300 hover:text-slate-400'
+                  }`}
+                  title={isExceedingB ? (lang === 'id' ? "Batas struktural terlampaui! Sorot untuk melihat detail visual." : "Structural limit exceeded! Hover to see visual details.") : "Ergonomic Limits: 20-55mm."}
+                >
+                  <AlertCircle size={11} />
+                </button>
+              </div>
+              <Input 
                 type="number" value={frame.b} onChange={(e) => setFrame({...frame, b: parseFloat(e.target.value)})}
-                className="w-full text-center text-xs font-mono font-bold text-blue-600 bg-white border border-slate-200 rounded py-1.5 outline-none focus:bg-blue-50 focus:border-blue-300 transition-colors shadow-sm"
+                className={`w-full text-center text-xs font-mono font-bold bg-white border ${
+                  isExceedingB ? 'border-amber-500 text-amber-600 focus:ring-amber-500' : 'border-slate-200 text-blue-600'
+                }`}
               />
             </div>
           </div>
           <div className="grid grid-cols-2 gap-3">
-            <div>
-              <label className="text-[10px] text-slate-500 block mb-1">DBL</label>
-              <input 
+            <div className="flex flex-col">
+              <div className="flex items-center justify-between mb-1">
+                <LabelWithTooltip label="DBL" lang={lang} className="" isUppercaseHeader icon={<Ruler size={11} className="text-emerald-500" />} />
+                <button
+                  type="button"
+                  onMouseEnter={() => setHighlightedLimit('dbl')}
+                  onMouseLeave={() => setHighlightedLimit(null)}
+                  onClick={() => setHighlightedLimit(highlightedLimit === 'dbl' ? null : 'dbl')}
+                  className={`p-1 rounded-full transition-all cursor-pointer ${
+                    isExceedingDbl 
+                      ? 'text-amber-500 hover:text-amber-600 animate-pulse bg-amber-500/10' 
+                      : 'text-slate-300 hover:text-slate-400'
+                  }`}
+                  title={isExceedingDbl ? (lang === 'id' ? "Batas struktural terlampaui! Sorot untuk melihat detail visual." : "Structural limit exceeded! Hover to see visual details.") : "Ergonomic Limits: 10-28mm."}
+                >
+                  <AlertCircle size={11} />
+                </button>
+              </div>
+              <Input 
                 type="number" value={frame.dbl} onChange={(e) => setFrame({...frame, dbl: parseFloat(e.target.value)})}
-                className="w-full text-center text-xs font-mono font-bold text-blue-600 bg-white border border-slate-200 rounded py-1.5 outline-none focus:bg-blue-50 focus:border-blue-300 transition-colors shadow-sm"
+                className={`w-full text-center text-xs font-mono font-bold bg-white border ${
+                  isExceedingDbl ? 'border-amber-500 text-amber-600 focus:ring-amber-500' : 'border-slate-200 text-blue-600'
+                }`}
               />
             </div>
-            <div>
-              <label className="text-[10px] text-slate-500 block mb-1">ED</label>
-              <input 
+            <div className="flex flex-col">
+              <div className="flex items-center justify-between mb-1">
+                <LabelWithTooltip label="ED" lang={lang} className="" isUppercaseHeader icon={<Ruler size={11} className="text-emerald-500" />} />
+                <button
+                  type="button"
+                  onMouseEnter={() => setHighlightedLimit('ed')}
+                  onMouseLeave={() => setHighlightedLimit(null)}
+                  onClick={() => setHighlightedLimit(highlightedLimit === 'ed' ? null : 'ed')}
+                  className={`p-1 rounded-full transition-all cursor-pointer ${
+                    isExceedingEd 
+                      ? 'text-amber-500 hover:text-amber-600 animate-pulse bg-amber-500/10' 
+                      : 'text-slate-300 hover:text-slate-400'
+                  }`}
+                  title={isExceedingEd ? (lang === 'id' ? "Batas struktural terlampaui! Sorot untuk melihat detail visual." : "Structural limit exceeded! Hover to see visual details.") : "Ergonomic Limits: ED >= A and <= 75mm."}
+                >
+                  <AlertCircle size={11} />
+                </button>
+              </div>
+              <Input 
                 type="number" value={frame.ed} onChange={(e) => setFrame({...frame, ed: parseFloat(e.target.value)})}
-                className="w-full text-center text-xs font-mono font-bold text-blue-600 bg-white border border-slate-200 rounded py-1.5 outline-none focus:bg-blue-50 focus:border-blue-300 transition-colors shadow-sm"
+                className={`w-full text-center text-xs font-mono font-bold bg-white border ${
+                  isExceedingEd ? 'border-amber-500 text-amber-600 focus:ring-amber-500' : 'border-slate-200 text-blue-600'
+                }`}
               />
             </div>
           </div>
-          <Control label={t.frameDepth} unit="mm" min={1} max={10} step={0.1} value={frame.depth} onChange={(v: number) => setFrame({ ...frame, depth: v })} lang={lang} />
+          <Control label={t.frameDepth} unit="mm" min={1} max={10} step={0.1} value={frame.depth} onChange={(v: number) => setFrame({ ...frame, depth: v })} lang={lang} icon={<Gauge size={13} className="text-emerald-500" />} />
           
-          <div className="space-y-1.5 pt-2">
-            <label className="text-slate-600 text-[11px] font-medium">{t.frameType}</label>
+          <div className="space-y-1.5 pt-2 flex flex-col">
+            <LabelWithTooltip label={t.frameType} lang={lang} className="text-[11px]" icon={<Frame size={13} className="text-emerald-500" />} />
             <div className="grid grid-cols-3 gap-1">
               {(['full', 'half', 'rimless'] as FrameType[]).map(type => (
                 <button
                   key={type}
                   onClick={() => setFrameType(type)}
-                  className={`py-1.5 px-2 rounded text-[10px] font-bold text-center transition-all border ${
+                  className={`py-2 rounded text-[10px] font-bold text-center transition-all border cursor-pointer ${
                     frameType === type 
-                      ? 'bg-emerald-600 border-emerald-600 text-white' 
-                      : 'bg-slate-50 border-slate-200 text-slate-500'
+                      ? 'bg-emerald-600 border-emerald-600 text-white shadow-sm' 
+                      : 'bg-slate-50 border-slate-200 text-slate-500 shadow-none'
                   }`}
                 >
-                  <span>{type === 'full' ? t.fullRim : type === 'half' ? t.halfRim : t.rimless}</span>
+                  {type === 'full' ? t.fullRim : type === 'half' ? t.halfRim : t.rimless}
                 </button>
               ))}
             </div>
@@ -267,12 +392,12 @@ export const Sidebar: React.FC<SidebarProps> = ({
         </InputGroup>
 
         <InputGroup title={t.fittingSpecs} icon={User} iconColor="text-orange-500" groupKey="fitting">
-          <Control label={t.pd} unit="mm" min={40} max={80} step={0.5} value={patient.pd} onChange={(v: number) => setPatient({ ...patient, pd: v })} lang={lang} />
-          <Control label={t.fittingHeight} unit="mm" min={10} max={40} step={0.5} value={patient.fittingHeight} onChange={(v: number) => setPatient({ ...patient, fittingHeight: v })} lang={lang} />
+          <Control label={t.pd} unit="mm" min={40} max={80} step={0.5} value={patient.pd} onChange={(v: number) => setPatient({ ...patient, pd: v })} lang={lang} icon={<Eye size={13} className="text-orange-500" />} />
+          <Control label={t.fittingHeight} unit="mm" min={10} max={40} step={0.5} value={patient.fittingHeight} onChange={(v: number) => setPatient({ ...patient, fittingHeight: v })} lang={lang} icon={<Ruler size={13} className="text-orange-500" />} />
           
           <div className="pt-2">
             <div className="flex justify-between items-center text-[10px] uppercase font-bold text-slate-400 mb-2">
-              <span>{t.bevelPos}</span>
+              <LabelWithTooltip label={t.bevelPos} lang={lang} className="text-[10px] text-slate-400 font-bold uppercase tracking-wider" icon={<Zap size={11} className="text-orange-500" />} />
             </div>
             <div className="flex items-center gap-3">
                <span className="text-[9px] font-bold text-slate-400">{t.bevelFront}</span>
@@ -285,46 +410,16 @@ export const Sidebar: React.FC<SidebarProps> = ({
             </div>
           </div>
         </InputGroup>
-
-        <div className="p-4 rounded-xl bg-slate-50 border border-slate-200 space-y-4">
-           <div className="flex items-center justify-between">
-              <h4 className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">{t.compareMode}</h4>
-              <button 
-                onClick={() => setCompareMode(!compareMode)}
-                className={`w-9 h-5 rounded-full relative transition-all ${compareMode ? 'bg-blue-600' : 'bg-slate-300'}`}
-              >
-                 <div className={`absolute top-1 w-3 h-3 rounded-full bg-white transition-all ${compareMode ? 'left-5' : 'left-1'}`} />
-              </button>
-           </div>
-           {compareMode && (
-              <div className="grid grid-cols-5 gap-1">
-                {indices.map(idx => (
-                  <button
-                    key={idx}
-                    onClick={() => setCompareIndex(idx)}
-                    className={`py-1.5 rounded text-[10px] font-bold transition-all border ${
-                      compareIndex === idx 
-                        ? 'bg-slate-800 border-slate-800 text-white' 
-                        : 'bg-white border-slate-200 text-slate-400'
-                    }`}
-                  >
-                    {idx.toFixed(2)}
-                  </button>
-                ))}
-              </div>
-           )}
-        </div>
       </div>
     );
   }
 
   return (
-    <aside className="w-72 h-screen bg-white border-r border-slate-200 flex flex-col shrink-0 shadow-[2px_0_12px_rgba(0,0,0,0.02)] z-30">
-      {/* Compact Header Area */}
-      <div className="p-5 border-b border-slate-100 bg-white">
+    <aside className="w-[300px] shrink-0 bg-white border-r border-slate-100 flex flex-col h-full shadow-[4px_0_24px_rgba(0,0,0,0.015)] text-left">
+      {/* Clinic/App Branding Header */}
+      <div className="p-5 border-b border-slate-100">
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 bg-white p-1 rounded-lg border border-slate-105 flex items-center justify-center shrink-0">
-            {/* Minimalist SVG logo */}
+          <div className="w-10 h-10 bg-white p-1 rounded-lg border border-slate-100 flex items-center justify-center shrink-0">
             <svg viewBox="0 0 100 100" className="w-full h-full">
               <rect x="42" y="10" width="16" height="35" fill="#1e73be" rx="2" transform="rotate(-45 50 50)" />
               <rect x="42" y="55" width="16" height="35" fill="#2d9e4b" rx="2" transform="rotate(-45 50 50)" />
@@ -356,17 +451,20 @@ export const Sidebar: React.FC<SidebarProps> = ({
           <Control 
             label={t.sphere} unit=" D" min={-20} max={20} step={0.25}
             value={lens.sph} onChange={(v: number) => setLens({ ...lens, sph: v })} lang={lang}
+            icon={<Aperture size={13} className="text-blue-500" />}
           />
           <Control 
             label={t.cylinder} unit=" D" min={-10} max={0} step={0.25}
             value={lens.cyl} onChange={(v: number) => setLens({ ...lens, cyl: v })} lang={lang}
+            icon={<Gauge size={13} className="text-blue-500" />}
           />
           <Control 
             label={t.axis} unit="°" min={0} max={180} step={1}
             value={lens.axis} onChange={(v: number) => setLens({ ...lens, axis: v })} lang={lang}
+            icon={<Zap size={13} className="text-blue-500" />}
           />
-          <div className="space-y-1.5 pt-2">
-            <label className="text-slate-600 text-[11px] font-medium">{t.refractiveIndex}</label>
+          <div className="space-y-1.5 flex flex-col">
+            <LabelWithTooltip label={t.refractiveIndex} lang={lang} className="text-[11px]" icon={<Eye size={13} className="text-blue-500" />} />
             <div className="grid grid-cols-3 gap-1">
               {indices.map(idx => (
                 <button
@@ -374,7 +472,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
                   onClick={() => setLens({ ...lens, index: idx })}
                   className={`py-1.5 rounded text-[10px] font-bold transition-all border cursor-pointer ${
                     lens.index === idx 
-                      ? 'bg-blue-600 border-blue-600 text-white shadow-md shadow-blue-505/20' 
+                      ? 'bg-blue-600 border-blue-600 text-white shadow-md shadow-blue-500/20' 
                       : 'bg-slate-50 border-slate-200 text-slate-500 hover:border-slate-300'
                   }`}
                 >
@@ -386,46 +484,119 @@ export const Sidebar: React.FC<SidebarProps> = ({
           <Control 
             label={t.baseCurve} unit=" D" min={0.25} max={12} step={0.25}
             value={lens.baseCurve} onChange={(v: number) => setLens({ ...lens, baseCurve: v })} lang={lang}
+            icon={<Aperture size={13} className="text-blue-500" />}
           />
         </InputGroup>
 
         <InputGroup title={t.frameGeometry} icon={Frame} iconColor="text-emerald-500" groupKey="frame">
           <div className="grid grid-cols-2 gap-3">
-            <div>
-              <label className="text-[10px] text-slate-500 block mb-1">{t.aSize}</label>
-              <input 
+            <div className="flex flex-col">
+              <div className="flex items-center justify-between mb-1">
+                <LabelWithTooltip label={t.aSize} lang={lang} className="" isUppercaseHeader icon={<Ruler size={11} className="text-emerald-500" />} />
+                <button
+                  type="button"
+                  onMouseEnter={() => setHighlightedLimit('a')}
+                  onMouseLeave={() => setHighlightedLimit(null)}
+                  onClick={() => setHighlightedLimit(highlightedLimit === 'a' ? null : 'a')}
+                  className={`p-1 rounded-full transition-all cursor-pointer ${
+                    isExceedingA 
+                      ? 'text-amber-500 hover:text-amber-600 animate-pulse bg-amber-500/10' 
+                      : 'text-slate-300 hover:text-slate-400'
+                  }`}
+                  title={isExceedingA ? (lang === 'id' ? "Batas struktural terlampaui! Sorot untuk melihat detail visual." : "Structural limit exceeded! Hover to see visual details.") : "Ergonomic Limits: 35-65mm."}
+                >
+                  <AlertCircle size={11} />
+                </button>
+              </div>
+              <Input 
                 type="number" value={frame.a} onChange={(e) => setFrame({...frame, a: parseFloat(e.target.value)})}
-                className="w-full text-center text-xs font-mono font-bold text-blue-600 bg-white border border-slate-200 rounded py-1.5 outline-none focus:bg-blue-50 focus:border-blue-300 transition-colors shadow-sm"
+                className={`w-full text-center text-xs font-mono font-bold bg-white border ${
+                  isExceedingA ? 'border-amber-500 text-amber-600 focus:ring-amber-500' : 'border-slate-200 text-blue-600'
+                }`}
               />
             </div>
-            <div>
-              <label className="text-[10px] text-slate-500 block mb-1">{t.bSize}</label>
-              <input 
+            <div className="flex flex-col">
+              <div className="flex items-center justify-between mb-1">
+                <LabelWithTooltip label={t.bSize} lang={lang} className="" isUppercaseHeader icon={<Ruler size={11} className="text-emerald-500" />} />
+                <button
+                  type="button"
+                  onMouseEnter={() => setHighlightedLimit('b')}
+                  onMouseLeave={() => setHighlightedLimit(null)}
+                  onClick={() => setHighlightedLimit(highlightedLimit === 'b' ? null : 'b')}
+                  className={`p-1 rounded-full transition-all cursor-pointer ${
+                    isExceedingB 
+                      ? 'text-amber-500 hover:text-amber-600 animate-pulse bg-amber-500/10' 
+                      : 'text-slate-300 hover:text-slate-400'
+                  }`}
+                  title={isExceedingB ? (lang === 'id' ? "Batas struktural terlampaui! Sorot untuk melihat detail visual." : "Structural limit exceeded! Hover to see visual details.") : "Ergonomic Limits: 20-55mm."}
+                >
+                  <AlertCircle size={11} />
+                </button>
+              </div>
+              <Input 
                 type="number" value={frame.b} onChange={(e) => setFrame({...frame, b: parseFloat(e.target.value)})}
-                className="w-full text-center text-xs font-mono font-bold text-blue-600 bg-white border border-slate-200 rounded py-1.5 outline-none focus:bg-blue-50 focus:border-blue-300 transition-colors shadow-sm"
+                className={`w-full text-center text-xs font-mono font-bold bg-white border ${
+                  isExceedingB ? 'border-amber-500 text-amber-600 focus:ring-amber-500' : 'border-slate-200 text-blue-600'
+                }`}
               />
             </div>
           </div>
           <div className="grid grid-cols-2 gap-3">
-            <div>
-              <label className="text-[10px] text-slate-500 block mb-1">DBL</label>
-              <input 
+            <div className="flex flex-col">
+              <div className="flex items-center justify-between mb-1">
+                <LabelWithTooltip label="DBL" lang={lang} className="" isUppercaseHeader icon={<Ruler size={11} className="text-emerald-500" />} />
+                <button
+                  type="button"
+                  onMouseEnter={() => setHighlightedLimit('dbl')}
+                  onMouseLeave={() => setHighlightedLimit(null)}
+                  onClick={() => setHighlightedLimit(highlightedLimit === 'dbl' ? null : 'dbl')}
+                  className={`p-1 rounded-full transition-all cursor-pointer ${
+                    isExceedingDbl 
+                      ? 'text-amber-500 hover:text-amber-600 animate-pulse bg-amber-500/10' 
+                      : 'text-slate-300 hover:text-slate-400'
+                  }`}
+                  title={isExceedingDbl ? (lang === 'id' ? "Batas struktural terlampaui! Sorot untuk melihat detail visual." : "Structural limit exceeded! Hover to see visual details.") : "Ergonomic Limits: 10-28mm."}
+                >
+                  <AlertCircle size={11} />
+                </button>
+              </div>
+              <Input 
                 type="number" value={frame.dbl} onChange={(e) => setFrame({...frame, dbl: parseFloat(e.target.value)})}
-                className="w-full text-center text-xs font-mono font-bold text-blue-600 bg-white border border-slate-200 rounded py-1.5 outline-none focus:bg-blue-50 focus:border-blue-300 transition-colors shadow-sm"
+                className={`w-full text-center text-xs font-mono font-bold bg-white border ${
+                  isExceedingDbl ? 'border-amber-500 text-amber-600 focus:ring-amber-500' : 'border-slate-200 text-blue-600'
+                }`}
               />
             </div>
-            <div>
-              <label className="text-[10px] text-slate-500 block mb-1">ED</label>
-              <input 
+            <div className="flex flex-col">
+              <div className="flex items-center justify-between mb-1">
+                <LabelWithTooltip label="ED" lang={lang} className="" isUppercaseHeader icon={<Ruler size={11} className="text-emerald-500" />} />
+                <button
+                  type="button"
+                  onMouseEnter={() => setHighlightedLimit('ed')}
+                  onMouseLeave={() => setHighlightedLimit(null)}
+                  onClick={() => setHighlightedLimit(highlightedLimit === 'ed' ? null : 'ed')}
+                  className={`p-1 rounded-full transition-all cursor-pointer ${
+                    isExceedingEd 
+                      ? 'text-amber-500 hover:text-amber-600 animate-pulse bg-amber-500/10' 
+                      : 'text-slate-300 hover:text-slate-400'
+                  }`}
+                  title={isExceedingEd ? (lang === 'id' ? "Batas struktural terlampaui! Sorot untuk melihat detail visual." : "Structural limit exceeded! Hover to see visual details.") : "Ergonomic Limits: ED >= A and <= 75mm."}
+                >
+                  <AlertCircle size={11} />
+                </button>
+              </div>
+              <Input 
                 type="number" value={frame.ed} onChange={(e) => setFrame({...frame, ed: parseFloat(e.target.value)})}
-                className="w-full text-center text-xs font-mono font-bold text-blue-600 bg-white border border-slate-200 rounded py-1.5 outline-none focus:bg-blue-50 focus:border-blue-300 transition-colors shadow-sm"
+                className={`w-full text-center text-xs font-mono font-bold bg-white border ${
+                  isExceedingEd ? 'border-amber-500 text-amber-600 focus:ring-amber-500' : 'border-slate-200 text-blue-600'
+                }`}
               />
             </div>
           </div>
-          <Control label={t.frameDepth} unit="mm" min={1} max={10} step={0.1} value={frame.depth} onChange={(v: number) => setFrame({ ...frame, depth: v })} lang={lang} />
+          <Control label={t.frameDepth} unit="mm" min={1} max={10} step={0.1} value={frame.depth} onChange={(v: number) => setFrame({ ...frame, depth: v })} lang={lang} icon={<Gauge size={13} className="text-emerald-500" />} />
           
-          <div className="space-y-1.5 pt-2">
-            <label className="text-slate-600 text-[11px] font-medium">{t.frameType}</label>
+          <div className="space-y-1.5 pt-2 flex flex-col">
+            <LabelWithTooltip label={t.frameType} lang={lang} className="text-[11px]" icon={<Frame size={13} className="text-emerald-500" />} />
             <div className="grid grid-cols-1 gap-1">
               {(['full', 'half', 'rimless'] as FrameType[]).map(type => (
                 <button
@@ -446,12 +617,12 @@ export const Sidebar: React.FC<SidebarProps> = ({
         </InputGroup>
 
         <InputGroup title={t.fittingSpecs} icon={User} iconColor="text-orange-500" groupKey="fitting">
-          <Control label={t.pd} unit="mm" min={40} max={80} step={0.5} value={patient.pd} onChange={(v: number) => setPatient({ ...patient, pd: v })} lang={lang} />
-          <Control label={t.fittingHeight} unit="mm" min={10} max={40} step={0.5} value={patient.fittingHeight} onChange={(v: number) => setPatient({ ...patient, fittingHeight: v })} lang={lang} />
+          <Control label={t.pd} unit="mm" min={40} max={80} step={0.5} value={patient.pd} onChange={(v: number) => setPatient({ ...patient, pd: v })} lang={lang} icon={<Eye size={13} className="text-orange-500" />} />
+          <Control label={t.fittingHeight} unit="mm" min={10} max={40} step={0.5} value={patient.fittingHeight} onChange={(v: number) => setPatient({ ...patient, fittingHeight: v })} lang={lang} icon={<Ruler size={13} className="text-orange-500" />} />
           
           <div className="pt-2">
             <div className="flex justify-between items-center text-[10px] uppercase font-bold text-slate-400 mb-2">
-              <span>{t.bevelPos}</span>
+              <LabelWithTooltip label={t.bevelPos} lang={lang} isUppercaseHeader className="text-[10px] text-slate-400 font-bold uppercase tracking-wider" icon={<Zap size={11} className="text-orange-500" />} />
             </div>
             <div className="flex items-center gap-3">
                <span className="text-[9px] font-bold text-slate-400">{t.bevelFront}</span>
@@ -467,7 +638,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
 
         <div className="mt-3 p-4 rounded-xl bg-slate-50 border border-slate-200/60 space-y-4">
            <div className="flex items-center justify-between">
-              <h4 className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">{t.compareMode}</h4>
+              <LabelWithTooltip label={t.compareMode} lang={lang} isUppercaseHeader className="text-[10px] text-slate-400 font-bold uppercase tracking-wider" icon={<Copy size={11} className="text-slate-400" />} />
               <button 
                 onClick={() => setCompareMode(!compareMode)}
                 className={`w-9 h-5 rounded-full relative transition-all cursor-pointer ${compareMode ? 'bg-blue-600' : 'bg-slate-300'}`}
@@ -481,12 +652,13 @@ export const Sidebar: React.FC<SidebarProps> = ({
                   <button
                     key={idx}
                     onClick={() => setCompareIndex(idx)}
-                    className={`py-1.5 rounded text-[10px] font-bold transition-all border cursor-pointer ${
+                    className={`py-1.5 rounded text-[10px] font-bold transition-all border cursor-pointer flex items-center justify-center gap-1 ${
                       compareIndex === idx 
                         ? 'bg-slate-800 border-slate-800 text-white shadow-sm' 
                         : 'bg-white border-slate-200 text-slate-400 hover:border-slate-300'
                     }`}
                   >
+                    {compareIndex === idx && <ArrowRight size={9} />}
                     {idx.toFixed(2)}
                   </button>
                 ))}
@@ -497,9 +669,10 @@ export const Sidebar: React.FC<SidebarProps> = ({
 
       {/* Sticky Bottom Action Bar */}
       <div className="p-4 border-t border-slate-100 bg-slate-50 shadow-[0_-4px_16px_rgba(0,0,0,0.015)]">
-        <button className="w-full py-3 bg-slate-900 hover:bg-slate-800 text-white rounded-xl text-[10px] font-bold uppercase tracking-wider transition-all duration-150 transform active:scale-95 shadow-md shadow-slate-900/10 cursor-pointer">
+        <Button className="w-full py-5 bg-slate-900 hover:bg-slate-800 text-white rounded-xl text-[10px] font-bold uppercase tracking-wider transition-all duration-150 transform active:scale-95 shadow-md shadow-slate-900/10 cursor-pointer flex items-center justify-center gap-2">
+          <Zap size={11} />
           {t.calculateFull}
-        </button>
+        </Button>
       </div>
     </aside>
   );
