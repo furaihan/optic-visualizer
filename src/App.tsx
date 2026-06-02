@@ -1,20 +1,20 @@
-import { useState, useMemo, useEffect } from "react";
+/**
+ * @license
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
+import { useState, useEffect } from "react";
 import { Sidebar } from "./components/Sidebar";
 import { Visualizer } from "./components/Visualizer";
 import { SummaryCard } from "./components/SummaryCard";
 import { CurvatureCard } from "./components/CurvatureCard";
 import { RecommendationCard } from "./components/RecommendationCard";
-import {
-  calculateLens,
-  LensParameters,
-  FrameParameters,
-  PatientParameters,
-  FrameType,
-  OPTICAL_ENGINE_VERSION,
-} from "./lib/optical";
+import { useOpticalState } from "./hooks/useOpticalState";
+import { OPTICAL_ENGINE_VERSION } from "./lib/optical";
 import { translations, Language } from "./lib/i18n";
 import { motion, AnimatePresence } from "motion/react";
 import { TooltipProvider } from "./components/ui/tooltip";
+import { Undo2, Redo2, RotateCcw, AlertTriangle } from "lucide-react";
 
 export default function App() {
   const [lang, setLang] = useState<Language>("id");
@@ -26,56 +26,34 @@ export default function App() {
 
   const [highlightedLimit, setHighlightedLimit] = useState<'a' | 'b' | 'dbl' | 'ed' | null>(null);
 
-  const [lens, setLens] = useState<LensParameters>({
-    sph: -4.0,
-    cyl: 0.0,
-    axis: 0,
-    index: 1.6,
-    baseCurve: 4.0,
-  });
-
-  const [frame, setFrame] = useState<FrameParameters>({
-    a: 52,
-    b: 40,
-    dbl: 18,
-    depth: 4.5,
-    ed: 54,
-  });
-
-  const [patient, setPatient] = useState<PatientParameters>({
-    pd: 63,
-    fittingHeight: 22,
-  });
-
-  const [compareMode, setCompareMode] = useState(false);
-  const [compareIndex, setCompareIndex] = useState(1.74);
-  const [bevelPercent, setBevelPercent] = useState(0.33);
-  const [frameType, setFrameType] = useState<FrameType>("full");
-
-  const result = useMemo(
-    () => calculateLens(lens, frame, patient, 1.0, bevelPercent, frameType),
-    [lens, frame, patient, bevelPercent, frameType],
-  );
-
-  const compareResult = useMemo(() => {
-    if (!compareMode) return undefined;
-    return calculateLens(
-      { ...lens, index: compareIndex },
-      frame,
-      patient,
-      1.0,
-      bevelPercent,
-      frameType,
-    );
-  }, [
+  // Use centralized custom hook state with localStorage caching and Undo/Redo tracking
+  const {
     lens,
     frame,
     patient,
-    compareMode,
-    compareIndex,
     bevelPercent,
     frameType,
-  ]);
+    setLens,
+    setFrame,
+    setPatient,
+    setBevelPercent,
+    setFrameType,
+
+    compareMode,
+    setCompareMode,
+    compareIndex,
+    setCompareIndex,
+
+    result,
+    compareResult,
+    validation,
+
+    undo,
+    redo,
+    canUndo,
+    canRedo,
+    resetSession
+  } = useOpticalState();
 
   useEffect(() => {
     const mql = window.matchMedia("(min-width: 768px)");
@@ -88,6 +66,23 @@ export default function App() {
     mql.addEventListener("change", handleResize);
     return () => mql.removeEventListener("change", handleResize);
   }, []);
+
+  // Keyboard shortcut listener for Ctrl+Z (Undo) and Ctrl+Y (Redo)
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.ctrlKey || e.metaKey) {
+        if (e.key === 'z' || e.key === 'Z') {
+          e.preventDefault();
+          undo();
+        } else if (e.key === 'y' || e.key === 'Y') {
+          e.preventDefault();
+          redo();
+        }
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [undo, redo]);
 
   return (
     <TooltipProvider delay={200}>
@@ -116,53 +111,109 @@ export default function App() {
 
         <main className="flex-1 flex flex-col h-screen overflow-hidden">
           {/* Header Bar */}
-          <header className="h-12 bg-white border-b border-slate-200 flex items-center justify-between px-4 md:px-6 shrink-0 z-20">
+          <header className="h-12 bg-white border-b border-slate-200 flex items-center justify-between px-4 md:px-6 shrink-0 z-20 shadow-sm">
             <div className="flex items-center gap-3">
-              <h2 className="font-bold text-[10px] md:text-[11px] tracking-widest text-slate-400 uppercase truncate max-w-[120px] sm:max-w-none">
+              <h1 className="font-bold text-[10px] md:text-[11px] tracking-widest text-slate-400 uppercase truncate max-w-[120px] sm:max-w-none">
                 {t.title}
-              </h2>
+              </h1>
               <div className="h-4 w-px bg-slate-200"></div>
               <div
                 className={`gap-1 bg-slate-50 p-0.5 md:p-1 rounded-lg border border-slate-200/50 ${activeTab !== "visualizer" ? "hidden md:flex" : "flex"}`}
               >
                 <button
                   onClick={() => setView("side")}
-                  className={`px-2 md:px-3 py-0.5 text-[8px] md:text-[9px] font-bold rounded-md border transition-all ${view === "side" ? "bg-white shadow-sm border-slate-200 text-slate-700" : "border-transparent text-slate-400"}`}
+                  className={`px-2 md:px-3 py-0.5 text-[8px] md:text-[9px] font-bold rounded-md border transition-all cursor-pointer ${view === "side" ? "bg-white shadow-sm border-slate-200 text-slate-700" : "border-transparent text-slate-400"}`}
                 >
                   {t.sideProfile}
                 </button>
                 <button
                   onClick={() => setView("top")}
-                  className={`px-2 md:px-3 py-0.5 text-[8px] md:text-[9px] font-bold rounded-md border transition-all ${view === "top" ? "bg-white shadow-sm border-slate-200 text-slate-700" : "border-transparent text-slate-400"}`}
+                  className={`px-2 md:px-3 py-0.5 text-[8px] md:text-[9px] font-bold rounded-md border transition-all cursor-pointer ${view === "top" ? "bg-white shadow-sm border-slate-200 text-slate-700" : "border-transparent text-slate-400"}`}
                 >
                   {t.topDown}
                 </button>
                 <button
                   onClick={() => setView("front")}
-                  className={`px-2 md:px-3 py-0.5 text-[8px] md:text-[9px] font-bold rounded-md border transition-all ${view === "front" ? "bg-white shadow-sm border-slate-200 text-slate-700" : "border-transparent text-slate-400"}`}
+                  className={`px-2 md:px-3 py-0.5 text-[8px] md:text-[9px] font-bold rounded-md border transition-all cursor-pointer ${view === "front" ? "bg-white shadow-sm border-slate-200 text-slate-700" : "border-transparent text-slate-400"}`}
                 >
                   {t.frontView}
                 </button>
               </div>
             </div>
 
-            <div className="flex items-center gap-4">
-              <div className="flex gap-1 bg-slate-50 p-0.5 md:p-1 rounded-lg border border-slate-200/50">
+            <div className="flex items-center gap-2 md:gap-4 shrink-0">
+              {/* Undo / Redo controls */}
+              <div className="flex items-center gap-0.5 bg-slate-50 p-0.5 rounded-lg border border-slate-200/50">
+                <button
+                  onClick={undo}
+                  disabled={!canUndo}
+                  className={`p-1.5 rounded-md transition-all cursor-pointer ${
+                    canUndo ? "text-slate-700 hover:bg-white hover:shadow-sm" : "text-slate-300 pointer-events-none"
+                  }`}
+                  title={lang === "id" ? "Batal (Ctrl+Z)" : "Undo (Ctrl+Z)"}
+                >
+                  <Undo2 size={13} />
+                </button>
+                <button
+                  onClick={redo}
+                  disabled={!canRedo}
+                  className={`p-1.5 rounded-md transition-all cursor-pointer ${
+                    canRedo ? "text-slate-700 hover:bg-white hover:shadow-sm" : "text-slate-300 pointer-events-none"
+                  }`}
+                  title={lang === "id" ? "Ulang (Ctrl+Y)" : "Redo (Ctrl+Y)"}
+                >
+                  <Redo2 size={13} />
+                </button>
+              </div>
+
+              {/* Reset Session */}
+              <button
+                onClick={resetSession}
+                className="p-1 px-2.5 rounded-lg text-[9px] font-bold bg-slate-100 hover:bg-slate-200 text-slate-600 transition-all border border-slate-200/60 cursor-pointer flex items-center gap-1"
+                title={lang === "id" ? "Kembalikan ke pengaturan awal" : "Reset session parameters to defaults"}
+              >
+                <RotateCcw size={11} />
+                <span className="hidden sm:inline">Reset</span>
+              </button>
+
+              {/* Language Switcher */}
+              <div className="flex gap-1 bg-slate-50 p-0.5 rounded-lg border border-slate-200/50">
                 <button
                   onClick={() => setLang("id")}
-                  className={`px-2 md:px-2.5 py-0.5 text-[8px] md:text-[9px] font-bold rounded-md border transition-all ${lang === "id" ? "bg-white shadow-sm border-slate-200 text-blue-600" : "border-transparent text-slate-400 hover:text-slate-600"}`}
+                  className={`px-2 py-0.5 text-[8px] md:text-[9px] font-bold rounded-md border transition-all cursor-pointer ${lang === "id" ? "bg-white shadow-sm border-slate-200 text-blue-600" : "border-transparent text-slate-400 hover:text-slate-600"}`}
                 >
                   ID
                 </button>
                 <button
                   onClick={() => setLang("en")}
-                  className={`px-2 md:px-2.5 py-0.5 text-[8px] md:text-[9px] font-bold rounded-md border transition-all ${lang === "en" ? "bg-white shadow-sm border-slate-200 text-blue-600" : "border-transparent text-slate-400 hover:text-slate-600"}`}
+                  className={`px-2 py-0.5 text-[8px] md:text-[9px] font-bold rounded-md border transition-all cursor-pointer ${lang === "en" ? "bg-white shadow-sm border-slate-200 text-blue-600" : "border-transparent text-slate-400 hover:text-slate-600"}`}
                 >
                   EN
                 </button>
               </div>
             </div>
           </header>
+
+          {/* Verification / Alert Warnings Bar */}
+          {validation.errors.length > 0 && (
+            <div className="bg-amber-50 border-b border-amber-200/60 px-4 md:px-6 py-2 shrink-0 animate-fade-in">
+              <div className="flex items-start gap-2 max-w-7xl mx-auto">
+                <AlertTriangle size={14} className="text-amber-500 shrink-0 mt-0.5" />
+                <div className="flex-1">
+                  <div className="text-[10px] uppercase tracking-wider font-extrabold text-amber-600 mb-0.5">
+                    {lang === 'id' ? 'Catatan & Validasi Klinis' : 'Clinical Verification Alerts'}
+                  </div>
+                  <ul className="list-disc list-inside text-xs text-slate-600 font-medium leading-tight">
+                    {validation.errors.map((err, i) => (
+                      <li key={i}>
+                        {lang === 'id' ? err.messageId : err.messageEn}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              </div>
+            </div>
+          )}
 
           {/* Visualization Content */}
           <div className="flex-1 overflow-hidden p-3 md:p-4 lg:p-6 flex flex-col gap-3 md:gap-4">
@@ -334,7 +385,7 @@ export default function App() {
           </div>
 
           {/* Footer Info (Subtle) */}
-          <footer className="h-7 bg-white border-t border-slate-200 text-slate-400 px-4 md:px-6 flex items-center justify-between text-[8px] font-mono shrink-0 z-20 overflow-hidden">
+          <footer className="h-7 bg-white border-t border-slate-200 text-slate-400 px-4 md:px-6 flex items-center justify-between text-[8px] font-mono shrink-0 z-20 overflow-hidden shadow-sm">
             <div className="flex gap-4 md:gap-6 uppercase tracking-[0.1em] truncate mr-2">
               <span className="flex gap-1 md:gap-1.5">
                 <span className="text-slate-300">{t.framePd}:</span>{" "}

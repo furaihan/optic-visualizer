@@ -3,6 +3,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+import { MATERIALS_DB, FRAME_TYPE_OVERRIDES } from '../data/materials';
+
 export interface LensParameters {
   sph: number;
   cyl: number;
@@ -49,6 +51,10 @@ export interface CalculationResult {
 
 export type FrameType = 'full' | 'half' | 'rimless';
 
+/**
+ * PURE BUSINESS LOGIC: Calculates optical lens outputs based on geometric theory.
+ * Entirely decoupled from component lifecycles of React.
+ */
 export function calculateLens(
   lens: LensParameters,
   frame: FrameParameters,
@@ -61,8 +67,7 @@ export function calculateLens(
   const { a, dbl, ed, depth } = frame;
   const { pd } = patient;
 
-  // For thickness simulator, we calculate at the most powerful meridian
-  // to show "worst case" thickness.
+  // Most powerful meridian worst-case calculation
   const totalPower = sph + (cyl < 0 ? 0 : cyl); 
   const minPower = sph + (cyl < 0 ? cyl : 0);
   
@@ -77,25 +82,28 @@ export function calculateLens(
   const decentrationV = Math.abs(patient.fittingHeight - frame.b / 2); // Vertical
   const decentrationCombined = Math.sqrt(decentration * decentration + decentrationV * decentrationV);
 
-  // 2. Calculation radius (y)
+  // 2. Calculation diameter radius (y)
   const y = (ed / 2) + decentrationCombined;
 
-  // 3. Radius of curvature (in mm)
+  // 3. Curved surfaces radii (in mm)
   const r1 = 1000 * (index - 1) / baseCurve;
   const backPower = calculationPower - baseCurve;
   const r2 = backPower === 0 ? Infinity : 1000 * (index - 1) / Math.abs(backPower);
 
-  // 4. Sagitta (s = R - sqrt(R^2 - y^2))
+  // 4. Sagitta calculator (s = R - sqrt(R^2 - y^2))
   function getSag(r: number, yVal: number): number {
-    if (r === Infinity) return 0;
-    if (yVal >= Math.abs(r)) return Math.abs(r);
-    return Math.abs(r) - Math.sqrt(Math.pow(r, 2) - Math.pow(yVal, 2));
+    if (r === Infinity || isNaN(r)) return 0;
+    const absR = Math.abs(r);
+    if (yVal >= absR) return absR; // clamp to maximum physical deflection
+    const val = Math.pow(absR, 2) - Math.pow(yVal, 2);
+    if (val < 0) return 0;
+    return absR - Math.sqrt(val);
   }
 
   const s1 = getSag(r1, y);
   const s2 = getSag(r2, y);
 
-  // 5. Thickness (CT and ET)
+  // 5. Thickness matching (Center vs Edge)
   let ct: number, et: number;
 
   if (calculationPower >= 0) {
@@ -117,7 +125,11 @@ export function calculateLens(
   ct = Math.max(ct, minThickness);
   et = Math.max(et, minThickness);
 
-  // 6. Protrusion (Dynamic bevel position)
+  // Fallback protection against infinite or NaN values in early calculations
+  if (isNaN(ct) || !isFinite(ct)) ct = minThickness;
+  if (isNaN(et) || !isFinite(et)) et = minThickness;
+
+  // 6. Protrusion (Dynamic bevel placement inside frame slot)
   const groovePosition = depth * bevelPercent;
   
   const etX_start = groovePosition - et / 2;
@@ -129,95 +141,72 @@ export function calculateLens(
   const anteriorProtrusion = Math.max(0, -frontMostX);
   const posteriorProtrusion = Math.max(0, backMostX - depth);
 
-  // 7. Enhanced Recommendation Engine based on Knowledge Base
-  // Spherical Equivalent (S.E) = Sph + 1/2 Cyl
+  // 7. Dynamic Recommendation Module querying centralized MATERIALS_DB
   const se = Math.abs(sph + (cyl / 2));
   
-  let recIndex = 1.50;
-  let recMaterial = "CR-39";
-  let recReason = "";
-  let thinness = "0%";
-  let abbe = 58;
-
-  // Base recommendation by power
-  if (se <= 2.00) {
-    recIndex = 1.50;
-    recMaterial = "CR-39";
-    recReason = "Low power: Standard index provides excellent clarity (highest Abbe value).";
-    thinness = "0%";
-    abbe = 58;
-  } else if (se <= 3.00) {
-    recIndex = 1.56;
-    recMaterial = "Mid-Index (NK-55)";
-    recReason = "Mid power: 1.56 index balances cost and ~15% thickness reduction.";
-    thinness = "15%";
-    abbe = 38;
-  } else if (se <= 5.00) {
-    recIndex = 1.61;
-    recMaterial = "High-Index (MR-8)";
-    recReason = "High power: 1.61 index offers ~25% reduction and high impact resistance.";
-    thinness = "25%";
-    abbe = 42;
-  } else if (se <= 8.00) {
-    recIndex = 1.67;
-    recMaterial = "Ultra High-Index (MR-10)";
-    recReason = "Very high power: 1.67 index significantly reduces edge thickness (~35%).";
-    thinness = "35%";
-    abbe = 32;
-  } else {
-    recIndex = 1.74;
-    recMaterial = "Premium Index (MR-174)";
-    recReason = "Extreme power: 1.74 technology is critical for aesthetics (~45% thinner).";
-    thinness = "45%";
-    abbe = 33;
+  // Find standard base material matching the Sphere Equivalent Power Range
+  let bestMatch = MATERIALS_DB.find(m => se >= m.seRange.min && se < m.seRange.max);
+  if (!bestMatch) {
+    bestMatch = MATERIALS_DB[0];
   }
 
-  // Frame Type overrides
-  if (frameType === 'half' && recIndex < 1.56) {
-    recIndex = 1.56;
-    recMaterial = "NK-55";
-    recReason = "Half-rim detected: Minimum 1.56 required for tensile strength (prevents chipping).";
-    thinness = "15%";
-    abbe = 38;
-  } else if (frameType === 'rimless') {
-    if (recIndex < 1.61) {
-        recIndex = 1.61;
-        recMaterial = "MR-8";
-        recReason = "Rimless detected: 1.61 (MR-8) is mandatory for drilling durability and flex.";
-        thinness = "25%";
-        abbe = 42;
+  let recIndex = bestMatch.index;
+  let recMaterial = bestMatch.name;
+  let thinness = bestMatch.thinness;
+  let abbe = bestMatch.abbe;
+  let recReason = "";
+
+  // Set explanatory reasons based on clinical guidelines
+  if (se <= 2.00) {
+    recReason = "Low power: Standard index provides excellent clarity (highest Abbe value).";
+  } else if (se <= 3.00) {
+    recReason = "Mid power: 1.56 index balances cost and ~15% thickness reduction.";
+  } else if (se <= 5.00) {
+    recReason = "High power: 1.61 index offers ~25% reduction and high impact resistance.";
+  } else if (se <= 8.00) {
+    recReason = "Very high power: 1.67 index significantly reduces edge thickness (~35%).";
+  } else {
+    recReason = "Extreme power: 1.74 technology is critical for aesthetics (~45% thinner).";
+  }
+
+  // Inject structural overrides (Half-rim / Rimless stress support)
+  const override = FRAME_TYPE_OVERRIDES[frameType as keyof typeof FRAME_TYPE_OVERRIDES];
+  if (override && recIndex < override.minIndex) {
+    const overrideMat = MATERIALS_DB.find(m => m.index === override.minIndex);
+    if (overrideMat) {
+      recIndex = overrideMat.index;
+      recMaterial = overrideMat.name;
+      thinness = overrideMat.thinness;
+      abbe = overrideMat.abbe;
+      recReason = override.reasonEn;
     }
   }
 
-  // Eye size penalty: If lens is minus and frame A is large (> 54), suggest one step higher if possible
+  // Eye size index penalty: If eye dimension is large (A >= 54) and high minus, recommend higher index
   if (calculationPower < 0 && a >= 54 && recIndex < 1.74) {
-      if (recIndex === 1.50) recIndex = 1.56;
-      else if (recIndex === 1.56) recIndex = 1.61;
-      else if (recIndex === 1.61) recIndex = 1.67;
-      else if (recIndex === 1.67) recIndex = 1.74;
-      recReason += " Note: Large eye size increases edge thickness; higher index recommended.";
+    const currentIndexOrder = [1.50, 1.56, 1.61, 1.67, 1.74];
+    const currPos = currentIndexOrder.indexOf(recIndex);
+    if (currPos !== -1 && currPos < currentIndexOrder.length - 1) {
+      const nextIndex = currentIndexOrder[currPos + 1];
+      const upgradeMat = MATERIALS_DB.find(m => m.index === nextIndex);
+      if (upgradeMat) {
+        recIndex = upgradeMat.index;
+        recMaterial = upgradeMat.name;
+        thinness = upgradeMat.thinness;
+        abbe = upgradeMat.abbe;
+        recReason += " Note: Large eye size increases edge thickness; higher index recommended.";
+      }
+    }
   }
 
-  // 8. Density mapping and weight estimation
-  let density = 1.32;
-  if (index <= 1.52) {
-    density = 1.32; // CR-39
-  } else if (index <= 1.57) {
-    density = 1.24; // 1.56 Mid-Index
-  } else if (index <= 1.62) {
-    density = 1.30; // 1.60/1.61 High-Index MR-8
-  } else if (index <= 1.69) {
-    density = 1.35; // 1.67 MR-10
-  } else {
-    density = 1.47; // 1.74 MR-174
+  // 8. Dynamic density query from physical config database
+  let density = 1.32; // Standard nylon/CR-39 density fallback
+  const indexMatch = MATERIALS_DB.find(m => Math.abs(m.index - index) < 0.015);
+  if (indexMatch) {
+    density = indexMatch.density;
   }
 
-  // Volume approximation of edged lens using elliptical cylinder:
-  // Area_ellipse (mm2) = Math.PI * (a / 2) * (b / 2)
-  // Avg thickness (mm) = (ct + et) / 2
-  // Vol (mm3) = Area_ellipse * Avg thickness
-  // Vol (cm3) = Vol (mm3) / 1000
-  // Weight (g) = Vol (cm3) * density
+  // Weight estimation per lens blank volume projection
   const areaMm2 = Math.PI * (a / 2) * (frame.b / 2);
   const avgThickMm = (ct + et) / 2;
   const volumeCm3 = (areaMm2 * avgThickMm) / 1000;
@@ -247,5 +236,4 @@ export function calculateLens(
   };
 }
 
-export const OPTICAL_ENGINE_VERSION = 'AMP_V4.1.2';
-
+export const OPTICAL_ENGINE_VERSION = 'AMP_V4.2.0';

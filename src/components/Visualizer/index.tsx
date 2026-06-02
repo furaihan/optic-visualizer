@@ -1,11 +1,12 @@
 import React, { useMemo, useState } from 'react';
-import { AlertCircle } from 'lucide-react';
+import { AlertCircle, X, HelpCircle } from 'lucide-react';
 import { translations } from '../../lib/i18n';
 import { VisualizerProps, HoverLabel, LensPosition } from './types';
 import { LensProfile } from './LensProfile';
 import { FrameProfile } from './FrameProfile';
 import { FrontView } from './FrontView';
 import { TopDownView } from './TopDownView';
+import { Popover, PopoverContent, PopoverTrigger } from '../ui/popover';
 
 export const Visualizer: React.FC<VisualizerProps> = ({
   lens,
@@ -20,6 +21,7 @@ export const Visualizer: React.FC<VisualizerProps> = ({
 }) => {
   const t = translations[lang];
   const [hoveredLabel, setHoveredLabel] = useState<HoverLabel | null>(null);
+  const [isLegendOpen, setIsLegendOpen] = useState(true);
 
   // Scaling factors
   const PX_PER_MM = view === 'top' ? 4 : 6; 
@@ -208,19 +210,102 @@ export const Visualizer: React.FC<VisualizerProps> = ({
         )}
       </svg>
 
-      {/* Dimension Labels Overlay */}
-      <div className="absolute bottom-8 right-8 p-4 bg-white/80 border border-slate-200 backdrop-blur-md rounded-xl space-y-1.5 shadow-sm">
-        <div className="flex items-center gap-2">
-          <div className="w-2 h-2 rounded-full bg-blue-500 shadow-sm shadow-blue-500/50"></div>
-          <span className="text-[10px] font-bold text-slate-600 uppercase tracking-wider">{t.primarySpec}</span>
-        </div>
-        {compareResult && compareLens && (
-          <div className="flex items-center gap-2">
-            <div className="w-2 h-2 rounded-full bg-emerald-500 shadow-sm shadow-emerald-500/50"></div>
-            <span className="text-[10px] font-bold text-slate-600 uppercase tracking-wider">{t.comparison} ({compareLens.index.toFixed(2)})</span>
+      {/* Dimension Labels Overlay / Collapsible Legend */}
+      {isLegendOpen ? (
+        <div className="absolute bottom-6 right-6 p-3 bg-white/95 border border-slate-200/80 backdrop-blur-md rounded-xl space-y-2 shadow-md min-w-[145px] text-left transition-all duration-200 animate-in fade-in zoom-in-95 select-none md:bottom-8 md:right-8 z-20">
+          <div className="flex items-center justify-between gap-4 border-b border-slate-100 pb-1 mb-1">
+            <span className="text-[9px] font-extrabold text-slate-400 uppercase tracking-widest">
+              {lang === 'id' ? 'Legenda' : 'Legend'}
+            </span>
+            <button
+              onClick={() => setIsLegendOpen(false)}
+              className="p-1 rounded-md text-slate-400 hover:text-slate-600 hover:bg-slate-100 transition-colors cursor-pointer"
+              aria-label="Collapse legend"
+              title={lang === "id" ? "Sembunyikan legenda" : "Collapse legend"}
+            >
+              <X size={10} />
+            </button>
           </div>
-        )}
-      </div>
+          <div className="space-y-1.5">
+            <div className="flex items-center gap-2">
+              <div className="w-2.5 h-2.5 rounded-full bg-blue-500 shadow-sm shadow-blue-500/40"></div>
+              <span className="text-[10px] font-semibold text-slate-600 uppercase tracking-wider">{t.primarySpec}</span>
+            </div>
+            {compareResult && compareLens && (
+              <div className="flex items-center gap-2">
+                <div className="w-2.5 h-2.5 rounded-full bg-emerald-500 shadow-sm shadow-emerald-500/40"></div>
+                <span className="text-[10px] font-semibold text-slate-600 uppercase tracking-wider">{t.comparison} ({compareLens.index.toFixed(2)})</span>
+              </div>
+            )}
+          </div>
+        </div>
+      ) : (
+        /* Collapsed Panel utilizing Popover Shadcn */
+        <div className="absolute bottom-6 right-6 z-20 md:bottom-8 md:right-8 transition-all duration-200 animate-in fade-in zoom-in-95">
+          <Popover>
+            <PopoverTrigger
+              className="flex items-center gap-1.5 px-3 py-2 bg-white/95 border border-slate-200/80 backdrop-blur-md rounded-full shadow-md hover:shadow-lg hover:border-slate-300 transition-all cursor-pointer group active:scale-95"
+              title={lang === "id" ? "Tampilkan legenda" : "Show legend details"}
+            >
+              {/* Display tiny colored indicator circle icons */}
+              <span className="flex items-center -space-x-1">
+                <span className="w-2.5 h-2.5 rounded-full bg-blue-500 border border-white shadow-sm" />
+                {compareResult && compareLens && (
+                  <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 border border-white shadow-sm" />
+                )}
+              </span>
+              
+              {/* Mini help icon */}
+              <HelpCircle size={11} className="text-slate-400 group-hover:text-slate-600 transition-colors" />
+            </PopoverTrigger>
+            <PopoverContent 
+              side="top" 
+              align="end" 
+              sideOffset={8} 
+              className="w-56 p-3 bg-white/95 border border-slate-200/90 shadow-xl rounded-xl z-50 text-left backdrop-blur-sm"
+            >
+              <div className="space-y-2 select-none">
+                <div className="text-[9px] uppercase tracking-wider text-slate-400 font-extrabold pb-1 border-b border-slate-100">
+                  {lang === 'id' ? 'Legenda Visual' : 'Visual Legend'}
+                </div>
+                
+                <div className="space-y-2">
+                  <div className="flex items-start gap-2">
+                    <div className="w-2.5 h-2.5 rounded-full bg-blue-500 shadow-sm shrink-0 mt-0.5"></div>
+                    <div>
+                      <div className="text-[10px] font-bold text-slate-700 leading-tight">{t.primarySpec}</div>
+                      <div className="text-[8px] text-slate-400 font-medium">
+                        {lang === 'id' ? 'Lensa utama Anda sekarang' : 'Current active layout specs'}
+                      </div>
+                    </div>
+                  </div>
+                  
+                  {compareResult && compareLens && (
+                    <div className="flex items-start gap-2 pt-1">
+                      <div className="w-2.5 h-2.5 rounded-full bg-emerald-500 shadow-sm shrink-0 mt-0.5"></div>
+                      <div>
+                        <div className="text-[10px] font-bold text-slate-700 leading-tight">
+                          {t.comparison} ({compareLens.index.toFixed(2)})
+                        </div>
+                        <div className="text-[8px] text-slate-400 font-medium">
+                          {lang === 'id' ? 'Lensa untuk perbandingan indeks' : 'Secondary overlay for comparison'}
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                </div>
+                
+                <button
+                  onClick={() => setIsLegendOpen(true)}
+                  className="w-full mt-1.5 py-1 text-center text-[9px] font-extrabold text-blue-600 hover:text-blue-700 bg-blue-50 hover:bg-blue-100/70 border border-blue-200/30 rounded-lg transition-all uppercase tracking-wider cursor-pointer"
+                >
+                  {lang === 'id' ? 'Sematkan Legenda' : 'Pin Legend'}
+                </button>
+              </div>
+            </PopoverContent>
+          </Popover>
+        </div>
+      )}
     </div>
   );
 };

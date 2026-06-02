@@ -160,6 +160,47 @@ const Control: React.FC<ControlProps> = ({ label, value, min, max, step, onChang
   );
 };
 
+interface FrameInputProps {
+  value: number;
+  min: number;
+  max: number;
+  onChange: (v: number) => void;
+  isExceeding: boolean;
+}
+
+const FrameInput: React.FC<FrameInputProps> = ({ value, min, max, onChange, isExceeding }) => {
+  const [typed, setTyped] = React.useState(value.toString());
+
+  React.useEffect(() => {
+    setTyped(value.toString());
+  }, [value]);
+
+  const commit = () => {
+    const parsed = parseFloat(typed);
+    if (!isNaN(parsed) && isFinite(parsed)) {
+      const clamped = Math.min(max, Math.max(min, parsed));
+      onChange(clamped);
+      setTyped(clamped.toString());
+    } else {
+      setTyped(value.toString());
+    }
+  };
+
+  return (
+    <Input
+      type="text"
+      value={typed}
+      onChange={(e) => setTyped(e.target.value)}
+      onBlur={commit}
+      onKeyDown={(e) => e.key === 'Enter' && commit()}
+      className={`w-full text-center text-xs font-mono font-bold bg-white border h-8 ${
+        isExceeding ? 'border-amber-500 text-amber-600 focus:ring-amber-500' : 'border-slate-200 text-blue-600'
+      }`}
+    />
+  );
+};
+
+
 export const Sidebar: React.FC<SidebarProps> = ({
   lens, setLens,
   frame, setFrame,
@@ -284,11 +325,9 @@ export const Sidebar: React.FC<SidebarProps> = ({
                   <AlertCircle size={11} />
                 </button>
               </div>
-              <Input 
-                type="number" value={frame.a} onChange={(e) => setFrame({...frame, a: parseFloat(e.target.value)})}
-                className={`w-full text-center text-xs font-mono font-bold bg-white border ${
-                  isExceedingA ? 'border-amber-500 text-amber-600 focus:ring-amber-500' : 'border-slate-200 text-blue-600'
-                }`}
+              <FrameInput 
+                value={frame.a} min={35} max={65} isExceeding={isExceedingA}
+                onChange={(val) => setFrame({ ...frame, a: val })}
               />
             </div>
             <div className="flex flex-col">
@@ -309,11 +348,9 @@ export const Sidebar: React.FC<SidebarProps> = ({
                   <AlertCircle size={11} />
                 </button>
               </div>
-              <Input 
-                type="number" value={frame.b} onChange={(e) => setFrame({...frame, b: parseFloat(e.target.value)})}
-                className={`w-full text-center text-xs font-mono font-bold bg-white border ${
-                  isExceedingB ? 'border-amber-500 text-amber-600 focus:ring-amber-500' : 'border-slate-200 text-blue-600'
-                }`}
+              <FrameInput 
+                value={frame.b} min={20} max={55} isExceeding={isExceedingB}
+                onChange={(val) => setFrame({ ...frame, b: val })}
               />
             </div>
           </div>
@@ -336,11 +373,9 @@ export const Sidebar: React.FC<SidebarProps> = ({
                   <AlertCircle size={11} />
                 </button>
               </div>
-              <Input 
-                type="number" value={frame.dbl} onChange={(e) => setFrame({...frame, dbl: parseFloat(e.target.value)})}
-                className={`w-full text-center text-xs font-mono font-bold bg-white border ${
-                  isExceedingDbl ? 'border-amber-500 text-amber-600 focus:ring-amber-500' : 'border-slate-200 text-blue-600'
-                }`}
+              <FrameInput 
+                value={frame.dbl} min={10} max={28} isExceeding={isExceedingDbl}
+                onChange={(val) => setFrame({ ...frame, dbl: val })}
               />
             </div>
             <div className="flex flex-col">
@@ -361,11 +396,9 @@ export const Sidebar: React.FC<SidebarProps> = ({
                   <AlertCircle size={11} />
                 </button>
               </div>
-              <Input 
-                type="number" value={frame.ed} onChange={(e) => setFrame({...frame, ed: parseFloat(e.target.value)})}
-                className={`w-full text-center text-xs font-mono font-bold bg-white border ${
-                  isExceedingEd ? 'border-amber-500 text-amber-600 focus:ring-amber-500' : 'border-slate-200 text-blue-600'
-                }`}
+              <FrameInput 
+                value={frame.ed} min={35} max={75} isExceeding={isExceedingEd}
+                onChange={(val) => setFrame({ ...frame, ed: val })}
               />
             </div>
           </div>
@@ -508,11 +541,9 @@ export const Sidebar: React.FC<SidebarProps> = ({
                   <AlertCircle size={11} />
                 </button>
               </div>
-              <Input 
-                type="number" value={frame.a} onChange={(e) => setFrame({...frame, a: parseFloat(e.target.value)})}
-                className={`w-full text-center text-xs font-mono font-bold bg-white border ${
-                  isExceedingA ? 'border-amber-500 text-amber-600 focus:ring-amber-500' : 'border-slate-200 text-blue-600'
-                }`}
+              <FrameInput 
+                value={frame.a} min={35} max={65} isExceeding={isExceedingA}
+                onChange={(val) => setFrame({ ...frame, a: val })}
               />
             </div>
             <div className="flex flex-col">
@@ -533,11 +564,9 @@ export const Sidebar: React.FC<SidebarProps> = ({
                   <AlertCircle size={11} />
                 </button>
               </div>
-              <Input 
-                type="number" value={frame.b} onChange={(e) => setFrame({...frame, b: parseFloat(e.target.value)})}
-                className={`w-full text-center text-xs font-mono font-bold bg-white border ${
-                  isExceedingB ? 'border-amber-500 text-amber-600 focus:ring-amber-500' : 'border-slate-200 text-blue-600'
-                }`}
+              <FrameInput 
+                value={frame.b} min={20} max={55} isExceeding={isExceedingB}
+                onChange={(val) => setFrame({ ...frame, b: val })}
               />
             </div>
           </div>
@@ -560,11 +589,9 @@ export const Sidebar: React.FC<SidebarProps> = ({
                   <AlertCircle size={11} />
                 </button>
               </div>
-              <Input 
-                type="number" value={frame.dbl} onChange={(e) => setFrame({...frame, dbl: parseFloat(e.target.value)})}
-                className={`w-full text-center text-xs font-mono font-bold bg-white border ${
-                  isExceedingDbl ? 'border-amber-500 text-amber-600 focus:ring-amber-500' : 'border-slate-200 text-blue-600'
-                }`}
+              <FrameInput 
+                value={frame.dbl} min={10} max={28} isExceeding={isExceedingDbl}
+                onChange={(val) => setFrame({ ...frame, dbl: val })}
               />
             </div>
             <div className="flex flex-col">
@@ -585,11 +612,9 @@ export const Sidebar: React.FC<SidebarProps> = ({
                   <AlertCircle size={11} />
                 </button>
               </div>
-              <Input 
-                type="number" value={frame.ed} onChange={(e) => setFrame({...frame, ed: parseFloat(e.target.value)})}
-                className={`w-full text-center text-xs font-mono font-bold bg-white border ${
-                  isExceedingEd ? 'border-amber-500 text-amber-600 focus:ring-amber-500' : 'border-slate-200 text-blue-600'
-                }`}
+              <FrameInput 
+                value={frame.ed} min={35} max={75} isExceeding={isExceedingEd}
+                onChange={(val) => setFrame({ ...frame, ed: val })}
               />
             </div>
           </div>
