@@ -10,7 +10,8 @@ import {
   PatientParameters, 
   FrameType, 
   calculateLens, 
-  CalculationResult 
+  CalculationResult,
+  LensIndex
 } from '../lib/optical';
 import { validateOpticalParams, ValidationResult } from '../lib/validation';
 
@@ -68,7 +69,7 @@ export function useOpticalState() {
 
   // Compare mode states (does not need undo/redo tracking)
   const [compareMode, setCompareMode] = useState<boolean>(false);
-  const [compareIndex, setCompareIndex] = useState<number>(1.74);
+  const [compareIndex, setCompareIndex] = useState<LensIndex>(1.74);
 
   // Active current state
   const state = useMemo(() => {

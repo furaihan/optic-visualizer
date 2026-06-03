@@ -10,52 +10,34 @@ import { SummaryCard } from "./components/SummaryCard";
 import { CurvatureCard } from "./components/CurvatureCard";
 import { RecommendationCard } from "./components/RecommendationCard";
 import { useOpticalState } from "./hooks/useOpticalState";
+import { useTheme } from "./hooks/useTheme";
+import { useKeyboardShortcuts } from "./hooks/useKeyboardShortcuts";
 import { OPTICAL_ENGINE_VERSION } from "./lib/optical";
 import { translations, Language } from "./lib/i18n";
 import { motion, AnimatePresence } from "motion/react";
 import { TooltipProvider } from "./components/ui/tooltip";
 import { Undo2, Redo2, RotateCcw, AlertTriangle, Sun, Moon } from "lucide-react";
+import ErrorBoundary from "./components/ErrorBoundary";
+import { useNavigate } from '@tanstack/react-router';
+import { indexRoute } from './main';
 
 export default function App() {
-  const [lang, setLang] = useState<Language>("id");
-  const [view, setView] = useState<"side" | "top" | "front">("side");
-  
-  // Tab persistence via sessionStorage
-  const [activeTab, setActiveTab] = useState<"visualizer" | "summary" | "parameters">(() => {
-    if (typeof window !== "undefined") {
-      const saved = sessionStorage.getItem("activeTab");
-      if (saved === "visualizer" || saved === "summary" || saved === "parameters") {
-        return saved;
-      }
-    }
-    return "visualizer";
-  });
+  const search = indexRoute.useSearch();
+  const navigate = useNavigate({ from: indexRoute.id });
 
-  const handleTabChange = (tab: "visualizer" | "summary" | "parameters") => {
-    setActiveTab(tab);
-    sessionStorage.setItem("activeTab", tab);
-  };
+  const lang = search.lang || 'id';
+  const setLang = (newLang: Language) => navigate({ search: (prev) => ({ ...prev, lang: newLang }) });
+
+  const view = search.view || 'side';
+  const setView = (newView: "side" | "top" | "front") => navigate({ search: (prev) => ({ ...prev, view: newView }) });
+
+  const activeTab = search.activeTab || 'visualizer';
+  const setActiveTab = (tab: "visualizer" | "summary" | "parameters") => navigate({ search: (prev) => ({ ...prev, activeTab: tab }) });
+
+  const handleTabChange = setActiveTab;
 
   // Dark/Light Mode support
-  const [theme, setTheme] = useState<'light' | 'dark'>(() => {
-    if (typeof window !== "undefined") {
-      const saved = localStorage.getItem("theme");
-      if (saved === "light" || saved === "dark") {
-        return saved;
-      }
-    }
-    return "light";
-  });
-
-  useEffect(() => {
-    localStorage.setItem("theme", theme);
-    const root = window.document.documentElement;
-    if (theme === 'dark') {
-      root.classList.add('dark');
-    } else {
-      root.classList.remove('dark');
-    }
-  }, [theme]);
+  const { theme, toggleTheme } = useTheme();
 
   const t = translations[lang];
 
@@ -95,11 +77,6 @@ export default function App() {
     const handleResize = (e: MediaQueryListEvent | MediaQueryList) => {
       if (e.matches) {
         setActiveTab("visualizer");
-      } else {
-        const saved = sessionStorage.getItem("activeTab");
-        if (saved === "visualizer" || saved === "summary" || saved === "parameters") {
-          setActiveTab(saved);
-        }
       }
     };
     handleResize(mql);
@@ -108,21 +85,7 @@ export default function App() {
   }, []);
 
   // Keyboard shortcut listener for Ctrl+Z (Undo) and Ctrl+Y (Redo)
-  useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.ctrlKey || e.metaKey) {
-        if (e.key === 'z' || e.key === 'Z') {
-          e.preventDefault();
-          undo();
-        } else if (e.key === 'y' || e.key === 'Y') {
-          e.preventDefault();
-          redo();
-        }
-      }
-    };
-    window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [undo, redo]);
+  useKeyboardShortcuts(undo, redo);
 
   return (
     <TooltipProvider delay={50}>
@@ -218,7 +181,7 @@ export default function App() {
 
               {/* Theme Toggle Button */}
               <button
-                onClick={() => setTheme(theme === 'light' ? 'dark' : 'light')}
+                onClick={toggleTheme}
                 className="p-1.5 rounded-lg bg-slate-50 dark:bg-slate-950 hover:bg-slate-100 dark:hover:bg-slate-900 text-slate-500 dark:text-slate-400 border border-slate-200/50 dark:border-slate-800/80 cursor-pointer transition-all flex items-center justify-center"
                 title={theme === 'light' ? (lang === 'id' ? 'Mode Gelap' : 'Dark Mode') : (lang === 'id' ? 'Mode Terang' : 'Light Mode')}
               >
@@ -304,32 +267,36 @@ export default function App() {
             <div className="hidden md:flex flex-col gap-4 flex-1 overflow-y-auto custom-scrollbar md:pr-1.5 pb-6">
               {/* Summary Stats Grid (Compact) */}
               <div className="shrink-0">
-                <SummaryCard
-                  result={result}
-                  compareResult={compareResult}
-                  lang={lang}
-                  frame={frame}
-                  lens={lens}
-                />
+                <ErrorBoundary fallback={<div className="p-4 border border-red-200 bg-red-50 text-red-600 rounded-xl text-xs">Summary Card Error</div>}>
+                  <SummaryCard
+                    result={result}
+                    compareResult={compareResult}
+                    lang={lang}
+                    frame={frame}
+                    lens={lens}
+                  />
+                </ErrorBoundary>
               </div>
 
               <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 shrink-0">
                 {/* Simulation Component - Large Center */}
                 <div className="lg:col-span-2 h-[480px] min-h-[380px]">
-                  <Visualizer
-                    lens={lens}
-                    frame={frame}
-                    patient={patient}
-                    result={result}
-                    compareResult={compareResult}
-                    compareLens={
-                      compareMode ? { ...lens, index: compareIndex } : undefined
-                    }
-                    lang={lang}
-                    view={view}
-                    frameType={frameType}
-                    highlightedLimit={highlightedLimit}
-                  />
+                  <ErrorBoundary fallback={<div className="h-full w-full flex items-center justify-center border border-red-200 bg-red-50 text-red-600 rounded-xl text-xs">Visualizer Rendering Error</div>}>
+                    <Visualizer
+                      lens={lens}
+                      frame={frame}
+                      patient={patient}
+                      result={result}
+                      compareResult={compareResult}
+                      compareLens={
+                        compareMode ? { ...lens, index: compareIndex } : undefined
+                      }
+                      lang={lang}
+                      view={view}
+                      frameType={frameType}
+                      highlightedLimit={highlightedLimit}
+                    />
+                  </ErrorBoundary>
                 </div>
 
                 {/* Technical breakdown column */}
@@ -356,20 +323,22 @@ export default function App() {
                     transition={{ duration: 0.15 }}
                     className="flex-1 flex flex-col min-h-0"
                   >
-                    <Visualizer
-                      lens={lens}
-                      frame={frame}
-                      patient={patient}
-                      result={result}
-                      compareResult={compareResult}
-                      compareLens={
-                        compareMode ? { ...lens, index: compareIndex } : undefined
-                      }
-                      lang={lang}
-                      view={view}
-                      frameType={frameType}
-                      highlightedLimit={highlightedLimit}
-                    />
+                    <ErrorBoundary fallback={<div className="h-full w-full flex items-center justify-center border border-red-200 bg-red-50 text-red-600 rounded-xl text-xs">Visualizer Error</div>}>
+                      <Visualizer
+                        lens={lens}
+                        frame={frame}
+                        patient={patient}
+                        result={result}
+                        compareResult={compareResult}
+                        compareLens={
+                          compareMode ? { ...lens, index: compareIndex } : undefined
+                        }
+                        lang={lang}
+                        view={view}
+                        frameType={frameType}
+                        highlightedLimit={highlightedLimit}
+                      />
+                    </ErrorBoundary>
                   </motion.div>
                 )}
 
@@ -382,13 +351,15 @@ export default function App() {
                     transition={{ duration: 0.15 }}
                     className="flex-1 overflow-y-auto space-y-4 pb-6 custom-scrollbar pr-0.5"
                   >
-                    <SummaryCard
-                      result={result}
-                      compareResult={compareResult}
-                      lang={lang}
-                      frame={frame}
-                      lens={lens}
-                    />
+                    <ErrorBoundary fallback={<div className="p-4 border border-red-200 bg-red-50 text-red-600 rounded-xl text-xs">Summary Card Error</div>}>
+                      <SummaryCard
+                        result={result}
+                        compareResult={compareResult}
+                        lang={lang}
+                        frame={frame}
+                        lens={lens}
+                      />
+                    </ErrorBoundary>
                     <CurvatureCard result={result} lang={lang} />
                     <RecommendationCard
                       result={result}

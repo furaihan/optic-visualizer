@@ -5,6 +5,14 @@
 
 import { MATERIALS_DB, FRAME_TYPE_OVERRIDES } from '../data/materials';
 
+export type LensIndex = 1.5 | 1.56 | 1.6 | 1.67 | 1.74;
+
+export const VALID_INDICES: readonly LensIndex[] = [1.5, 1.56, 1.6, 1.67, 1.74];
+
+export function isValidIndex(value: unknown): value is LensIndex {
+  return VALID_INDICES.includes(value as LensIndex);
+}
+
 export interface LensParameters {
   sph: number;
   cyl: number;

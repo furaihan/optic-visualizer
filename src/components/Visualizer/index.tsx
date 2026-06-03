@@ -8,7 +8,7 @@ import { FrontView } from './FrontView';
 import { TopDownView } from './TopDownView';
 import { Popover, PopoverContent, PopoverTrigger } from '../ui/popover';
 
-export const Visualizer: React.FC<VisualizerProps> = ({
+export const Visualizer: React.FC<VisualizerProps> = React.memo(({
   lens,
   frame,
   patient,
@@ -308,4 +308,17 @@ export const Visualizer: React.FC<VisualizerProps> = ({
       )}
     </div>
   );
-};
+}, (prevProps, nextProps) => {
+  return (
+    prevProps.lens === nextProps.lens &&
+    prevProps.frame === nextProps.frame &&
+    prevProps.patient === nextProps.patient &&
+    prevProps.result === nextProps.result &&
+    prevProps.compareResult === nextProps.compareResult &&
+    prevProps.compareLens === nextProps.compareLens &&
+    prevProps.lang === nextProps.lang &&
+    prevProps.view === nextProps.view &&
+    prevProps.highlightedLimit === nextProps.highlightedLimit &&
+    prevProps.frameType === nextProps.frameType
+  );
+});

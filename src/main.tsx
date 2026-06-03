@@ -5,6 +5,12 @@ import App from './App.tsx';
 import ErrorBoundary from './components/ErrorBoundary.tsx';
 import './index.css';
 
+export type SimulatorSearchParams = {
+  activeTab?: 'visualizer' | 'summary' | 'parameters';
+  view?: 'side' | 'top' | 'front';
+  lang?: 'id' | 'en';
+};
+
 const rootRoute = createRootRoute({
   component: () => (
     <>
@@ -13,9 +19,20 @@ const rootRoute = createRootRoute({
   ),
 });
 
-const indexRoute = createRoute({
+export const indexRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: '/',
+  validateSearch: (search: Record<string, unknown>): SimulatorSearchParams => ({
+    activeTab: ['visualizer', 'summary', 'parameters'].includes(search.activeTab as string) 
+      ? (search.activeTab as SimulatorSearchParams['activeTab']) 
+      : 'visualizer',
+    view: ['side', 'top', 'front'].includes(search.view as string)
+      ? (search.view as SimulatorSearchParams['view'])
+      : 'side',
+    lang: ['id', 'en'].includes(search.lang as string)
+      ? (search.lang as SimulatorSearchParams['lang'])
+      : 'id',
+  }),
   component: App,
 });
 

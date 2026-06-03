@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { LensParameters, FrameParameters, PatientParameters, FrameType } from '../lib/optical';
+import { LensParameters, FrameParameters, PatientParameters, FrameType, LensIndex } from '../lib/optical';
 import { translations, Language } from '../lib/i18n';
 import { 
   Layers, 
@@ -29,8 +29,8 @@ interface SidebarProps {
   setPatient: (p: PatientParameters) => void;
   compareMode: boolean;
   setCompareMode: (v: boolean) => void;
-  compareIndex: number;
-  setCompareIndex: (v: number) => void;
+  compareIndex: LensIndex;
+  setCompareIndex: (v: LensIndex) => void;
   bevelPercent: number;
   setBevelPercent: (v: number) => void;
   frameType: FrameType;
@@ -62,7 +62,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
   setHighlightedLimit,
 }) => {
   const t = translations[lang];
-  const indices = [1.5, 1.56, 1.6, 1.67, 1.74];
+  const indices: LensIndex[] = [1.5, 1.56, 1.6, 1.67, 1.74];
 
   // Optical verification threshold helper flags
   const framePD = frame.a + frame.dbl;
