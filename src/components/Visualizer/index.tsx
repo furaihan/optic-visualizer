@@ -71,13 +71,13 @@ export const Visualizer: React.FC<VisualizerProps> = ({
           <AlertCircle className="text-amber-500 shrink-0 mt-0.5" size={16} />
           <div>
             <h4 className="text-[10px] font-bold text-amber-600 dark:text-amber-400 uppercase tracking-widest mb-1 leading-none">
-              {(t as any).limitWarningTitle || "Batas Struktural Terlampaui!"}
+              {t.limitWarningTitle || "Batas Struktural Terlampaui!"}
             </h4>
             <p className="text-[9.5px] text-slate-600 dark:text-slate-300 font-semibold leading-relaxed">
-              {highlightedLimit === 'a' && (t as any).limitWarningA?.replace('{val}', String(frame.a)).replace('{blankVal}', (result.y * 2 + 2).toFixed(0))}
-              {highlightedLimit === 'b' && (t as any).limitWarningB?.replace('{val}', String(frame.b))}
-              {highlightedLimit === 'dbl' && (t as any).limitWarningDbl?.replace('{val}', String(frame.dbl))}
-              {highlightedLimit === 'ed' && (t as any).limitWarningEd?.replace('{val}', String(frame.ed)).replace('{aVal}', String(frame.a))}
+              {highlightedLimit === 'a' && t.limitWarningA?.replace('{val}', String(frame.a)).replace('{blankVal}', (result.y * 2 + 2).toFixed(0))}
+              {highlightedLimit === 'b' && t.limitWarningB?.replace('{val}', String(frame.b))}
+              {highlightedLimit === 'dbl' && t.limitWarningDbl?.replace('{val}', String(frame.dbl))}
+              {highlightedLimit === 'ed' && t.limitWarningEd?.replace('{val}', String(frame.ed)).replace('{aVal}', String(frame.a))}
             </p>
           </div>
         </div>

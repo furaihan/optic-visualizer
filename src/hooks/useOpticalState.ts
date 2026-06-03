@@ -172,6 +172,30 @@ export function useOpticalState() {
 
   // 3. Calculation Engine (Pure calculations)
   const result: CalculationResult = useMemo(() => {
+    if (!validation.isValid) {
+      return {
+        ct: 2.0,
+        et: 2.0,
+        anteriorProtrusion: 0,
+        posteriorProtrusion: 0,
+        r1: 0,
+        r2: 0,
+        backPower: 0,
+        s1: 0,
+        s2: 0,
+        decentration: 0,
+        y: 0,
+        weight: 0,
+        density: 1.32,
+        recommendation: {
+          index: 1.5,
+          material: "CR-39",
+          reason: "Validation error. Please check parameters.",
+          thinness: "Standard",
+          abbe: 58
+        }
+      };
+    }
     // If invalid parameters, calculateLens will fall back gracefully or cap values internally
     return calculateLens(
       state.lens, 
@@ -181,10 +205,11 @@ export function useOpticalState() {
       state.bevelPercent, 
       state.frameType
     );
-  }, [state.lens, state.frame, state.patient, state.bevelPercent, state.frameType]);
+  }, [state.lens, state.frame, state.patient, state.bevelPercent, state.frameType, validation.isValid]);
 
   const compareResult: CalculationResult | undefined = useMemo(() => {
     if (!compareMode) return undefined;
+    if (!validation.isValid) return undefined;
     return calculateLens(
       { ...state.lens, index: compareIndex },
       state.frame,
@@ -193,7 +218,7 @@ export function useOpticalState() {
       state.bevelPercent,
       state.frameType
     );
-  }, [state.lens, state.frame, state.patient, state.bevelPercent, state.frameType, compareMode, compareIndex]);
+  }, [state.lens, state.frame, state.patient, state.bevelPercent, state.frameType, compareMode, compareIndex, validation.isValid]);
 
   return {
     lens: state.lens,

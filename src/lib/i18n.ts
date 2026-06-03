@@ -1,6 +1,103 @@
 export type Language = 'id' | 'en';
 
-export const translations = {
+export interface AppTranslations {
+  title: string;
+  tabParameters: string;
+  tabVisualizer: string;
+  tabSummary: string;
+  sideProfile: string;
+  topDown: string;
+  future: string;
+  labOrder: string;
+  curvatureSpecs: string;
+  r1Front: string;
+  r2Back: string;
+  s1Sag: string;
+  s2Sag: string;
+  geometricAudit: string;
+  volumeReduction: string;
+  volumeCompact: string;
+  volumeElevated: string;
+  volumeLabel: string;
+  framePd: string;
+  decentration: string;
+  minBlank: string;
+  engine: string;
+  labs: string;
+  baseCurve: string;
+  lensParams: string;
+  sphere: string;
+  cylinder: string;
+  axis: string;
+  refractiveIndex: string;
+  frameGeometry: string;
+  aSize: string;
+  bSize: string;
+  dbl: string;
+  ed: string;
+  frameDepth: string;
+  fittingSpecs: string;
+  pd: string;
+  fittingHeight: string;
+  frameType: string;
+  fullRim: string;
+  halfRim: string;
+  rimless: string;
+  bevelPos: string;
+  bevelFront: string;
+  bevelBack: string;
+  recomTitle: string;
+  bestChoice: string;
+  aiConsultant: string;
+  getAiRec: string;
+  aiLoading: string;
+  aiError: string;
+  compareMode: string;
+  calculateFull: string;
+  edgeThick: string;
+  center: string;
+  anteriorProt: string;
+  posteriorProt: string;
+  lensWeight: string;
+  thick: string;
+  medium: string;
+  thin: string;
+  moderate: string;
+  noticeable: string;
+  flush: string;
+  optimized: string;
+  crossSection: string;
+  visualSim: string;
+  primarySpec: string;
+  comparison: string;
+  frontView: string;
+  threeDView: string;
+  overhang: string;
+  pupil: string;
+  groove: string;
+  tipSphere: string;
+  tipCylinder: string;
+  tipAxis: string;
+  tipRefractiveIndex: string;
+  tipBaseCurve: string;
+  tipASize: string;
+  tipBSize: string;
+  tipDbl: string;
+  tipEd: string;
+  tipFittingHeight: string;
+  tipPd: string;
+  tipFrameDepth: string;
+  tipFrameType: string;
+  tipBevelPos: string;
+  tipCompareMode: string;
+  limitWarningTitle: string;
+  limitWarningA: string;
+  limitWarningB: string;
+  limitWarningDbl: string;
+  limitWarningEd: string;
+}
+
+export const translations: Record<Language, AppTranslations> = {
   id: {
     title: 'Analisis Interaktif',
     tabParameters: 'Parameter',
@@ -212,7 +309,7 @@ export const translations = {
 };
 
 export const getTooltipByLabel = (label: string, lang: Language): string => {
-  const t = translations[lang] as any;
+  const t: AppTranslations = translations[lang];
   const normalized = label.trim().toLowerCase();
 
   // Check direct matches with current translation values

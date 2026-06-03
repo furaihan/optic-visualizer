@@ -69,6 +69,17 @@ export const SummaryCard: React.FC<SummaryCardProps> = ({ result, compareResult,
     );
   };
 
+  interface StatItemProps {
+    label: string;
+    value: number;
+    unit: string;
+    status: string;
+    statusColor: string;
+    icon?: React.ComponentType<{ size?: number; className?: string; strokeWidth?: number }>;
+    iconColor?: string;
+    resultKey?: 'et' | 'ct' | 'anteriorProtrusion' | 'posteriorProtrusion' | 'weight';
+  }
+
   const StatItem = ({ 
     label, 
     value, 
@@ -78,7 +89,7 @@ export const SummaryCard: React.FC<SummaryCardProps> = ({ result, compareResult,
     icon: Icon, 
     iconColor = "text-slate-400 dark:text-slate-500 font-bold",
     resultKey
-  }: any) => {
+  }: StatItemProps) => {
     const deltaNode = resultKey ? getDeltaElement(resultKey) : null;
     
     return (
