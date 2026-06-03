@@ -14,14 +14,49 @@ import { OPTICAL_ENGINE_VERSION } from "./lib/optical";
 import { translations, Language } from "./lib/i18n";
 import { motion, AnimatePresence } from "motion/react";
 import { TooltipProvider } from "./components/ui/tooltip";
-import { Undo2, Redo2, RotateCcw, AlertTriangle } from "lucide-react";
+import { Undo2, Redo2, RotateCcw, AlertTriangle, Sun, Moon } from "lucide-react";
 
 export default function App() {
   const [lang, setLang] = useState<Language>("id");
   const [view, setView] = useState<"side" | "top" | "front">("side");
-  const [activeTab, setActiveTab] = useState<
-    "visualizer" | "summary" | "parameters"
-  >("visualizer");
+  
+  // Tab persistence via sessionStorage
+  const [activeTab, setActiveTab] = useState<"visualizer" | "summary" | "parameters">(() => {
+    if (typeof window !== "undefined") {
+      const saved = sessionStorage.getItem("activeTab");
+      if (saved === "visualizer" || saved === "summary" || saved === "parameters") {
+        return saved;
+      }
+    }
+    return "visualizer";
+  });
+
+  const handleTabChange = (tab: "visualizer" | "summary" | "parameters") => {
+    setActiveTab(tab);
+    sessionStorage.setItem("activeTab", tab);
+  };
+
+  // Dark/Light Mode support
+  const [theme, setTheme] = useState<'light' | 'dark'>(() => {
+    if (typeof window !== "undefined") {
+      const saved = localStorage.getItem("theme");
+      if (saved === "light" || saved === "dark") {
+        return saved;
+      }
+    }
+    return "light";
+  });
+
+  useEffect(() => {
+    localStorage.setItem("theme", theme);
+    const root = window.document.documentElement;
+    if (theme === 'dark') {
+      root.classList.add('dark');
+    } else {
+      root.classList.remove('dark');
+    }
+  }, [theme]);
+
   const t = translations[lang];
 
   const [highlightedLimit, setHighlightedLimit] = useState<'a' | 'b' | 'dbl' | 'ed' | null>(null);
@@ -60,6 +95,11 @@ export default function App() {
     const handleResize = (e: MediaQueryListEvent | MediaQueryList) => {
       if (e.matches) {
         setActiveTab("visualizer");
+      } else {
+        const saved = sessionStorage.getItem("activeTab");
+        if (saved === "visualizer" || saved === "summary" || saved === "parameters") {
+          setActiveTab(saved);
+        }
       }
     };
     handleResize(mql);
@@ -85,8 +125,8 @@ export default function App() {
   }, [undo, redo]);
 
   return (
-    <TooltipProvider delay={200}>
-      <div className="flex h-screen bg-slate-50 font-sans text-slate-800 overflow-hidden">
+    <TooltipProvider delay={50}>
+      <div className={`flex h-screen w-full font-sans overflow-hidden transition-colors duration-200 ${theme === 'dark' ? 'bg-slate-950 text-slate-100' : 'bg-slate-50 text-slate-800'}`}>
         <div className="hidden md:block shrink-0">
           <Sidebar
             lens={lens}
@@ -111,44 +151,44 @@ export default function App() {
 
         <main className="flex-1 flex flex-col h-screen overflow-hidden">
           {/* Header Bar */}
-          <header className="h-12 bg-white border-b border-slate-200 flex items-center justify-between px-4 md:px-6 shrink-0 z-20 shadow-sm">
+          <header className="h-12 bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between px-4 md:px-6 shrink-0 z-20 shadow-sm transition-colors duration-200">
             <div className="flex items-center gap-3">
-              <h1 className="font-bold text-[10px] md:text-[11px] tracking-widest text-slate-400 uppercase truncate max-w-[120px] sm:max-w-none">
+              <h1 className="font-bold text-[10px] md:text-[11px] tracking-widest text-slate-400 dark:text-slate-500 uppercase truncate max-w-[120px] sm:max-w-none">
                 {t.title}
               </h1>
-              <div className="h-4 w-px bg-slate-200"></div>
+              <div className="h-4 w-px bg-slate-200 dark:bg-slate-800"></div>
               <div
-                className={`gap-1 bg-slate-50 p-0.5 md:p-1 rounded-lg border border-slate-200/50 ${activeTab !== "visualizer" ? "hidden md:flex" : "flex"}`}
+                className={`gap-1 bg-slate-50 dark:bg-slate-950 p-0.5 md:p-1 rounded-lg border border-slate-200/50 dark:border-slate-800/80 ${activeTab !== "visualizer" ? "hidden md:flex" : "flex"}`}
               >
                 <button
                   onClick={() => setView("side")}
-                  className={`px-2 md:px-3 py-0.5 text-[8px] md:text-[9px] font-bold rounded-md border transition-all cursor-pointer ${view === "side" ? "bg-white shadow-sm border-slate-200 text-slate-700" : "border-transparent text-slate-400"}`}
+                  className={`px-2 md:px-3 py-0.5 text-[8px] md:text-[9px] font-bold rounded-md border transition-all cursor-pointer ${view === "side" ? "bg-white dark:bg-slate-900 shadow-sm border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-100 font-extrabold" : "border-transparent text-slate-400 hover:text-slate-600 dark:hover:text-slate-300"}`}
                 >
                   {t.sideProfile}
                 </button>
                 <button
                   onClick={() => setView("top")}
-                  className={`px-2 md:px-3 py-0.5 text-[8px] md:text-[9px] font-bold rounded-md border transition-all cursor-pointer ${view === "top" ? "bg-white shadow-sm border-slate-200 text-slate-700" : "border-transparent text-slate-400"}`}
+                  className={`px-2 md:px-3 py-0.5 text-[8px] md:text-[9px] font-bold rounded-md border transition-all cursor-pointer ${view === "top" ? "bg-white dark:bg-slate-900 shadow-sm border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-100 font-extrabold" : "border-transparent text-slate-400 hover:text-slate-600 dark:hover:text-slate-300"}`}
                 >
                   {t.topDown}
                 </button>
                 <button
                   onClick={() => setView("front")}
-                  className={`px-2 md:px-3 py-0.5 text-[8px] md:text-[9px] font-bold rounded-md border transition-all cursor-pointer ${view === "front" ? "bg-white shadow-sm border-slate-200 text-slate-700" : "border-transparent text-slate-400"}`}
+                  className={`px-2 md:px-3 py-0.5 text-[8px] md:text-[9px] font-bold rounded-md border transition-all cursor-pointer ${view === "front" ? "bg-white dark:bg-slate-900 shadow-sm border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-100 font-extrabold" : "border-transparent text-slate-400 hover:text-slate-600 dark:hover:text-slate-300"}`}
                 >
                   {t.frontView}
                 </button>
               </div>
             </div>
 
-            <div className="flex items-center gap-2 md:gap-4 shrink-0">
+            <div className="flex items-center gap-2 md:gap-4 shrink-0 font-sans">
               {/* Undo / Redo controls */}
-              <div className="flex items-center gap-0.5 bg-slate-50 p-0.5 rounded-lg border border-slate-200/50">
+              <div className="flex items-center gap-0.5 bg-slate-50 dark:bg-slate-950 p-0.5 rounded-lg border border-slate-200/50 dark:border-slate-800/80">
                 <button
                   onClick={undo}
                   disabled={!canUndo}
                   className={`p-1.5 rounded-md transition-all cursor-pointer ${
-                    canUndo ? "text-slate-700 hover:bg-white hover:shadow-sm" : "text-slate-300 pointer-events-none"
+                    canUndo ? "text-slate-700 dark:text-slate-200 hover:bg-white dark:hover:bg-slate-900 hover:shadow-sm" : "text-slate-300 dark:text-slate-700 pointer-events-none"
                   }`}
                   title={lang === "id" ? "Batal (Ctrl+Z)" : "Undo (Ctrl+Z)"}
                 >
@@ -158,7 +198,7 @@ export default function App() {
                   onClick={redo}
                   disabled={!canRedo}
                   className={`p-1.5 rounded-md transition-all cursor-pointer ${
-                    canRedo ? "text-slate-700 hover:bg-white hover:shadow-sm" : "text-slate-300 pointer-events-none"
+                    canRedo ? "text-slate-700 dark:text-slate-200 hover:bg-white dark:hover:bg-slate-900 hover:shadow-sm" : "text-slate-300 dark:text-slate-700 pointer-events-none"
                   }`}
                   title={lang === "id" ? "Ulang (Ctrl+Y)" : "Redo (Ctrl+Y)"}
                 >
@@ -169,24 +209,33 @@ export default function App() {
               {/* Reset Session */}
               <button
                 onClick={resetSession}
-                className="p-1 px-2.5 rounded-lg text-[9px] font-bold bg-slate-100 hover:bg-slate-200 text-slate-600 transition-all border border-slate-200/60 cursor-pointer flex items-center gap-1"
+                className="p-1 px-2.5 rounded-lg text-[9px] font-bold bg-slate-100 hover:bg-slate-200 dark:bg-slate-900 dark:hover:bg-slate-800 text-slate-600 dark:text-slate-300 border border-slate-200/60 dark:border-slate-800/85 cursor-pointer transition-all flex items-center gap-1"
                 title={lang === "id" ? "Kembalikan ke pengaturan awal" : "Reset session parameters to defaults"}
               >
                 <RotateCcw size={11} />
                 <span className="hidden sm:inline">Reset</span>
               </button>
 
+              {/* Theme Toggle Button */}
+              <button
+                onClick={() => setTheme(theme === 'light' ? 'dark' : 'light')}
+                className="p-1.5 rounded-lg bg-slate-50 dark:bg-slate-950 hover:bg-slate-100 dark:hover:bg-slate-900 text-slate-500 dark:text-slate-400 border border-slate-200/50 dark:border-slate-800/80 cursor-pointer transition-all flex items-center justify-center"
+                title={theme === 'light' ? (lang === 'id' ? 'Mode Gelap' : 'Dark Mode') : (lang === 'id' ? 'Mode Terang' : 'Light Mode')}
+              >
+                {theme === 'light' ? <Moon size={13} /> : <Sun size={13} className="text-amber-400" />}
+              </button>
+
               {/* Language Switcher */}
-              <div className="flex gap-1 bg-slate-50 p-0.5 rounded-lg border border-slate-200/50">
+              <div className="flex gap-1 bg-slate-50 dark:bg-slate-950 p-0.5 rounded-lg border border-slate-200/50 dark:border-slate-800/80">
                 <button
                   onClick={() => setLang("id")}
-                  className={`px-2 py-0.5 text-[8px] md:text-[9px] font-bold rounded-md border transition-all cursor-pointer ${lang === "id" ? "bg-white shadow-sm border-slate-200 text-blue-600" : "border-transparent text-slate-400 hover:text-slate-600"}`}
+                  className={`px-2 py-0.5 text-[8px] md:text-[9px] font-bold rounded-md border transition-all cursor-pointer ${lang === "id" ? "bg-white dark:bg-slate-900 shadow-sm border-slate-200 dark:border-slate-800 text-blue-600 dark:text-blue-400" : "border-transparent text-slate-400 hover:text-slate-600 dark:hover:text-slate-300"}`}
                 >
                   ID
                 </button>
                 <button
                   onClick={() => setLang("en")}
-                  className={`px-2 py-0.5 text-[8px] md:text-[9px] font-bold rounded-md border transition-all cursor-pointer ${lang === "en" ? "bg-white shadow-sm border-slate-200 text-blue-600" : "border-transparent text-slate-400 hover:text-slate-600"}`}
+                  className={`px-2 py-0.5 text-[8px] md:text-[9px] font-bold rounded-md border transition-all cursor-pointer ${lang === "en" ? "bg-white dark:bg-slate-900 shadow-sm border-slate-200 dark:border-slate-800 text-blue-600 dark:text-blue-400" : "border-transparent text-slate-400 hover:text-slate-600 dark:hover:text-slate-300"}`}
                 >
                   EN
                 </button>
@@ -196,16 +245,16 @@ export default function App() {
 
           {/* Verification / Alert Warnings Bar */}
           {validation.errors.length > 0 && (
-            <div className="bg-amber-50 border-b border-amber-200/60 px-4 md:px-6 py-2 shrink-0 animate-fade-in">
+            <div className="bg-amber-50/90 dark:bg-amber-950/20 border-b border-amber-200/60 dark:border-amber-900/40 px-4 md:px-6 py-2 shrink-0 animate-fade-in">
               <div className="flex items-start gap-2 max-w-7xl mx-auto">
                 <AlertTriangle size={14} className="text-amber-500 shrink-0 mt-0.5" />
-                <div className="flex-1">
-                  <div className="text-[10px] uppercase tracking-wider font-extrabold text-amber-600 mb-0.5">
+                <div className="flex-1 min-w-0">
+                  <div className="text-[10px] uppercase tracking-wider font-extrabold text-amber-600 dark:text-amber-400 mb-0.5 whitespace-normal break-words">
                     {lang === 'id' ? 'Catatan & Validasi Klinis' : 'Clinical Verification Alerts'}
                   </div>
-                  <ul className="list-disc list-inside text-xs text-slate-600 font-medium leading-tight">
+                  <ul className="list-disc list-inside text-xs text-slate-600 dark:text-slate-300 font-medium leading-tight">
                     {validation.errors.map((err, i) => (
-                      <li key={i}>
+                      <li key={i} className="whitespace-normal break-words py-0.5">
                         {lang === 'id' ? err.messageId : err.messageEn}
                       </li>
                     ))}
@@ -218,33 +267,33 @@ export default function App() {
           {/* Visualization Content */}
           <div className="flex-1 overflow-hidden p-3 md:p-4 lg:p-6 flex flex-col gap-3 md:gap-4">
             {/* Mobile Tab Control */}
-            <div className="md:hidden flex p-1 bg-slate-100 border border-slate-200 rounded-xl shrink-0">
+            <div className="md:hidden flex p-1 bg-slate-100 dark:bg-slate-900/60 border border-slate-200 dark:border-slate-830 rounded-xl shrink-0">
               <button
-                onClick={() => setActiveTab("visualizer")}
-                className={`flex-1 py-1.5 text-[10px] font-bold rounded-lg transition-all ${
+                onClick={() => handleTabChange("visualizer")}
+                className={`flex-1 py-1.5 text-[10px] font-bold rounded-lg transition-all cursor-pointer ${
                   activeTab === "visualizer"
-                    ? "bg-white text-blue-600 shadow-sm border border-slate-200/40"
-                    : "text-slate-500 hover:text-slate-700 border border-transparent"
+                    ? "bg-white dark:bg-slate-950 text-blue-600 dark:text-blue-400 shadow-sm border border-slate-200/40 dark:border-slate-800/80"
+                    : "text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200 border border-transparent"
                 }`}
               >
                 {t.tabVisualizer}
               </button>
               <button
-                onClick={() => setActiveTab("summary")}
-                className={`flex-1 py-1.5 text-[10px] font-bold rounded-lg transition-all ${
+                onClick={() => handleTabChange("summary")}
+                className={`flex-1 py-1.5 text-[10px] font-bold rounded-lg transition-all cursor-pointer ${
                   activeTab === "summary"
-                    ? "bg-white text-blue-600 shadow-sm border border-slate-200/40"
-                    : "text-slate-500 hover:text-slate-700 border border-transparent"
+                    ? "bg-white dark:bg-slate-950 text-blue-600 dark:text-blue-400 shadow-sm border border-slate-200/40 dark:border-slate-800/80"
+                    : "text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200 border border-transparent"
                 }`}
               >
                 {t.tabSummary}
               </button>
               <button
-                onClick={() => setActiveTab("parameters")}
-                className={`flex-1 py-1.5 text-[10px] font-bold rounded-lg transition-all ${
+                onClick={() => handleTabChange("parameters")}
+                className={`flex-1 py-1.5 text-[10px] font-bold rounded-lg transition-all cursor-pointer ${
                   activeTab === "parameters"
-                    ? "bg-white text-blue-600 shadow-sm border border-slate-200/40"
-                    : "text-slate-500 hover:text-slate-700 border border-transparent"
+                    ? "bg-white dark:bg-slate-950 text-blue-600 dark:text-blue-400 shadow-sm border border-slate-200/40 dark:border-slate-800/80"
+                    : "text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200 border border-transparent"
                 }`}
               >
                 {t.tabParameters}

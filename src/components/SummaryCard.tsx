@@ -76,30 +76,30 @@ export const SummaryCard: React.FC<SummaryCardProps> = ({ result, compareResult,
     status, 
     statusColor, 
     icon: Icon, 
-    iconColor = "text-slate-400 font-bold",
+    iconColor = "text-slate-400 dark:text-slate-500 font-bold",
     resultKey
   }: any) => {
     const deltaNode = resultKey ? getDeltaElement(resultKey) : null;
     
     return (
-      <div className="bg-white p-4 flex flex-col justify-between hover:bg-slate-50/40 transition-colors">
+      <div className="bg-white dark:bg-slate-950 p-4 flex flex-col justify-between hover:bg-slate-50/40 dark:hover:bg-slate-900/40 transition-colors">
         <div className="space-y-1.5">
           <div className="flex items-center gap-1.5">
             {Icon && <Icon size={13} className={iconColor} strokeWidth={2.5} />}
-            <p className="text-[10px] font-bold text-slate-500 uppercase tracking-wider">{label}</p>
+            <p className="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">{label}</p>
           </div>
           
           <div className="flex items-baseline gap-2 flex-wrap">
-            <p className="text-xl md:text-2xl font-mono font-bold text-slate-800 leading-none">
+            <p className="text-xl md:text-2xl font-mono font-bold text-slate-800 dark:text-slate-100 leading-none">
               {value.toFixed(2)}
-              <span className="text-[10px] ml-1 font-sans font-medium text-slate-400 lowercase">{unit}</span>
+              <span className="text-[10px] ml-1 font-sans font-medium text-slate-400 dark:text-slate-500 lowercase">{unit}</span>
             </p>
             {deltaNode}
           </div>
         </div>
 
         <div className="mt-3">
-          <span className={`inline-block px-2 py-0.5 rounded text-[9px] font-semibold uppercase tracking-wider ${statusColor} leading-none`}>
+          <span className={`inline-block px-2 py-0.5 rounded text-[9px] font-semibold uppercase tracking-wider border ${statusColor} leading-none`}>
             {status}
           </span>
         </div>
@@ -108,22 +108,22 @@ export const SummaryCard: React.FC<SummaryCardProps> = ({ result, compareResult,
   };
 
   const getETStatus = (et: number) => {
-    if (et > 6) return { label: t.thick, color: 'bg-rose-50 text-rose-700 border border-rose-100', icon: AlertTriangle, iconColor: 'text-rose-500' };
-    if (et > 4) return { label: t.medium, color: 'bg-amber-50 text-amber-700 border border-amber-100', icon: ArrowUpRight, iconColor: 'text-amber-500' };
-    return { label: t.thin, color: 'bg-emerald-50 text-emerald-700 border border-emerald-100', icon: CheckCircle2, iconColor: 'text-emerald-500' };
+    if (et > 6) return { label: t.thick, color: 'bg-rose-50 text-rose-700 border-rose-100 dark:bg-rose-950/20 dark:text-rose-350 dark:border-rose-900/60', icon: AlertTriangle, iconColor: 'text-rose-500' };
+    if (et > 4) return { label: t.medium, color: 'bg-amber-50 text-amber-700 border-amber-100 dark:bg-amber-950/20 dark:text-amber-350 dark:border-amber-900/60', icon: ArrowUpRight, iconColor: 'text-amber-500' };
+    return { label: t.thin, color: 'bg-emerald-50 text-emerald-700 border-emerald-100 dark:bg-emerald-950/20 dark:text-emerald-350 dark:border-emerald-900/60', icon: CheckCircle2, iconColor: 'text-emerald-500' };
   };
 
   const getProtrusionStatus = (val: number) => {
-    if (val > 2) return { label: t.moderate, color: 'bg-rose-50 text-rose-700 border border-rose-100', icon: AlertTriangle, iconColor: 'text-rose-500' };
-    if (val > 0.5) return { label: t.noticeable, color: 'bg-amber-50 text-amber-700 border border-amber-100', icon: ArrowUpRight, iconColor: 'text-amber-500' };
-    return { label: t.flush, color: 'bg-emerald-50 text-emerald-700 border border-emerald-100', icon: CheckCircle2, iconColor: 'text-emerald-500' };
+    if (val > 2) return { label: t.moderate, color: 'bg-rose-50 text-rose-700 border-rose-100 dark:bg-rose-950/20 dark:text-rose-350 dark:border-rose-900/60', icon: AlertTriangle, iconColor: 'text-rose-500' };
+    if (val > 0.5) return { label: t.noticeable, color: 'bg-amber-50 text-amber-700 border-amber-100 dark:bg-amber-950/20 dark:text-amber-350 dark:border-amber-900/60', icon: ArrowUpRight, iconColor: 'text-amber-500' };
+    return { label: t.flush, color: 'bg-emerald-50 text-emerald-700 border-emerald-100 dark:bg-emerald-950/20 dark:text-emerald-350 dark:border-emerald-900/60', icon: CheckCircle2, iconColor: 'text-emerald-500' };
   };
 
   const getWeightStatus = (w: number) => {
-    if (w > 15) return { label: lang === 'id' ? 'Berat' : 'Heavy', color: 'bg-rose-50 text-rose-700 border border-rose-100' };
-    if (w > 10) return { label: lang === 'id' ? 'Sedang' : 'Moderate', color: 'bg-amber-50 text-amber-700 border border-amber-100' };
-    if (w > 5) return { label: lang === 'id' ? 'Ringan' : 'Light', color: 'bg-emerald-50 text-emerald-700 border border-emerald-100' };
-    return { label: lang === 'id' ? 'Sangat Ringan' : 'Ultralight', color: 'bg-blue-50 text-blue-700 border border-blue-100' };
+    if (w > 15) return { label: lang === 'id' ? 'Berat' : 'Heavy', color: 'bg-rose-50 text-rose-700 border border-rose-100 dark:bg-rose-950/20 dark:text-rose-350 dark:border-rose-900/60' };
+    if (w > 10) return { label: lang === 'id' ? 'Sedang' : 'Moderate', color: 'bg-amber-50 text-amber-700 border border-amber-100 dark:bg-amber-950/20 dark:text-amber-350 dark:border-amber-900/60' };
+    if (w > 5) return { label: lang === 'id' ? 'Ringan' : 'Light', color: 'bg-emerald-50 text-emerald-700 border border-emerald-100 dark:bg-emerald-950/20 dark:text-emerald-350 dark:border-emerald-900/60' };
+    return { label: lang === 'id' ? 'Sangat Ringan' : 'Ultralight', color: 'bg-blue-50 text-blue-700 border border-blue-100 dark:bg-blue-950/20 dark:text-blue-350 dark:border-blue-900/60' };
   };
 
   const etStatus = getETStatus(result.et);

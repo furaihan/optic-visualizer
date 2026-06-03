@@ -54,26 +54,26 @@ export const Visualizer: React.FC<VisualizerProps> = ({
   }, [compareResult]);
 
   return (
-    <div className="relative w-full h-full min-h-[300px] bg-slate-100 rounded-3xl overflow-hidden flex items-center justify-center border border-slate-200 shadow-inner">
+    <div className="relative w-full h-full min-h-[300px] bg-slate-100 dark:bg-slate-900 rounded-3xl overflow-hidden flex items-center justify-center border border-slate-200 dark:border-slate-800 shadow-inner">
       {/* Background Lab Grid */}
       <div className="absolute inset-0 lab-grid" />
 
-      <div className="absolute top-8 left-8 border-l-2 border-slate-300 pl-4 py-1 z-10 text-left">
-        <h3 className="text-slate-500 text-[10px] font-bold uppercase tracking-[0.2em]">
+      <div className="absolute top-8 left-8 border-l-2 border-slate-300 dark:border-slate-700 pl-4 py-1 z-10 text-left">
+        <h3 className="text-slate-500 dark:text-slate-400 text-[10px] font-bold uppercase tracking-[0.2em]">
           {view === 'side' ? t.crossSection : view === 'top' ? t.topDown : t.frontView}
         </h3>
-        <p className="text-slate-400 text-[9px] italic">{t.visualSim}</p>
+        <p className="text-slate-400 dark:text-slate-500 text-[9px] italic">{t.visualSim}</p>
       </div>
 
       {/* Floating Exceeded/Warning Alert Card */}
       {highlightedLimit && (
-        <div className="absolute top-8 right-8 max-w-[280px] p-4 bg-amber-500/10 backdrop-blur-md border border-amber-500/30 rounded-2xl flex items-start gap-2.5 shadow-lg animate-in fade-in slide-in-from-top-4 duration-300 text-left z-20">
+        <div className="absolute top-8 right-8 max-w-[280px] p-4 bg-amber-500/10 dark:bg-amber-500/15 backdrop-blur-md border border-amber-500/30 rounded-2xl flex items-start gap-2.5 shadow-lg animate-in fade-in slide-in-from-top-4 duration-300 text-left z-20">
           <AlertCircle className="text-amber-500 shrink-0 mt-0.5" size={16} />
           <div>
-            <h4 className="text-[10px] font-bold text-amber-600 uppercase tracking-widest mb-1 leading-none">
+            <h4 className="text-[10px] font-bold text-amber-600 dark:text-amber-400 uppercase tracking-widest mb-1 leading-none">
               {(t as any).limitWarningTitle || "Batas Struktural Terlampaui!"}
             </h4>
-            <p className="text-[9.5px] text-slate-600 font-semibold leading-relaxed">
+            <p className="text-[9.5px] text-slate-600 dark:text-slate-300 font-semibold leading-relaxed">
               {highlightedLimit === 'a' && (t as any).limitWarningA?.replace('{val}', String(frame.a)).replace('{blankVal}', (result.y * 2 + 2).toFixed(0))}
               {highlightedLimit === 'b' && (t as any).limitWarningB?.replace('{val}', String(frame.b))}
               {highlightedLimit === 'dbl' && (t as any).limitWarningDbl?.replace('{val}', String(frame.dbl))}
@@ -212,14 +212,14 @@ export const Visualizer: React.FC<VisualizerProps> = ({
 
       {/* Dimension Labels Overlay / Collapsible Legend */}
       {isLegendOpen ? (
-        <div className="absolute bottom-6 right-6 p-3 bg-white/95 border border-slate-200/80 backdrop-blur-md rounded-xl space-y-2 shadow-md min-w-[145px] text-left transition-all duration-200 animate-in fade-in zoom-in-95 select-none md:bottom-8 md:right-8 z-20">
-          <div className="flex items-center justify-between gap-4 border-b border-slate-100 pb-1 mb-1">
-            <span className="text-[9px] font-extrabold text-slate-400 uppercase tracking-widest">
+        <div className="absolute bottom-6 right-6 p-3 bg-white/95 dark:bg-slate-950/95 border border-slate-200/80 dark:border-slate-800/80 backdrop-blur-md rounded-xl space-y-2 shadow-md min-w-[145px] text-left transition-all duration-200 animate-in fade-in zoom-in-95 select-none md:bottom-8 md:right-8 z-20">
+          <div className="flex items-center justify-between gap-4 border-b border-slate-100 dark:border-slate-800 pb-1 mb-1">
+            <span className="text-[9px] font-extrabold text-slate-400 dark:text-slate-500 uppercase tracking-widest">
               {lang === 'id' ? 'Legenda' : 'Legend'}
             </span>
             <button
               onClick={() => setIsLegendOpen(false)}
-              className="p-1 rounded-md text-slate-400 hover:text-slate-600 hover:bg-slate-100 transition-colors cursor-pointer"
+              className="p-1 rounded-md text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-900 transition-colors cursor-pointer"
               aria-label="Collapse legend"
               title={lang === "id" ? "Sembunyikan legenda" : "Collapse legend"}
             >
@@ -229,12 +229,12 @@ export const Visualizer: React.FC<VisualizerProps> = ({
           <div className="space-y-1.5">
             <div className="flex items-center gap-2">
               <div className="w-2.5 h-2.5 rounded-full bg-blue-500 shadow-sm shadow-blue-500/40"></div>
-              <span className="text-[10px] font-semibold text-slate-600 uppercase tracking-wider">{t.primarySpec}</span>
+              <span className="text-[10px] font-semibold text-slate-600 dark:text-slate-350 uppercase tracking-wider">{t.primarySpec}</span>
             </div>
             {compareResult && compareLens && (
               <div className="flex items-center gap-2">
                 <div className="w-2.5 h-2.5 rounded-full bg-emerald-500 shadow-sm shadow-emerald-500/40"></div>
-                <span className="text-[10px] font-semibold text-slate-600 uppercase tracking-wider">{t.comparison} ({compareLens.index.toFixed(2)})</span>
+                <span className="text-[10px] font-semibold text-slate-600 dark:text-slate-350 uppercase tracking-wider">{t.comparison} ({compareLens.index.toFixed(2)})</span>
               </div>
             )}
           </div>
@@ -244,28 +244,28 @@ export const Visualizer: React.FC<VisualizerProps> = ({
         <div className="absolute bottom-6 right-6 z-20 md:bottom-8 md:right-8 transition-all duration-200 animate-in fade-in zoom-in-95">
           <Popover>
             <PopoverTrigger
-              className="flex items-center gap-1.5 px-3 py-2 bg-white/95 border border-slate-200/80 backdrop-blur-md rounded-full shadow-md hover:shadow-lg hover:border-slate-300 transition-all cursor-pointer group active:scale-95"
+              className="flex items-center gap-1.5 px-3 py-2 bg-white/95 dark:bg-slate-950/95 border border-slate-200/80 dark:border-slate-800/80 backdrop-blur-md rounded-full shadow-md hover:shadow-lg hover:border-slate-300 dark:hover:border-slate-700 transition-all cursor-pointer group active:scale-95"
               title={lang === "id" ? "Tampilkan legenda" : "Show legend details"}
             >
               {/* Display tiny colored indicator circle icons */}
               <span className="flex items-center -space-x-1">
-                <span className="w-2.5 h-2.5 rounded-full bg-blue-500 border border-white shadow-sm" />
+                <span className="w-2.5 h-2.5 rounded-full bg-blue-500 border border-white dark:border-slate-900 shadow-sm" />
                 {compareResult && compareLens && (
-                  <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 border border-white shadow-sm" />
+                  <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 border border-white dark:border-slate-900 shadow-sm" />
                 )}
               </span>
               
               {/* Mini help icon */}
-              <HelpCircle size={11} className="text-slate-400 group-hover:text-slate-600 transition-colors" />
+              <HelpCircle size={11} className="text-slate-400 group-hover:text-slate-600 dark:group-hover:text-slate-300 transition-colors" />
             </PopoverTrigger>
             <PopoverContent 
               side="top" 
               align="end" 
               sideOffset={8} 
-              className="w-56 p-3 bg-white/95 border border-slate-200/90 shadow-xl rounded-xl z-50 text-left backdrop-blur-sm"
+              className="w-56 p-3 bg-white/95 dark:bg-slate-950/95 border border-slate-200/90 dark:border-slate-800 shadow-xl rounded-xl z-50 text-left backdrop-blur-sm"
             >
               <div className="space-y-2 select-none">
-                <div className="text-[9px] uppercase tracking-wider text-slate-400 font-extrabold pb-1 border-b border-slate-100">
+                <div className="text-[9px] uppercase tracking-wider text-slate-400 dark:text-slate-500 font-extrabold pb-1 border-b border-slate-100 dark:border-slate-800">
                   {lang === 'id' ? 'Legenda Visual' : 'Visual Legend'}
                 </div>
                 
@@ -273,8 +273,8 @@ export const Visualizer: React.FC<VisualizerProps> = ({
                   <div className="flex items-start gap-2">
                     <div className="w-2.5 h-2.5 rounded-full bg-blue-500 shadow-sm shrink-0 mt-0.5"></div>
                     <div>
-                      <div className="text-[10px] font-bold text-slate-700 leading-tight">{t.primarySpec}</div>
-                      <div className="text-[8px] text-slate-400 font-medium">
+                      <div className="text-[10px] font-bold text-slate-700 dark:text-slate-300 leading-tight">{t.primarySpec}</div>
+                      <div className="text-[8px] text-slate-400 dark:text-slate-500 font-medium">
                         {lang === 'id' ? 'Lensa utama Anda sekarang' : 'Current active layout specs'}
                       </div>
                     </div>
@@ -284,10 +284,10 @@ export const Visualizer: React.FC<VisualizerProps> = ({
                     <div className="flex items-start gap-2 pt-1">
                       <div className="w-2.5 h-2.5 rounded-full bg-emerald-500 shadow-sm shrink-0 mt-0.5"></div>
                       <div>
-                        <div className="text-[10px] font-bold text-slate-700 leading-tight">
+                        <div className="text-[10px] font-bold text-slate-700 dark:text-slate-300 leading-tight">
                           {t.comparison} ({compareLens.index.toFixed(2)})
                         </div>
-                        <div className="text-[8px] text-slate-400 font-medium">
+                        <div className="text-[8px] text-slate-400 dark:text-slate-500 font-medium">
                           {lang === 'id' ? 'Lensa untuk perbandingan indeks' : 'Secondary overlay for comparison'}
                         </div>
                       </div>
@@ -297,7 +297,7 @@ export const Visualizer: React.FC<VisualizerProps> = ({
                 
                 <button
                   onClick={() => setIsLegendOpen(true)}
-                  className="w-full mt-1.5 py-1 text-center text-[9px] font-extrabold text-blue-600 hover:text-blue-700 bg-blue-50 hover:bg-blue-100/70 border border-blue-200/30 rounded-lg transition-all uppercase tracking-wider cursor-pointer"
+                  className="w-full mt-1.5 py-1 text-center text-[9px] font-extrabold text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 bg-blue-50 dark:bg-blue-950/20 hover:bg-blue-100/70 dark:hover:bg-blue-950/40 border border-blue-200/30 dark:border-blue-900/40 rounded-lg transition-all uppercase tracking-wider cursor-pointer"
                 >
                   {lang === 'id' ? 'Sematkan Legenda' : 'Pin Legend'}
                 </button>

@@ -77,7 +77,7 @@ const Control: React.FC<ControlProps> = ({ label, value, min, max, step, onChang
   }, [value]);
 
   const isAxis = unit === '°';
-  const inputWidthClass = isAxis ? 'w-12' : 'w-16';
+  const inputWidthClass = isAxis ? 'min-w-12 max-w-14' : 'min-w-16 max-w-20';
 
   const commitVal = (v: number) => {
     const snapped = Math.round(v / step) * step;
@@ -114,12 +114,12 @@ const Control: React.FC<ControlProps> = ({ label, value, min, max, step, onChang
   return (
     <div className="space-y-1">
       <div className="flex justify-between items-center text-[11px] py-1">
-        <LabelWithTooltip label={label} lang={lang} className="pr-1 select-none leading-tight" icon={icon} />
+        <LabelWithTooltip label={label} lang={lang} className="pr-1 select-none leading-tight dark:text-slate-300" icon={icon} />
         <div className="flex items-center gap-1.5 shrink-0">
-          <div className="flex items-center border border-slate-200 rounded-lg overflow-hidden bg-white shadow-sm h-8">
+          <div className="flex items-center border border-slate-200 dark:border-slate-800 focus-within:border-blue-400 dark:focus-within:border-blue-500 focus-within:ring-2 focus-within:ring-blue-400/30 rounded-lg overflow-hidden bg-white dark:bg-slate-950 shadow-sm h-8 transition-all">
             <button 
               onClick={() => commitVal(value - step)}
-              className="w-8 h-8 flex items-center justify-center bg-slate-50 hover:bg-slate-100 text-slate-500 hover:text-slate-800 transition-colors active:bg-slate-200 cursor-pointer"
+              className="w-8 h-8 flex items-center justify-center bg-slate-50/50 dark:bg-slate-900/40 hover:bg-slate-100 dark:hover:bg-slate-800/80 text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-slate-200 border-r border-slate-100 dark:border-slate-800/60 transition-colors active:bg-slate-200 dark:active:bg-slate-800 cursor-pointer"
               title="Decrease"
             >
               <Minus size={11} strokeWidth={3} />
@@ -130,17 +130,17 @@ const Control: React.FC<ControlProps> = ({ label, value, min, max, step, onChang
               onChange={handleTypedChange}
               onBlur={handleBlur}
               onKeyDown={handleKeyDown}
-              className={`border-0 focus:ring-0 focus:border-0 rounded-none bg-white text-center font-mono text-xs font-bold text-slate-800 p-0 h-8 ${inputWidthClass}`}
+              className={`border-0 focus:ring-2 focus:ring-blue-400/30 focus-visible:ring-0 focus-visible:ring-offset-0 focus:bg-blue-50/30 dark:focus:bg-blue-950/20 rounded-none bg-white dark:bg-slate-950 text-center font-mono text-xs font-bold text-slate-800 dark:text-slate-100 p-0 h-8 ${inputWidthClass}`}
             />
             <button 
               onClick={() => commitVal(value + step)}
-              className="w-8 h-8 flex items-center justify-center bg-slate-50 hover:bg-slate-100 text-slate-500 hover:text-slate-800 transition-colors active:bg-slate-200 cursor-pointer"
+              className="w-8 h-8 flex items-center justify-center bg-slate-50/50 dark:bg-slate-900/40 hover:bg-slate-100 dark:hover:bg-slate-800/80 text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-slate-200 border-l border-slate-100 dark:border-slate-800/60 transition-colors active:bg-slate-200 dark:active:bg-slate-800 cursor-pointer"
               title="Increase"
             >
               <Plus size={11} strokeWidth={3} />
             </button>
           </div>
-          <span className="text-slate-400 font-mono font-bold w-6 text-[10px] text-left shrink-0 pl-1 select-none">{unit}</span>
+          <span className="text-slate-400 dark:text-slate-500 font-mono font-bold w-6 text-[10px] text-left shrink-0 pl-1 select-none">{unit}</span>
         </div>
       </div>
 
@@ -282,7 +282,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
           />
           <div className="space-y-1.5 flex flex-col">
             <LabelWithTooltip label={t.refractiveIndex} lang={lang} className="text-[11px]" icon={<Eye size={13} className="text-blue-500" />} />
-            <div className="grid grid-cols-5 gap-1">
+            <div className="grid grid-cols-3 sm:grid-cols-5 md:grid-cols-3 gap-1">
               {indices.map(idx => (
                 <button
                   key={idx}
@@ -317,7 +317,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
                   onClick={() => setHighlightedLimit(highlightedLimit === 'a' ? null : 'a')}
                   className={`p-1 rounded-full transition-all cursor-pointer ${
                     isExceedingA 
-                      ? 'text-amber-500 hover:text-amber-600 animate-pulse bg-amber-500/10' 
+                      ? 'text-amber-500 hover:text-amber-600 animate-pulse-soft bg-amber-500/10' 
                       : 'text-slate-300 hover:text-slate-400'
                   }`}
                   title={isExceedingA ? (lang === 'id' ? "Batas struktural terlampaui! Sorot untuk melihat detail visual." : "Structural limit exceeded! Hover to see visual details.") : "Ergonomic Limits: 35-65mm."}
@@ -340,7 +340,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
                   onClick={() => setHighlightedLimit(highlightedLimit === 'b' ? null : 'b')}
                   className={`p-1 rounded-full transition-all cursor-pointer ${
                     isExceedingB 
-                      ? 'text-amber-500 hover:text-amber-600 animate-pulse bg-amber-500/10' 
+                      ? 'text-amber-500 hover:text-amber-600 animate-pulse-soft bg-amber-500/10' 
                       : 'text-slate-300 hover:text-slate-400'
                   }`}
                   title={isExceedingB ? (lang === 'id' ? "Batas struktural terlampaui! Sorot untuk melihat detail visual." : "Structural limit exceeded! Hover to see visual details.") : "Ergonomic Limits: 20-55mm."}
@@ -365,7 +365,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
                   onClick={() => setHighlightedLimit(highlightedLimit === 'dbl' ? null : 'dbl')}
                   className={`p-1 rounded-full transition-all cursor-pointer ${
                     isExceedingDbl 
-                      ? 'text-amber-500 hover:text-amber-600 animate-pulse bg-amber-500/10' 
+                      ? 'text-amber-500 hover:text-amber-600 animate-pulse-soft bg-amber-500/10' 
                       : 'text-slate-300 hover:text-slate-400'
                   }`}
                   title={isExceedingDbl ? (lang === 'id' ? "Batas struktural terlampaui! Sorot untuk melihat detail visual." : "Structural limit exceeded! Hover to see visual details.") : "Ergonomic Limits: 10-28mm."}
@@ -388,7 +388,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
                   onClick={() => setHighlightedLimit(highlightedLimit === 'ed' ? null : 'ed')}
                   className={`p-1 rounded-full transition-all cursor-pointer ${
                     isExceedingEd 
-                      ? 'text-amber-500 hover:text-amber-600 animate-pulse bg-amber-500/10' 
+                      ? 'text-amber-500 hover:text-amber-600 animate-pulse-soft bg-amber-500/10' 
                       : 'text-slate-300 hover:text-slate-400'
                   }`}
                   title={isExceedingEd ? (lang === 'id' ? "Batas struktural terlampaui! Sorot untuk melihat detail visual." : "Structural limit exceeded! Hover to see visual details.") : "Ergonomic Limits: ED >= A and <= 75mm."}
@@ -498,7 +498,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
           />
           <div className="space-y-1.5 flex flex-col">
             <LabelWithTooltip label={t.refractiveIndex} lang={lang} className="text-[11px]" icon={<Eye size={13} className="text-blue-500" />} />
-            <div className="grid grid-cols-3 gap-1">
+            <div className="grid grid-cols-3 sm:grid-cols-5 md:grid-cols-3 gap-1">
               {indices.map(idx => (
                 <button
                   key={idx}
@@ -533,7 +533,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
                   onClick={() => setHighlightedLimit(highlightedLimit === 'a' ? null : 'a')}
                   className={`p-1 rounded-full transition-all cursor-pointer ${
                     isExceedingA 
-                      ? 'text-amber-500 hover:text-amber-600 animate-pulse bg-amber-500/10' 
+                      ? 'text-amber-500 hover:text-amber-600 animate-pulse-soft bg-amber-500/10' 
                       : 'text-slate-300 hover:text-slate-400'
                   }`}
                   title={isExceedingA ? (lang === 'id' ? "Batas struktural terlampaui! Sorot untuk melihat detail visual." : "Structural limit exceeded! Hover to see visual details.") : "Ergonomic Limits: 35-65mm."}
@@ -556,7 +556,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
                   onClick={() => setHighlightedLimit(highlightedLimit === 'b' ? null : 'b')}
                   className={`p-1 rounded-full transition-all cursor-pointer ${
                     isExceedingB 
-                      ? 'text-amber-500 hover:text-amber-600 animate-pulse bg-amber-500/10' 
+                      ? 'text-amber-500 hover:text-amber-600 animate-pulse-soft bg-amber-500/10' 
                       : 'text-slate-300 hover:text-slate-400'
                   }`}
                   title={isExceedingB ? (lang === 'id' ? "Batas struktural terlampaui! Sorot untuk melihat detail visual." : "Structural limit exceeded! Hover to see visual details.") : "Ergonomic Limits: 20-55mm."}
@@ -581,7 +581,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
                   onClick={() => setHighlightedLimit(highlightedLimit === 'dbl' ? null : 'dbl')}
                   className={`p-1 rounded-full transition-all cursor-pointer ${
                     isExceedingDbl 
-                      ? 'text-amber-500 hover:text-amber-600 animate-pulse bg-amber-500/10' 
+                      ? 'text-amber-500 hover:text-amber-600 animate-pulse-soft bg-amber-500/10' 
                       : 'text-slate-300 hover:text-slate-400'
                   }`}
                   title={isExceedingDbl ? (lang === 'id' ? "Batas struktural terlampaui! Sorot untuk melihat detail visual." : "Structural limit exceeded! Hover to see visual details.") : "Ergonomic Limits: 10-28mm."}
@@ -604,7 +604,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
                   onClick={() => setHighlightedLimit(highlightedLimit === 'ed' ? null : 'ed')}
                   className={`p-1 rounded-full transition-all cursor-pointer ${
                     isExceedingEd 
-                      ? 'text-amber-500 hover:text-amber-600 animate-pulse bg-amber-500/10' 
+                      ? 'text-amber-500 hover:text-amber-600 animate-pulse-soft bg-amber-500/10' 
                       : 'text-slate-300 hover:text-slate-400'
                   }`}
                   title={isExceedingEd ? (lang === 'id' ? "Batas struktural terlampaui! Sorot untuk melihat detail visual." : "Structural limit exceeded! Hover to see visual details.") : "Ergonomic Limits: ED >= A and <= 75mm."}

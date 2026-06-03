@@ -62,7 +62,7 @@ export const FrontView: React.FC<FrontViewProps> = ({
        {isMain && (
          <g className="text-[10px] font-bold fill-slate-400 uppercase tracking-widest text-left">
            {/* A Size Label */}
-           <g className={highlightedLimit === 'a' ? "text-amber-500 fill-amber-500 font-extrabold animate-pulse" : "text-slate-400 fill-slate-400"}>
+           <g className={highlightedLimit === 'a' ? "text-amber-500 fill-amber-500 font-extrabold animate-pulse-soft" : "text-slate-400 fill-slate-400"}>
              <line 
                x1={0} y1={-20} x2={frame.a * F_SCALE} y2={-20} 
                stroke="currentColor" 
@@ -75,7 +75,7 @@ export const FrontView: React.FC<FrontViewProps> = ({
            </g>
            
            {/* B Size Label */}
-           <g className={highlightedLimit === 'b' ? "text-amber-500 fill-amber-500 font-extrabold animate-pulse" : "text-slate-400 fill-slate-400"}>
+           <g className={highlightedLimit === 'b' ? "text-amber-500 fill-amber-500 font-extrabold animate-pulse-soft" : "text-slate-400 fill-slate-400"}>
              <line 
                x1={-20} y1={0} x2={-20} y2={frame.b * F_SCALE} 
                stroke="currentColor" 
@@ -88,7 +88,7 @@ export const FrontView: React.FC<FrontViewProps> = ({
            </g>
 
            {/* DBL Label */}
-           <g className={highlightedLimit === 'dbl' ? "text-amber-500 fill-amber-500 font-extrabold animate-pulse" : "text-blue-500 fill-blue-500"}>
+           <g className={highlightedLimit === 'dbl' ? "text-amber-500 fill-amber-500 font-extrabold animate-pulse-soft" : "text-blue-500 fill-blue-500"}>
              <line 
                x1={frame.a * F_SCALE} y1={frame.b * F_SCALE / 2} x2={(frame.a + frame.dbl) * F_SCALE} y2={frame.b * F_SCALE / 2} 
                stroke="currentColor" 
@@ -119,7 +119,7 @@ export const FrontView: React.FC<FrontViewProps> = ({
        />
        
        {/* ED Circle */}
-       <g className={highlightedLimit === 'ed' ? "text-amber-500 fill-amber-500 font-extrabold animate-pulse" : "text-blue-400 fill-blue-400"}>
+       <g className={highlightedLimit === 'ed' ? "text-amber-500 fill-amber-500 font-extrabold animate-pulse-soft" : "text-blue-400 fill-blue-400"}>
          <circle 
            cx={frame.a * F_SCALE / 2} cy={frame.b * F_SCALE / 2} 
            r={frame.ed * F_SCALE / 2} 

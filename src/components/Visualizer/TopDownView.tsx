@@ -77,7 +77,7 @@ export const TopDownView: React.FC<TopDownViewProps> = ({
         stroke={highlightedLimit === 'dbl' ? "#f59e0b" : "#334155"} 
         strokeWidth={highlightedLimit === 'dbl' ? "5" : "3"} 
         strokeOpacity={highlightedLimit === 'dbl' ? "0.9" : "0.5"}
-        className={highlightedLimit === 'dbl' ? "animate-pulse" : ""}
+        className={highlightedLimit === 'dbl' ? "animate-pulse-soft" : ""}
       />
       
       {/* Frame Rims (Top/Bottom) */}
@@ -92,7 +92,7 @@ export const TopDownView: React.FC<TopDownViewProps> = ({
             fillOpacity={highlightedLimit === 'a' ? 0.3 : 0.1}
             stroke={highlightedLimit === 'a' ? "#f59e0b" : "url(#metallic-gradient)"} 
             strokeWidth={highlightedLimit === 'a' ? "2.5" : "1.5"}
-            className={highlightedLimit === 'a' ? "animate-pulse" : ""}
+            className={highlightedLimit === 'a' ? "animate-pulse-soft" : ""}
             rx={2}
           />
           {/* Refined Temple arms with curves */}
@@ -144,7 +144,7 @@ export const TopDownView: React.FC<TopDownViewProps> = ({
                 fill="#3b82f6" fillOpacity={highlightedLimit === 'a' || highlightedLimit === 'ed' ? 0.35 : 0.25} 
                 stroke={highlightedLimit === 'a' || highlightedLimit === 'ed' ? "#f59e0b" : "#3b82f6"} 
                 strokeOpacity="0.4"
-                className={highlightedLimit === 'a' || highlightedLimit === 'ed' ? "animate-pulse" : ""}
+                className={highlightedLimit === 'a' || highlightedLimit === 'ed' ? "animate-pulse-soft" : ""}
              />
 
              {/* Overhang Indicators Top/Side */}
@@ -184,7 +184,7 @@ export const TopDownView: React.FC<TopDownViewProps> = ({
           stroke="#f59e0b" 
           strokeWidth="3" 
           strokeDasharray="6 4" 
-          className="animate-pulse"
+          className="animate-pulse-soft"
         />
       )}
 

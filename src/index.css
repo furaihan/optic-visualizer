@@ -18,6 +18,10 @@
 }
 
 @layer utilities {
+  .custom-scrollbar {
+    scrollbar-width: thin;
+    scrollbar-color: rgb(203, 213, 225) rgb(241, 245, 249);
+  }
   .custom-scrollbar::-webkit-scrollbar {
     width: 5px;
   }
@@ -33,6 +37,14 @@
     background-size: 32px 32px;
     opacity: 0.3;
   }
+}
+
+@keyframes pulse-soft {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.75; transform: scale(0.97); }
+}
+.animate-pulse-soft {
+  animation: pulse-soft 3.5s cubic-bezier(0.4, 0, 0.6, 1) infinite;
 }
 
 input[type="range"] {
