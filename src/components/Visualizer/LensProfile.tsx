@@ -1,7 +1,7 @@
 import React from 'react';
 import { motion } from 'motion/react';
 import { LensParameters, CalculationResult } from '../../lib/optical';
-import { Language, translations } from '../../lib/i18n';
+import { Language, translations } from '../../lib/translations';
 import { LensPosition, HoverLabel } from './types';
 
 interface LensProfileProps {
@@ -79,7 +79,7 @@ export const LensProfile: React.FC<LensProfileProps> = ({
           className="cursor-help pointer-events-auto"
           onMouseEnter={() => onHoverLabel({
             title: `Center Thickness (CT): ${result.ct.toFixed(2)}mm`,
-            desc: lang === 'id' ? "Ketebalan pusat lensa" : "Thickness at optical center",
+            desc: t.ctDescTop,
             x: (frontApexX + (result.ct / 2)) * scale,
             y: -14
           })}
@@ -110,7 +110,7 @@ export const LensProfile: React.FC<LensProfileProps> = ({
           className="cursor-help pointer-events-auto"
           onMouseEnter={() => onHoverLabel({
             title: `Edge Thickness (ET): ${result.et.toFixed(2)}mm`,
-            desc: lang === 'id' ? "Ketebalan tepi terluar lensa" : "Thickness at lens outer boundary",
+            desc: t.etDescTop,
             x: clampedLabelX + 24,
             y: (yVal + 3) * scale
           })}

@@ -1,6 +1,6 @@
 import React from 'react';
 import { HelpCircle } from 'lucide-react';
-import { Language, getTooltipByLabel } from '../../lib/i18n';
+import { Language, getTooltipByLabel } from '../../lib/translations';
 import { Tooltip, TooltipTrigger, TooltipContent } from '../ui/tooltip';
 
 interface LabelWithTooltipProps {
@@ -30,15 +30,15 @@ export const LabelWithTooltip: React.FC<LabelWithTooltipProps> = ({
   return (
     <Tooltip>
       <TooltipTrigger render={
-        <span className={`inline-flex items-center gap-1 cursor-help hover:text-blue-600 dark:hover:text-blue-400 transition-colors ${className || ''}`} />
+        <button type="button" className={`inline-flex items-center gap-1 cursor-help hover:text-blue-600 dark:hover:text-blue-400 transition-colors ${className || ''}`} aria-label={tooltipText} />
       }>
         <div className="flex items-center gap-1">
-          {icon && <span className="shrink-0">{icon}</span>}
+          {icon && <span className="shrink-0" aria-hidden="true">{icon}</span>}
           <span className={isUppercaseHeader ? "font-bold uppercase tracking-wider text-[10px] text-slate-500" : "font-semibold text-slate-700"}>
             {label}
           </span>
         </div>
-        <HelpCircle size={10} className="text-slate-400 shrink-0" />
+        <HelpCircle size={10} className="text-slate-400 shrink-0" aria-hidden="true" />
       </TooltipTrigger>
       <TooltipContent className="p-2.5 max-w-[220px] text-[10.5px] font-sans font-medium leading-normal bg-slate-900 border border-slate-800 text-slate-100 rounded-lg shadow-xl shrink-0 z-50">
         {tooltipText}

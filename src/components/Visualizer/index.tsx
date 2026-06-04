@@ -1,6 +1,6 @@
 import React, { useMemo, useState } from 'react';
 import { AlertCircle, X, HelpCircle } from 'lucide-react';
-import { translations } from '../../lib/i18n';
+import { translations } from '../../lib/translations';
 import { VisualizerProps, HoverLabel, LensPosition } from './types';
 import { LensProfile } from './LensProfile';
 import { FrameProfile } from './FrameProfile';
@@ -215,13 +215,13 @@ export const Visualizer: React.FC<VisualizerProps> = React.memo(({
         <div className="absolute bottom-6 right-6 p-3 bg-white/95 dark:bg-slate-950/95 border border-slate-200/80 dark:border-slate-800/80 backdrop-blur-md rounded-xl space-y-2 shadow-md min-w-[145px] text-left transition-all duration-200 animate-in fade-in zoom-in-95 select-none md:bottom-8 md:right-8 z-20">
           <div className="flex items-center justify-between gap-4 border-b border-slate-100 dark:border-slate-800 pb-1 mb-1">
             <span className="text-[9px] font-extrabold text-slate-400 dark:text-slate-500 uppercase tracking-widest">
-              {lang === 'id' ? 'Legenda' : 'Legend'}
+              {t.legend}
             </span>
             <button
               onClick={() => setIsLegendOpen(false)}
               className="p-1 rounded-md text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-900 transition-colors cursor-pointer"
-              aria-label="Collapse legend"
-              title={lang === "id" ? "Sembunyikan legenda" : "Collapse legend"}
+              aria-label={t.collapseLegend}
+              title={t.collapseLegend}
             >
               <X size={10} />
             </button>
@@ -245,7 +245,7 @@ export const Visualizer: React.FC<VisualizerProps> = React.memo(({
           <Popover>
             <PopoverTrigger
               className="flex items-center gap-1.5 px-3 py-2 bg-white/95 dark:bg-slate-950/95 border border-slate-200/80 dark:border-slate-800/80 backdrop-blur-md rounded-full shadow-md hover:shadow-lg hover:border-slate-300 dark:hover:border-slate-700 transition-all cursor-pointer group active:scale-95"
-              title={lang === "id" ? "Tampilkan legenda" : "Show legend details"}
+              title={t.showLegend}
             >
               {/* Display tiny colored indicator circle icons */}
               <span className="flex items-center -space-x-1">
@@ -266,7 +266,7 @@ export const Visualizer: React.FC<VisualizerProps> = React.memo(({
             >
               <div className="space-y-2 select-none">
                 <div className="text-[9px] uppercase tracking-wider text-slate-400 dark:text-slate-500 font-extrabold pb-1 border-b border-slate-100 dark:border-slate-800">
-                  {lang === 'id' ? 'Legenda Visual' : 'Visual Legend'}
+                  {t.visualLegend}
                 </div>
                 
                 <div className="space-y-2">
@@ -275,7 +275,7 @@ export const Visualizer: React.FC<VisualizerProps> = React.memo(({
                     <div>
                       <div className="text-[10px] font-bold text-slate-700 dark:text-slate-300 leading-tight">{t.primarySpec}</div>
                       <div className="text-[8px] text-slate-400 dark:text-slate-500 font-medium">
-                        {lang === 'id' ? 'Lensa utama Anda sekarang' : 'Current active layout specs'}
+                        {t.primaryDesc}
                       </div>
                     </div>
                   </div>
@@ -288,7 +288,7 @@ export const Visualizer: React.FC<VisualizerProps> = React.memo(({
                           {t.comparison} ({compareLens.index.toFixed(2)})
                         </div>
                         <div className="text-[8px] text-slate-400 dark:text-slate-500 font-medium">
-                          {lang === 'id' ? 'Lensa untuk perbandingan indeks' : 'Secondary overlay for comparison'}
+                          {t.comparisonDesc}
                         </div>
                       </div>
                     </div>
@@ -299,7 +299,7 @@ export const Visualizer: React.FC<VisualizerProps> = React.memo(({
                   onClick={() => setIsLegendOpen(true)}
                   className="w-full mt-1.5 py-1 text-center text-[9px] font-extrabold text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 bg-blue-50 dark:bg-blue-950/20 hover:bg-blue-100/70 dark:hover:bg-blue-950/40 border border-blue-200/30 dark:border-blue-900/40 rounded-lg transition-all uppercase tracking-wider cursor-pointer"
                 >
-                  {lang === 'id' ? 'Sematkan Legenda' : 'Pin Legend'}
+                  {t.pinLegend}
                 </button>
               </div>
             </PopoverContent>

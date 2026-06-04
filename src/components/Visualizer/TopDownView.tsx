@@ -1,7 +1,7 @@
 import React from 'react';
 import { motion } from 'motion/react';
 import { LensParameters, FrameParameters, PatientParameters, CalculationResult } from '../../lib/optical';
-import { Language, translations } from '../../lib/i18n';
+import { Language, translations } from '../../lib/translations';
 import { LensPosition } from './types';
 
 interface TopDownViewProps {

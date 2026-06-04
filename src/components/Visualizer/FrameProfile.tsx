@@ -1,6 +1,6 @@
 import React from 'react';
 import { FrameParameters, CalculationResult } from '../../lib/optical';
-import { Language, translations } from '../../lib/i18n';
+import { Language, translations } from '../../lib/translations';
 import { LensPosition } from './types';
 
 interface FrameProfileProps {

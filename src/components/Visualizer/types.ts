@@ -1,5 +1,5 @@
 import { LensParameters, FrameParameters, PatientParameters, CalculationResult, FrameType } from '../../lib/optical';
-import { Language } from '../../lib/i18n';
+import { Language } from '../../lib/translations';
 
 export interface VisualizerProps {
   lens: LensParameters;

@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { LensParameters, FrameParameters, PatientParameters, FrameType, LensIndex } from '../lib/optical';
-import { translations, Language } from '../lib/i18n';
+import { translations, Language } from '../lib/translations';
 import { 
   Layers, 
   Frame, 
@@ -16,6 +16,7 @@ import {
   AlertCircle 
 } from 'lucide-react';
 import { Button } from './ui/button';
+import { ScrollArea } from './ui/scroll-area';
 import { LabelWithTooltip } from './Sidebar/LabelWithTooltip';
 import { Control } from './Sidebar/Control';
 import { FrameInput } from './Sidebar/FrameInput';
@@ -39,6 +40,7 @@ interface SidebarProps {
   isMobile?: boolean;
   highlightedLimit: 'a' | 'b' | 'dbl' | 'ed' | null;
   setHighlightedLimit: (val: 'a' | 'b' | 'dbl' | 'ed' | null) => void;
+  isLoading?: boolean;
 }
 
 export const Sidebar: React.FC<SidebarProps> = ({
@@ -60,6 +62,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
   isMobile = false,
   highlightedLimit,
   setHighlightedLimit,
+  isLoading
 }) => {
   const t = translations[lang];
   const indices: LensIndex[] = [1.5, 1.56, 1.6, 1.67, 1.74];
@@ -125,28 +128,31 @@ export const Sidebar: React.FC<SidebarProps> = ({
           label={t.sphere} unit=" D" min={-20} max={20} step={0.25}
           value={lens.sph} onChange={(v) => setLens({ ...lens, sph: v })} lang={lang}
           icon={<Aperture size={13} className="text-blue-500" />}
+          isRecalculating={isLoading}
         />
         <Control 
           label={t.cylinder} unit=" D" min={-10} max={0} step={0.25}
           value={lens.cyl} onChange={(v) => setLens({ ...lens, cyl: v })} lang={lang}
           icon={<Gauge size={13} className="text-blue-500" />}
+          isRecalculating={isLoading}
         />
         <Control 
           label={t.axis} unit="°" min={0} max={180} step={1}
           value={lens.axis} onChange={(v) => setLens({ ...lens, axis: v })} lang={lang}
           icon={<Zap size={13} className="text-blue-500" />}
+          isRecalculating={isLoading}
         />
         <div className="space-y-1.5 flex flex-col">
           <LabelWithTooltip label={t.refractiveIndex} lang={lang} className="text-[11px]" icon={<Eye size={13} className="text-blue-500" />} />
-          <div className="grid grid-cols-3 sm:grid-cols-5 md:grid-cols-3 gap-1" role="group" aria-label={t.refractiveIndex}>
+          <div className={`grid grid-cols-3 sm:grid-cols-5 md:grid-cols-3 gap-1.5 p-1 rounded-xl transition-colors duration-300 ${isLoading ? 'bg-blue-50 dark:bg-blue-900/30' : 'bg-transparent'}`} role="group" aria-label={t.refractiveIndex}>
             {indices.map(idx => (
               <button
                 key={idx}
                 onClick={() => setLens({ ...lens, index: idx })}
-                className={`py-1.5 rounded text-[10px] font-bold transition-all border cursor-pointer ${
+                className={`py-2 px-1 rounded-lg text-[10px] min-h-[36px] font-bold transition-all border cursor-pointer ${
                   lens.index === idx 
                     ? 'bg-blue-600 border-blue-600 dark:bg-blue-500 dark:border-blue-500 text-white shadow-sm' 
-                    : 'bg-slate-50 dark:bg-slate-900 border-slate-200 dark:border-slate-800 text-slate-500 dark:text-slate-400'
+                    : 'bg-slate-50 dark:bg-slate-900 border-slate-200 dark:border-slate-800 text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800'
                 }`}
                 aria-pressed={lens.index === idx}
               >
@@ -159,6 +165,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
           label={t.baseCurve} unit=" D" min={0.25} max={12} step={0.25}
           value={lens.baseCurve} onChange={(v) => setLens({ ...lens, baseCurve: v })} lang={lang}
           icon={<Aperture size={13} className="text-blue-500" />}
+          isRecalculating={isLoading}
         />
       </InputGroup>
 
@@ -177,7 +184,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
                     ? 'text-amber-500 hover:text-amber-600 animate-pulse-soft bg-amber-500/10' 
                     : 'text-slate-300 hover:text-slate-400 dark:text-slate-600 dark:hover:text-slate-500'
                 }`}
-                title={isExceedingA ? (lang === 'id' ? "Batas struktural terlampaui! Sorot untuk melihat detail visual." : "Structural limit exceeded! Hover to see visual details.") : "Ergonomic Limits: 35-65mm."}
+                title={isExceedingA ? t.limitExceededTitle : t.ergonomicLimitsA}
                 aria-label="Toggle frame parameter A limit warning highlight"
               >
                 <AlertCircle size={11} />
@@ -201,7 +208,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
                     ? 'text-amber-500 hover:text-amber-600 animate-pulse-soft bg-amber-500/10' 
                     : 'text-slate-300 hover:text-slate-400 dark:text-slate-600 dark:hover:text-slate-500'
                 }`}
-                title={isExceedingB ? (lang === 'id' ? "Batas struktural terlampaui! Sorot untuk melihat detail visual." : "Structural limit exceeded! Hover to see visual details.") : "Ergonomic Limits: 20-55mm."}
+                title={isExceedingB ? t.limitExceededTitle : t.ergonomicLimitsB}
                 aria-label="Toggle frame parameter B limit warning highlight"
               >
                 <AlertCircle size={11} />
@@ -228,7 +235,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
                     ? 'text-amber-500 hover:text-amber-600 animate-pulse-soft bg-amber-500/10' 
                     : 'text-slate-300 hover:text-slate-400 dark:text-slate-600 dark:hover:text-slate-500'
                 }`}
-                title={isExceedingDbl ? (lang === 'id' ? "Batas struktural terlampaui! Sorot untuk melihat detail visual." : "Structural limit exceeded! Hover to see visual details.") : "Ergonomic Limits: 10-28mm."}
+                title={isExceedingDbl ? t.limitExceededTitle : t.ergonomicLimitsDbl}
                 aria-label="Toggle bridge dbl limit warning highlight"
               >
                 <AlertCircle size={11} />
@@ -252,7 +259,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
                     ? 'text-amber-500 hover:text-amber-600 animate-pulse-soft bg-amber-500/10' 
                     : 'text-slate-300 hover:text-slate-400 dark:text-slate-600 dark:hover:text-slate-500'
                 }`}
-                title={isExceedingEd ? (lang === 'id' ? "Batas struktural terlampaui! Sorot untuk melihat detail visual." : "Structural limit exceeded! Hover to see visual details.") : "Ergonomic Limits: ED >= A and <= 75mm."}
+                title={isExceedingEd ? t.limitExceededTitle : t.ergonomicLimitsEd}
                 aria-label="Toggle effective diameter ed limit warning highlight"
               >
                 <AlertCircle size={11} />
@@ -291,6 +298,16 @@ export const Sidebar: React.FC<SidebarProps> = ({
             ))}
           </div>
         </div>
+
+        {/* Frame validation warnings */}
+        {(isExceedingA || isExceedingB || isExceedingDbl || isExceedingEd) && (
+          <div className="col-span-2 text-[9px] text-amber-700 dark:text-amber-400 bg-amber-50 dark:bg-amber-900/20 px-2.5 py-2 rounded-lg flex items-start gap-1.5 mt-2 border border-amber-200/50 dark:border-amber-800/30">
+            <AlertCircle size={12} className="shrink-0 mt-px" aria-hidden="true" />
+            <span className="leading-snug font-medium">
+              {t.ergonomicWarning}
+            </span>
+          </div>
+        )}
       </InputGroup>
 
       <InputGroup title={t.fittingSpecs} icon={User} iconColor="text-orange-500" groupKey="fitting">
@@ -324,30 +341,40 @@ export const Sidebar: React.FC<SidebarProps> = ({
               aria-label="Bevel positioning slider"
             />
             <span className="text-[9px] font-bold text-slate-400">{t.bevelBack}</span>
+            <div className="flex items-center px-1.5 py-0.5 rounded border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 w-[42px]">
+              <input 
+                type="number" 
+                min={0} max={100} step={1} 
+                value={Math.round(bevelPercent * 100)}
+                onChange={(e) => setBevelPercent(Math.min(100, Math.max(0, parseFloat(e.target.value || "0"))) / 100)}
+                className="w-full text-[9px] text-center font-mono bg-transparent outline-none text-slate-600 dark:text-slate-300 appearance-none"
+                aria-label="Bevel percentage numeric input"
+              />
+              <span className="text-[8px] text-slate-400">%</span>
+            </div>
           </div>
         </div>
       </InputGroup>
 
       <div className="mt-3 p-4 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200/60 dark:border-slate-800/80 space-y-4">
-        <div className="flex items-center justify-between">
+        <div className="flex flex-row items-center justify-between">
           <LabelWithTooltip 
             label={t.compareMode} 
             lang={lang} 
             isUppercaseHeader 
-            className="text-[10px] text-slate-400 font-bold uppercase tracking-wider" 
-            icon={<Copy size={11} className="text-slate-400" />} 
+            className="text-[10px] text-slate-600 dark:text-slate-300 font-bold uppercase tracking-wider" 
+            icon={<Copy size={11} className="text-slate-400" aria-hidden="true" />} 
           />
-          <button 
-            onClick={() => setCompareMode(!compareMode)}
-            className={`w-9 h-5 rounded-full relative transition-all cursor-pointer flex items-center ${
-              compareMode ? 'bg-blue-600' : 'bg-slate-300 dark:bg-slate-700'
-            }`}
-            aria-checked={compareMode}
-            role="switch"
-            aria-label="Compare mode toggle"
-          >
-            <div className={`absolute w-3 h-3 rounded-full bg-white transition-all ${compareMode ? 'left-5' : 'left-1'}`} />
-          </button>
+          <label className="relative inline-flex items-center cursor-pointer">
+            <input 
+              type="checkbox" 
+              className="sr-only peer" 
+              checked={compareMode}
+              onChange={(e) => setCompareMode(e.target.checked)}
+              aria-label={t.compareMode}
+            />
+            <div className="w-9 h-5 bg-slate-300 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 rounded-full peer dark:bg-slate-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600"></div>
+          </label>
         </div>
         {compareMode && (
           <div className="grid grid-cols-3 gap-1" role="group" aria-label="Comparison material indices">
@@ -381,7 +408,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
   }
 
   return (
-    <aside className="w-[300px] shrink-0 bg-white dark:bg-slate-950 border-r border-slate-100 dark:border-slate-850 flex flex-col h-full shadow-[4px_0_24px_rgba(0,0,0,0.015)] text-left transition-colors duration-200">
+    <aside className="w-[280px] lg:w-[320px] shrink-0 bg-white dark:bg-slate-950 border-r border-slate-100 dark:border-slate-850 flex flex-col h-full shadow-[4px_0_24px_rgba(0,0,0,0.015)] text-left transition-all duration-200">
       {/* Clinic/App Branding Header */}
       <div className="p-5 border-b border-slate-100 dark:border-slate-850">
         <div className="flex items-center gap-3">
@@ -398,9 +425,9 @@ export const Sidebar: React.FC<SidebarProps> = ({
             <h1 className="text-slate-900 dark:text-slate-100 font-extrabold text-sm tracking-tight leading-none mb-1">
               AKTRIYO
             </h1>
-            <p className="text-[8px] text-slate-500 dark:text-slate-400 font-bold uppercase tracking-wider leading-none">
-              Institut Optometri Yogyakarta
-            </p>
+            <h2 className="text-[8px] text-slate-500 dark:text-slate-400 font-bold uppercase tracking-wider leading-none m-0">
+              {t.institute}
+            </h2>
           </div>
         </div>
         <div className="mt-3 flex items-center justify-between gap-2">
@@ -412,17 +439,11 @@ export const Sidebar: React.FC<SidebarProps> = ({
       </div>
 
       {/* Main Form Fields (Scrollable) */}
-      <div className="flex-1 overflow-y-auto px-5 py-4 space-y-2 custom-scrollbar">
-        {renderFormContent()}
-      </div>
-
-      {/* Sticky Bottom Action Bar */}
-      <div className="p-4 border-t border-slate-100 dark:border-slate-850 bg-slate-50 dark:bg-slate-900/40 shadow-[0_-4px_16px_rgba(0,0,0,0.015)]">
-        <Button className="w-full py-5 bg-slate-900 hover:bg-slate-800 dark:bg-slate-100 dark:hover:bg-slate-200 dark:text-slate-900 rounded-xl text-[10px] font-bold uppercase tracking-wider transition-all duration-150 transform active:scale-95 shadow-md shadow-slate-900/10 dark:shadow-none cursor-pointer flex items-center justify-center gap-2">
-          <Zap size={11} />
-          {t.calculateFull}
-        </Button>
-      </div>
+      <ScrollArea className="flex-1 min-h-0">
+        <div className="px-5 py-4 space-y-2">
+          {renderFormContent()}
+        </div>
+      </ScrollArea>
     </aside>
   );
 };

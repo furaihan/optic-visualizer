@@ -1,16 +1,18 @@
 import React from 'react';
 import { ShieldCheck } from 'lucide-react';
 import { CalculationResult } from '../lib/optical';
-import { translations, Language } from '../lib/i18n';
+import { translations, Language } from '../lib/translations';
 import { Card, CardContent } from './ui/card';
+import { Skeleton } from './ui/skeleton';
 
 interface RecommendationCardProps {
   result: CalculationResult;
   lensIndex: number;
   lang: Language;
+  isLoading?: boolean;
 }
 
-export const RecommendationCard: React.FC<RecommendationCardProps> = ({ result, lensIndex, lang }) => {
+export const RecommendationCard: React.FC<RecommendationCardProps> = ({ result, lensIndex, lang, isLoading }) => {
   const t = translations[lang];
 
   // Correct volume reduction percentage calculation compared to 1.50 baseline
@@ -31,32 +33,45 @@ export const RecommendationCard: React.FC<RecommendationCardProps> = ({ result, 
           <div className="flex justify-between items-start">
             <div className="flex flex-col gap-0.5">
                <h3 className="text-[10px] font-bold text-slate-400/80 uppercase tracking-[0.2em]">{t.recomTitle}</h3>
-               <p className="text-[8px] text-blue-400 font-bold uppercase tracking-wider">Geometric Rule-base</p>
+               <p className="text-[8px] text-blue-400 font-bold uppercase tracking-wider">{t.geometricRuleBase}</p>
             </div>
             <div className="px-2 py-0.5 rounded-full bg-slate-800 text-slate-400 text-[8px] font-bold border border-white/5">{t.bestChoice}</div>
           </div>
 
-          <div className="flex flex-col gap-1.5">
-            <p className="text-2xl font-black text-white italic tracking-tighter">
-              INDEX {result.recommendation?.index.toFixed(2)}
-            </p>
-            <div className="flex flex-wrap gap-1.5">
-               <span className="text-[9px] px-1.5 py-0.5 bg-white/10 rounded font-bold text-slate-300 border border-white/5">
-                 {result.recommendation?.material}
-               </span>
-               <span className="text-[9px] px-1.5 py-0.5 bg-emerald-500/20 rounded font-bold text-emerald-400 border border-emerald-500/20">
-                 -{result.recommendation?.thinness} THIN
-               </span>
-               <span className="text-[9px] px-1.5 py-0.5 bg-blue-500/20 rounded font-bold text-blue-400 border border-blue-500/20">
-                 ABBE {result.recommendation?.abbe}
-               </span>
-            </div>
+          <div className="flex flex-col gap-1.5 h-[50px] justify-center">
+            {isLoading ? (
+               <Skeleton className="h-8 w-32 bg-slate-800/80" />
+            ) : (
+              <>
+                <p className="text-2xl font-black text-white italic tracking-tighter">
+                  INDEX {result.recommendation?.index.toFixed(2)}
+                </p>
+                <div className="flex flex-wrap gap-1.5">
+                   <span className="text-[9px] px-1.5 py-0.5 bg-white/10 rounded font-bold text-slate-300 border border-white/5">
+                     {result.recommendation?.material}
+                   </span>
+                   <span className="text-[9px] px-1.5 py-0.5 bg-emerald-500/20 rounded font-bold text-emerald-400 border border-emerald-500/20">
+                     -{result.recommendation?.thinness} THIN
+                   </span>
+                   <span className="text-[9px] px-1.5 py-0.5 bg-blue-500/20 rounded font-bold text-blue-400 border border-blue-500/20">
+                     ABBE {result.recommendation?.abbe}
+                   </span>
+                </div>
+              </>
+            )}
           </div>
           
           <div className="min-h-[40px]">
-             <p className="text-[11px] text-slate-300 font-medium leading-relaxed italic border-l-2 border-blue-500/50 pl-3 py-1">
+            {isLoading ? (
+              <div className="space-y-2 mt-2">
+                <Skeleton className="h-3 w-full bg-slate-800/80" />
+                <Skeleton className="h-3 w-4/5 bg-slate-800/80" />
+              </div>
+            ) : (
+             <p className="text-[11px] text-slate-300 font-medium leading-relaxed italic border-l-2 border-blue-500/50 pl-3 py-1 break-words whitespace-normal">
                 {result.recommendation?.reason}
              </p>
+            )}
           </div>
          </div>
 
@@ -65,9 +80,9 @@ export const RecommendationCard: React.FC<RecommendationCardProps> = ({ result, 
          <div className="space-y-2">
           <div className="flex justify-between items-start">
             <h3 className="text-[10px] font-bold text-slate-400/80 uppercase tracking-[0.2em]">{t.geometricAudit}</h3>
-            <ShieldCheck size={14} className="text-emerald-500" />
+            <ShieldCheck size={14} className="text-emerald-500" aria-hidden="true" />
           </div>
-          <p className="text-xs font-medium leading-relaxed text-slate-200">
+          <p className="text-xs font-medium leading-relaxed text-slate-200 break-words whitespace-normal">
              {text}
           </p>
          </div>

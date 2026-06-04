@@ -1,7 +1,9 @@
 import React from 'react';
 import { CalculationResult, FrameParameters, LensParameters } from '../lib/optical';
-import { translations, Language } from '../lib/i18n';
-import { ArrowUpRight, ArrowDownRight, AlertTriangle, CheckCircle2, Info, ChevronDown, MoveHorizontal, Compass, Diameter, Scale } from 'lucide-react';
+import { translations, Language } from '../lib/translations';
+import { ArrowUpRight, ArrowDownRight, AlertTriangle, CheckCircle2, Info, ChevronDown, MoveHorizontal, Compass, Diameter, Scale, X } from 'lucide-react';
+import { Skeleton } from './ui/skeleton';
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from './ui/collapsible';
 
 interface SummaryCardProps {
   result: CalculationResult;
@@ -9,38 +11,12 @@ interface SummaryCardProps {
   lang: Language;
   frame?: FrameParameters;
   lens?: LensParameters;
+  isLoading?: boolean;
 }
 
-export const SummaryCard: React.FC<SummaryCardProps> = ({ result, compareResult, lang, frame, lens }) => {
+export const SummaryCard: React.FC<SummaryCardProps> = ({ result, compareResult, lang, frame, lens, isLoading }) => {
   const t = translations[lang];
-  const [showGuide, setShowGuide] = React.useState(false);
-
-  const notes = {
-    id: {
-      title: 'Panduan Referensi Klinis & Kosmetis',
-      etLabel: 'Ketebalan Tepi (ET)',
-      etDesc: 'Ketebalan lensa di pinggiran. Idealnya ≤ 4.0 mm agar pas rapi dalam bingkai. Nilai > 6.0 mm akan memproyeksikan keluar bingkai dan meningkatkan berat secara signifikan.',
-      protLabel: 'Tonjolan Lensa (Ant / Post)',
-      protDesc: 'Sejauh mana lensa menonjol melebihi bingkai depan/belakang. Toleransi ≤ 0.5 mm dianggap rata (flush). > 2.0 mm berisiko mengenai bulu mata saat berkedip.',
-      ctLabel: 'Ketebalan Tengah (CT)',
-      ctDesc: 'Ketebalan pusat lensa. Lensa minus dioptimalkan otomatis pada batas aman (biasanya 1.0 - 1.5 mm) untuk mempertahankan kekuatan mekanis minimum.',
-      weightLabel: 'Estimasi Berat Lensa',
-      weightDesc: 'Berat estimasi per lensa tunggal setelah diasah agar pas ke dalam bingkai. Dihitung berdasarkan volume akhir lensa dan massa jenis monomer bahan.'
-    },
-    en: {
-      title: 'Clinical & Cosmetic Reference Guide',
-      etLabel: 'Edge Thickness (ET)',
-      etDesc: 'Lens thickness at the outer boundary. Ideally ≤ 4.0 mm for a clean fit within frame bevels. Values > 6.0 mm spill outward and increase weight.',
-      protLabel: 'Lens Protrusion (Ant / Post)',
-      protDesc: 'How much the lens projects beyond the frame front or back. Tolerance ≤ 0.5 mm is flush. Protrusion > 2.0 mm may touch lashes during blinking.',
-      ctLabel: 'Center Thickness (CT)',
-      ctDesc: 'Thickness at optical center. Minus lenses are optimized to safe lower limits (usually 1.0 - 1.5 mm) to retain structural strength.',
-      weightLabel: 'Estimated Lens Weight',
-      weightDesc: 'Estimated weight of a single edged lens. Values < 10g are highly comfortable for continuous wear. Computed based on final lens volume and material density.'
-    }
-  };
-
-  const currentNotes = notes[lang] || notes.en;
+  const [activePanel, setActivePanel] = React.useState<'none' | 'warnings' | 'guide'>('none');
 
   const getDeltaElement = (key: 'et' | 'ct' | 'anteriorProtrusion' | 'posteriorProtrusion' | 'weight') => {
     if (!compareResult) return null;
@@ -78,6 +54,7 @@ export const SummaryCard: React.FC<SummaryCardProps> = ({ result, compareResult,
     icon?: React.ComponentType<{ size?: number; className?: string; strokeWidth?: number }>;
     iconColor?: string;
     resultKey?: 'et' | 'ct' | 'anteriorProtrusion' | 'posteriorProtrusion' | 'weight';
+    isLoading?: boolean;
   }
 
   const StatItem = ({ 
@@ -88,31 +65,42 @@ export const SummaryCard: React.FC<SummaryCardProps> = ({ result, compareResult,
     statusColor, 
     icon: Icon, 
     iconColor = "text-slate-400 dark:text-slate-500 font-bold",
-    resultKey
+    resultKey,
+    isLoading
   }: StatItemProps) => {
     const deltaNode = resultKey ? getDeltaElement(resultKey) : null;
     
     return (
-      <div className="bg-white dark:bg-slate-950 p-4 flex flex-col justify-between hover:bg-slate-50/40 dark:hover:bg-slate-900/40 transition-colors">
-        <div className="space-y-1.5">
-          <div className="flex items-center gap-1.5">
-            {Icon && <Icon size={13} className={iconColor} strokeWidth={2.5} />}
-            <p className="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">{label}</p>
+      <div className="bg-white dark:bg-slate-950 p-2.5 sm:p-3.5 flex flex-col justify-between hover:bg-slate-50/40 dark:hover:bg-slate-900/40 transition-colors h-full snap-start shrink-0 w-[36%] sm:w-[28%] md:w-auto md:flex-1 border-r border-slate-200 dark:border-slate-800/80 last:border-r-0">
+        <div className="space-y-1.5 flex-1 flex flex-col">
+          <div className="flex items-center gap-1">
+            {Icon && <Icon size={12} className={iconColor} strokeWidth={2.5} />}
+            <p className="text-[9px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider truncate">{label}</p>
           </div>
           
-          <div className="flex items-baseline gap-2 flex-wrap">
-            <p className="text-xl md:text-2xl font-mono font-bold text-slate-800 dark:text-slate-100 leading-none">
-              {value.toFixed(2)}
-              <span className="text-[10px] ml-1 font-sans font-medium text-slate-400 dark:text-slate-500 lowercase">{unit}</span>
-            </p>
-            {deltaNode}
+          <div className="flex items-baseline gap-1.5 flex-wrap mt-auto">
+            {isLoading ? (
+              <Skeleton className="h-6 w-12" />
+            ) : (
+              <>
+                <p className="text-lg md:text-xl font-mono font-bold text-slate-800 dark:text-slate-100 leading-none">
+                  {value.toFixed(2)}
+                  <span className="text-[9px] ml-0.5 font-sans font-medium text-slate-400 dark:text-slate-500 lowercase">{unit}</span>
+                </p>
+                {deltaNode && <div className="scale-75 origin-left -ml-1 flex-shrink-0">{deltaNode}</div>}
+              </>
+            )}
           </div>
         </div>
 
-        <div className="mt-3">
-          <span className={`inline-block px-2 py-0.5 rounded text-[9px] font-semibold uppercase tracking-wider border ${statusColor} leading-none`}>
-            {status}
-          </span>
+        <div className="mt-2.5">
+          {isLoading ? (
+            <Skeleton className="h-3 w-10 rounded" />
+          ) : (
+            <span className={`inline-block px-1.5 py-0.5 rounded text-[8px] font-semibold uppercase tracking-wider border ${statusColor} leading-none truncate max-w-full`}>
+              {status}
+            </span>
+          )}
         </div>
       </div>
     );
@@ -131,10 +119,10 @@ export const SummaryCard: React.FC<SummaryCardProps> = ({ result, compareResult,
   };
 
   const getWeightStatus = (w: number) => {
-    if (w > 15) return { label: lang === 'id' ? 'Berat' : 'Heavy', color: 'bg-rose-50 text-rose-700 border border-rose-100 dark:bg-rose-950/20 dark:text-rose-350 dark:border-rose-900/60' };
-    if (w > 10) return { label: lang === 'id' ? 'Sedang' : 'Moderate', color: 'bg-amber-50 text-amber-700 border border-amber-100 dark:bg-amber-950/20 dark:text-amber-350 dark:border-amber-900/60' };
-    if (w > 5) return { label: lang === 'id' ? 'Ringan' : 'Light', color: 'bg-emerald-50 text-emerald-700 border border-emerald-100 dark:bg-emerald-950/20 dark:text-emerald-350 dark:border-emerald-900/60' };
-    return { label: lang === 'id' ? 'Sangat Ringan' : 'Ultralight', color: 'bg-blue-50 text-blue-700 border border-blue-100 dark:bg-blue-950/20 dark:text-blue-350 dark:border-blue-900/60' };
+    if (w > 15) return { label: t.weightHeavy, color: 'bg-rose-50 text-rose-700 border border-rose-100 dark:bg-rose-950/20 dark:text-rose-350 dark:border-rose-900/60' };
+    if (w > 10) return { label: t.weightModerate, color: 'bg-amber-50 text-amber-700 border border-amber-100 dark:bg-amber-950/20 dark:text-amber-350 dark:border-amber-900/60' };
+    if (w > 5) return { label: t.weightLight, color: 'bg-emerald-50 text-emerald-700 border border-emerald-100 dark:bg-emerald-950/20 dark:text-emerald-350 dark:border-emerald-900/60' };
+    return { label: t.weightUltralight, color: 'bg-blue-50 text-blue-700 border border-blue-100 dark:bg-blue-950/20 dark:text-blue-350 dark:border-blue-900/60' };
   };
 
   const etStatus = getETStatus(result.et);
@@ -151,62 +139,123 @@ export const SummaryCard: React.FC<SummaryCardProps> = ({ result, compareResult,
   const isHighDecentration = result.decentration > 3.0 && isHighPower;
   const inducedPrism = lens ? (Math.abs(totalPower) * (result.decentration / 10)) : 0;
 
+  const hasWarnings = isUnsafe || isHighDecentration;
+
   return (
-    <div className="space-y-3">
-      {/* Compatibility or Decentration Warnings */}
-      {isUnsafe && (
-        <div className="bg-red-50/90 border border-red-200/50 p-4 rounded-2xl text-[11.5px] text-red-800 flex items-start gap-3 shadow-md border-l-4 border-l-red-500 leading-relaxed">
-          <AlertTriangle className="text-red-500 shrink-0 mt-0.5" size={16} />
-          <div className="space-y-1">
-            <p className="font-black text-rose-800 tracking-wide uppercase text-[10.5px]">
-              {lang === 'id' ? '❌ Kompatibilitas Lensa Rendah' : '❌ Low Frame-Lens Compatibility'}
-            </p>
-            <div className="text-slate-600 font-medium space-y-1 mt-1">
-              {isAnteriorUnsafe && (
-                <p>
-                  {lang === 'id' 
-                    ? `• Lensa menonjol ke depan sebesar ${result.anteriorProtrusion.toFixed(1)}mm (melebihi batas aman 1.5mm). Risiko baret/pecah tinggi.`
-                    : `• Anterior protrusion is ${result.anteriorProtrusion.toFixed(1)}mm (exceeding 1.5mm limit). Highly prone to outer surface scratches.`
-                  }
+    <div className="space-y-3 relative">
+      <div className="flex items-center justify-between mb-2">
+        <h2 className="text-sm font-black text-slate-800 dark:text-slate-100 tracking-tight ml-1 uppercase">{t.tabSummary || 'Summary'}</h2>
+        <div className="flex items-center bg-slate-100/80 dark:bg-slate-800/80 p-0.5 rounded-lg border border-slate-200 dark:border-slate-700/80 shadow-sm">
+          {hasWarnings && (
+            <button
+              onClick={() => setActivePanel(p => p === 'warnings' ? 'none' : 'warnings')}
+              className={`flex items-center gap-1.5 px-2.5 py-1.5 text-[10px] font-bold rounded-md transition-all ${
+                activePanel === 'warnings' 
+                  ? 'bg-white dark:bg-slate-900 shadow text-amber-600 dark:text-amber-400' 
+                  : 'text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200 border border-transparent'
+              }`}
+            >
+              <AlertTriangle size={12} className={isUnsafe ? 'text-red-500' : 'text-amber-500'} />
+              <span className="uppercase tracking-wider">Warnings ({(isUnsafe ? 1 : 0) + (isHighDecentration ? 1 : 0)})</span>
+            </button>
+          )}
+          <button
+            onClick={() => setActivePanel(p => p === 'guide' ? 'none' : 'guide')}
+            className={`flex items-center gap-1.5 px-2.5 py-1.5 text-[10px] font-bold rounded-md transition-all ${
+              activePanel === 'guide' 
+                ? 'bg-white dark:bg-slate-900 shadow text-blue-600 dark:text-blue-400' 
+                : 'text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200 border border-transparent'
+            }`}
+          >
+            <Info size={12} />
+            <span className="uppercase tracking-wider">{t.guideTitle}</span>
+          </button>
+        </div>
+      </div>
+
+      {/* Warnings Panel */}
+      {activePanel === 'warnings' && hasWarnings && (
+        <div className="space-y-2 animate-in fade-in slide-in-from-top-2 duration-200">
+          {isUnsafe && (
+            <div className="bg-red-50/90 dark:bg-rose-950/30 border border-red-200/50 dark:border-rose-900/40 p-3.5 rounded-xl text-[11.5px] text-red-800 dark:text-rose-200 flex items-start gap-3 shadow-sm border-l-4 border-l-red-500 leading-relaxed group">
+              <AlertTriangle className="text-red-500 shrink-0 mt-0.5" size={16} aria-hidden="true" />
+              <div className="min-w-0 flex-1">
+                <p className="font-black text-rose-800 dark:text-rose-300 tracking-wide uppercase text-[10.5px] break-words mt-0.5">
+                  {t.lowCompatibility}
                 </p>
-              )}
-              {isPosteriorUnsafe && (
-                <p>
-                  {lang === 'id' 
-                    ? `• Lensa menonjol ke belakang sebesar ${result.posteriorProtrusion.toFixed(1)}mm (melebihi batas aman 2.0mm). Risiko tinggi menyentuh pipi/mata dan membuat tidak nyaman.`
-                    : `• Posterior protrusion is ${result.posteriorProtrusion.toFixed(1)}mm (exceeding 2.0mm limit). High risk of lash/skin contact and discomfort.`
-                  }
-                </p>
-              )}
+                <div className="text-slate-600 dark:text-rose-200/80 font-medium space-y-1 mt-1.5 break-words">
+                  {isAnteriorUnsafe && (
+                    <p>{t.anteriorWarning.replace('{val}', result.anteriorProtrusion.toFixed(1))}</p>
+                  )}
+                  {isPosteriorUnsafe && (
+                    <p>{t.posteriorWarning.replace('{val}', result.posteriorProtrusion.toFixed(1))}</p>
+                  )}
+                </div>
+              </div>
             </div>
+          )}
+
+          {isHighDecentration && (
+            <div className="bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-900/40 p-3.5 rounded-xl text-[11px] text-amber-800 dark:text-amber-200 flex items-start gap-3 shadow-sm border-l-4 border-l-amber-500 leading-relaxed group">
+              <AlertTriangle className="text-amber-500 shrink-0 mt-1" size={15} aria-hidden="true" />
+              <div className="min-w-0 flex-1">
+                <p className="font-black uppercase tracking-wide text-amber-900 dark:text-amber-300 text-[10.5px] break-words mt-1">
+                  {t.highDecentration}
+                </p>
+                <p className="mt-1.5 text-slate-600 dark:text-amber-200/80 font-medium font-sans break-words">
+                  {t.decentrationWarning.replace('{decentration}', result.decentration.toFixed(1)).replace('{prism}', inducedPrism.toFixed(1))}
+                </p>
+              </div>
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* Guide Panel */}
+      {activePanel === 'guide' && (
+        <div className="border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950 grid gap-4 p-4 rounded-xl sm:grid-cols-2 lg:grid-cols-4 text-xs text-slate-600 dark:text-slate-300 leading-normal shadow-sm animate-in fade-in slide-in-from-top-2 duration-200">
+          <div className="space-y-1 bg-slate-50/40 dark:bg-slate-900/50 p-3 rounded-lg border border-slate-100 dark:border-slate-800">
+            <h5 className="font-bold text-slate-800 dark:text-slate-200 flex items-center gap-1.5">
+              <span className="w-1.5 h-1.5 rounded-full bg-blue-500"></span>
+              {t.guideEtLabel}
+            </h5>
+            <p className="text-slate-500 dark:text-slate-400 pl-3 leading-relaxed mt-1 text-[11px]">{t.guideEtDesc}</p>
+          </div>
+          
+          <div className="space-y-1 bg-slate-50/40 dark:bg-slate-900/50 p-3 rounded-lg border border-slate-100 dark:border-slate-800">
+            <h5 className="font-bold text-slate-800 dark:text-slate-200 flex items-center gap-1.5">
+              <span className="w-1.5 h-1.5 rounded-full bg-indigo-500"></span>
+              {t.guideCtLabel}
+            </h5>
+            <p className="text-slate-500 dark:text-slate-400 pl-3 leading-relaxed mt-1 text-[11px]">{t.guideCtDesc}</p>
+          </div>
+          
+          <div className="space-y-1 bg-slate-50/40 dark:bg-slate-900/50 p-3 rounded-lg border border-slate-100 dark:border-slate-800">
+            <h5 className="font-bold text-slate-800 dark:text-slate-200 flex items-center gap-1.5">
+              <span className="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
+              {t.guideProtLabel}
+            </h5>
+            <p className="text-slate-500 dark:text-slate-400 pl-3 leading-relaxed mt-1 text-[11px]">{t.guideProtDesc}</p>
+          </div>
+          
+          <div className="space-y-1 bg-slate-50/40 dark:bg-slate-900/50 p-3 rounded-lg border border-slate-100 dark:border-slate-800">
+            <h5 className="font-bold text-slate-800 dark:text-slate-200 flex items-center gap-1.5">
+              <span className="w-1.5 h-1.5 rounded-full bg-amber-500"></span>
+              {t.guideWeightLabel}
+            </h5>
+            <p className="text-slate-500 dark:text-slate-400 pl-3 leading-relaxed mt-1 text-[11px]">{t.guideWeightDesc}</p>
           </div>
         </div>
       )}
 
-      {isHighDecentration && (
-        <div className="bg-amber-50 border border-amber-200 p-4 rounded-2xl text-[11px] text-amber-800 flex items-start gap-3 shadow-sm border-l-4 border-l-amber-500 leading-relaxed">
-          <AlertTriangle className="text-amber-500 shrink-0 mt-1" size={15} />
-          <div>
-            <p className="font-black uppercase tracking-wide text-amber-900 text-[10.5px]">
-              {lang === 'id' ? '⚠️ Peringatan Desentrasi Tinggi' : '⚠️ High Decentration Warning'}
-            </p>
-            <p className="mt-1 text-slate-600 font-medium font-sans">
-              {lang === 'id' 
-                ? `Desentrasi sebesar ${result.decentration.toFixed(1)}mm pada kekuatan lensa tinggi menimbulkan efek prisma sebesar ~${inducedPrism.toFixed(1)} Δ secara tidak sengaja. Hal ini dapat memicu ketegangan mata atau pusing. Gunakan frame yang melingkar atau lebar frame (A-Size) lebih kecil.`
-                : `A decentration of ${result.decentration.toFixed(1)}mm on a high prescription induces an unintended prismatic effect of ~${inducedPrism.toFixed(1)} Δ. This can cause eye strain or visual fatigue. Consider a smaller frame width (A-Size) or DBL.`
-              }
-            </p>
-          </div>
-        </div>
-      )}
-
-      <div className="bg-slate-200/60 border border-slate-200 rounded-2xl grid grid-cols-2 lg:grid-cols-5 gap-px overflow-hidden shadow-sm">
+      <div className="bg-slate-200/60 dark:bg-slate-800 border border-slate-200 dark:border-slate-800/80 rounded-2xl flex overflow-x-auto snap-x snap-mandatory shadow-sm [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
         <StatItem 
           label={t.edgeThick} 
           value={result.et} unit="mm"
           status={etStatus.label} statusColor={etStatus.color}
           icon={etStatus.icon} iconColor={etStatus.iconColor}
           resultKey="et"
+          isLoading={isLoading}
         />
         <StatItem 
           label={t.center} 
@@ -214,6 +263,7 @@ export const SummaryCard: React.FC<SummaryCardProps> = ({ result, compareResult,
           status={t.optimized} statusColor="bg-blue-50 text-blue-700 border border-blue-100/50"
           icon={CheckCircle2} iconColor="text-blue-500"
           resultKey="ct"
+          isLoading={isLoading}
         />
         <StatItem 
           label={t.anteriorProt} 
@@ -221,6 +271,7 @@ export const SummaryCard: React.FC<SummaryCardProps> = ({ result, compareResult,
           status={antStatus.label} statusColor={antStatus.color}
           icon={antStatus.icon} iconColor={antStatus.iconColor}
           resultKey="anteriorProtrusion"
+          isLoading={isLoading}
         />
         <StatItem 
           label={t.posteriorProt} 
@@ -228,6 +279,7 @@ export const SummaryCard: React.FC<SummaryCardProps> = ({ result, compareResult,
           status={postStatus.label} statusColor={postStatus.color}
           icon={postStatus.icon} iconColor={postStatus.iconColor}
           resultKey="posteriorProtrusion"
+          isLoading={isLoading}
         />
         <StatItem 
           label={t.lensWeight} 
@@ -235,96 +287,56 @@ export const SummaryCard: React.FC<SummaryCardProps> = ({ result, compareResult,
           status={weightStatus.label} statusColor={weightStatus.color}
           icon={Scale} iconColor="text-indigo-500"
           resultKey="weight"
+          isLoading={isLoading}
         />
       </div>
 
       {/* Secondary Clinical Specs Row (highly visible on mobile & desktop without truncation) */}
       {frame && (
-        <div className="bg-white border border-slate-200/90 rounded-2xl grid grid-cols-1 sm:grid-cols-3 divide-y sm:divide-y-0 sm:divide-x divide-slate-100 overflow-hidden shadow-sm">
-          <div className="flex items-center justify-between sm:justify-start gap-3 p-3 px-4 hover:bg-slate-50/40 transition-colors">
-            <div className="flex items-center gap-2">
-              <MoveHorizontal size={14} className="text-slate-400 group-hover:text-blue-500" />
-              <span className="font-bold text-slate-500 text-[9px] uppercase tracking-wider">{t.framePd}</span>
+        <div className="bg-white dark:bg-slate-950 border border-slate-200/90 dark:border-slate-800 rounded-2xl flex overflow-x-auto snap-x snap-mandatory divide-x divide-slate-100 dark:divide-slate-800/80 shadow-sm [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
+          <div className="flex items-center justify-between sm:justify-start gap-3 p-2.5 px-3 hover:bg-slate-50/40 dark:hover:bg-slate-900/80 transition-colors shrink-0 w-[45%] sm:w-auto sm:flex-1 snap-start">
+            <div className="flex items-center gap-1.5 min-w-0">
+              <MoveHorizontal size={13} className="text-slate-400 group-hover:text-blue-500 shrink-0" aria-hidden="true" />
+              <span className="font-bold text-slate-500 dark:text-slate-400 text-[8px] sm:text-[9px] uppercase tracking-wider truncate hidden sm:inline-block">{t.framePd}</span>
+              <span className="font-bold text-slate-500 dark:text-slate-400 text-[8px] sm:text-[9px] uppercase tracking-wider truncate sm:hidden">F.PD</span>
             </div>
-            <span className="font-mono font-bold text-slate-800 text-sm ml-auto sm:ml-2">
-              {(frame.a + frame.dbl).toFixed(1)}
-              <span className="text-[10px] font-normal text-slate-400 ml-0.5">mm</span>
-            </span>
+            {isLoading ? <Skeleton className="h-4 w-10 ml-auto sm:ml-2" /> : (
+              <span className="font-mono font-bold text-slate-800 dark:text-slate-100 text-[13px] sm:text-sm ml-auto sm:ml-2">
+                {(frame.a + frame.dbl).toFixed(1)}
+                <span className="text-[9px] font-normal text-slate-400 ml-0.5">mm</span>
+              </span>
+            )}
           </div>
 
-          <div className="flex items-center justify-between sm:justify-start gap-3 p-3 px-4 hover:bg-slate-50/40 transition-colors">
-            <div className="flex items-center gap-2">
-              <Compass size={14} className="text-slate-400" />
-              <span className="font-bold text-slate-500 text-[9px] uppercase tracking-wider">{t.decentration}</span>
+          <div className="flex items-center justify-between sm:justify-start gap-3 p-2.5 px-3 hover:bg-slate-50/40 dark:hover:bg-slate-900/80 transition-colors shrink-0 w-[45%] sm:w-auto sm:flex-1 snap-start">
+            <div className="flex items-center gap-1.5 min-w-0">
+              <Compass size={13} className="text-slate-400 shrink-0" aria-hidden="true" />
+              <span className="font-bold text-slate-500 dark:text-slate-400 text-[8px] sm:text-[9px] uppercase tracking-wider truncate hidden sm:inline-block">{t.decentration}</span>
+              <span className="font-bold text-slate-500 dark:text-slate-400 text-[8px] sm:text-[9px] uppercase tracking-wider truncate sm:hidden">Dec.</span>
             </div>
-            <span className="font-mono font-bold text-slate-800 text-sm ml-auto sm:ml-2">
-              {result.decentration.toFixed(2)}
-              <span className="text-[10px] font-normal text-slate-400 ml-0.5">mm</span>
-            </span>
+            {isLoading ? <Skeleton className="h-4 w-10 ml-auto sm:ml-2" /> : (
+              <span className="font-mono font-bold text-slate-800 dark:text-slate-100 text-[13px] sm:text-sm ml-auto sm:ml-2">
+                {result.decentration.toFixed(2)}
+                <span className="text-[9px] font-normal text-slate-400 ml-0.5">mm</span>
+              </span>
+            )}
           </div>
 
-          <div className="flex items-center justify-between sm:justify-start gap-3 p-3 px-4 hover:bg-slate-50/40 transition-colors">
-            <div className="flex items-center gap-2">
-              <Diameter size={14} className="text-slate-400" />
-              <span className="font-bold text-slate-500 text-[9px] uppercase tracking-wider">{t.minBlank}</span>
+          <div className="flex items-center justify-between sm:justify-start gap-3 p-2.5 px-3 hover:bg-slate-50/40 dark:hover:bg-slate-900/80 transition-colors shrink-0 w-[45%] sm:w-auto sm:flex-1 snap-start">
+            <div className="flex items-center gap-1.5 min-w-0">
+              <Diameter size={13} className="text-slate-400 shrink-0" aria-hidden="true" />
+              <span className="font-bold text-slate-500 dark:text-slate-400 text-[8px] sm:text-[9px] uppercase tracking-wider truncate hidden sm:inline-block">{t.minBlank}</span>
+              <span className="font-bold text-slate-500 dark:text-slate-400 text-[8px] sm:text-[9px] uppercase tracking-wider truncate sm:hidden">Blank</span>
             </div>
-            <span className="font-mono font-bold text-slate-800 text-sm ml-auto sm:ml-2">
-              {(result.y * 2 + 2).toFixed(0)}
-              <span className="text-[10px] font-normal text-slate-400 ml-0.5">mm</span>
-            </span>
+            {isLoading ? <Skeleton className="h-4 w-10 ml-auto sm:ml-2" /> : (
+              <span className="font-mono font-bold text-slate-800 dark:text-slate-100 text-[13px] sm:text-sm ml-auto sm:ml-2">
+                {(result.y * 2 + 2).toFixed(0)}
+                <span className="text-[9px] font-normal text-slate-400 ml-0.5">mm</span>
+              </span>
+            )}
           </div>
         </div>
       )}
-
-      {/* Accordion Clinical Guideline Info Footer */}
-      <div className="border border-slate-200 rounded-xl overflow-hidden shadow-sm bg-white">
-        <button
-          onClick={() => setShowGuide(!showGuide)}
-          className="w-full flex items-center justify-between px-4 py-2.5 bg-slate-50/80 hover:bg-slate-100/80 text-slate-600 hover:text-slate-800 transition-all font-medium text-xs select-none cursor-pointer"
-        >
-          <div className="flex items-center gap-2">
-            <Info size={14} className="text-blue-500" />
-            <span>{currentNotes.title}</span>
-          </div>
-          <ChevronDown size={14} className={`text-slate-400 transition-transform duration-200 ${showGuide ? 'rotate-180' : ''}`} />
-        </button>
-
-        {showGuide && (
-          <div className="p-4 border-t border-slate-100 bg-white grid gap-4 sm:grid-cols-2 lg:grid-cols-4 text-xs text-slate-600 leading-normal">
-            <div className="space-y-1 bg-slate-50/40 p-3 rounded-lg border border-slate-100">
-              <h5 className="font-bold text-slate-800 flex items-center gap-1.5">
-                <span className="w-1.5 h-1.5 rounded-full bg-blue-500"></span>
-                {currentNotes.etLabel}
-              </h5>
-              <p className="text-slate-500 pl-3 leading-relaxed mt-1 text-[11px]">{currentNotes.etDesc}</p>
-            </div>
-            
-            <div className="space-y-1 bg-slate-50/40 p-3 rounded-lg border border-slate-100">
-              <h5 className="font-bold text-slate-800 flex items-center gap-1.5">
-                <span className="w-1.5 h-1.5 rounded-full bg-indigo-500"></span>
-                {currentNotes.ctLabel}
-              </h5>
-              <p className="text-slate-500 pl-3 leading-relaxed mt-1 text-[11px]">{currentNotes.ctDesc}</p>
-            </div>
-            
-            <div className="space-y-1 bg-slate-50/40 p-3 rounded-lg border border-slate-100">
-              <h5 className="font-bold text-slate-800 flex items-center gap-1.5">
-                <span className="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
-                {currentNotes.protLabel}
-              </h5>
-              <p className="text-slate-500 pl-3 leading-relaxed mt-1 text-[11px]">{currentNotes.protDesc}</p>
-            </div>
-
-            <div className="space-y-1 bg-slate-50/40 p-3 rounded-lg border border-slate-100">
-              <h5 className="font-bold text-slate-800 flex items-center gap-1.5">
-                <span className="w-1.5 h-1.5 rounded-full bg-violet-500"></span>
-                {currentNotes.weightLabel}
-              </h5>
-              <p className="text-slate-500 pl-3 leading-relaxed mt-1 text-[11px]">{currentNotes.weightDesc}</p>
-            </div>
-          </div>
-        )}
-      </div>
     </div>
   );
 };

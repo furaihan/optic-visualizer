@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Minus, Plus, Lightbulb } from 'lucide-react';
-import { Language } from '../../lib/i18n';
+import { Language, translations } from '../../lib/translations';
 import { Input } from '../ui/input';
 import { LabelWithTooltip } from './LabelWithTooltip';
 
@@ -14,6 +14,7 @@ interface ControlProps {
   unit: string;
   lang: Language;
   icon?: React.ReactNode;
+  isRecalculating?: boolean;
 }
 
 export const Control: React.FC<ControlProps> = ({ 
@@ -25,7 +26,8 @@ export const Control: React.FC<ControlProps> = ({
   onChange, 
   unit, 
   lang, 
-  icon 
+  icon,
+  isRecalculating
 }) => {
   const [typedVal, setTypedVal] = useState(value.toString());
 
@@ -77,7 +79,7 @@ export const Control: React.FC<ControlProps> = ({
           icon={icon} 
         />
         <div className="flex items-center gap-1.5 shrink-0">
-          <div className="flex items-center border border-slate-200 dark:border-slate-800 focus-within:border-blue-400 dark:focus-within:border-blue-500 focus-within:ring-2 focus-within:ring-blue-400/30 rounded-lg overflow-hidden bg-white dark:bg-slate-950 shadow-sm h-8 transition-all">
+          <div className={`flex items-center border border-slate-200 dark:border-slate-800 focus-within:border-blue-400 dark:focus-within:border-blue-500 focus-within:ring-2 focus-within:ring-blue-400/30 rounded-lg overflow-hidden bg-white dark:bg-slate-950 shadow-sm h-8 transition-colors duration-300 ${isRecalculating ? 'ring-2 ring-blue-400/50 border-blue-400 bg-blue-50/50 dark:bg-blue-900/30' : ''}`}>
             <button 
               onClick={() => commitVal(value - step)}
               className="w-8 h-8 flex items-center justify-center bg-slate-50/50 dark:bg-slate-900/40 hover:bg-slate-100 dark:hover:bg-slate-800/80 text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-slate-200 border-r border-slate-100 dark:border-slate-800/60 transition-colors active:bg-slate-200 dark:active:bg-slate-800 cursor-pointer animate-none"
@@ -109,11 +111,7 @@ export const Control: React.FC<ControlProps> = ({
         <div className="text-[10px] text-slate-500 leading-normal mt-1 bg-blue-50/50 dark:bg-blue-950/20 p-2 rounded-lg border border-blue-100/30 dark:border-blue-900/30 flex gap-2">
           <Lightbulb size={14} className="text-blue-500 shrink-0 mt-0.5" />
           <span>
-            {lang === 'id' ? (
-              <span><strong>Rekomendasi:</strong> 4.00 - 8.00 D. Base datar untuk lensa minus tinggi, base cembung untuk plus.</span>
-            ) : (
-              <span><strong>Recommended:</strong> 4.00 - 8.00 D. Flatter curves suit high minus, steeper curves suit high plus.</span>
-            )}
+            <span><strong>{translations[lang].bcRecLabel}</strong> {translations[lang].bcRecText}</span>
           </span>
         </div>
       )}
