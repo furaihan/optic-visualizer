@@ -12,7 +12,7 @@ export const CurvatureCard: React.FC<CurvatureCardProps> = ({ result, lang }) =>
   const t = translations[lang];
 
   return (
-    <Card className="bg-white dark:bg-slate-950 border border-slate-200/90 dark:border-slate-800 shadow-sm" size="default">
+    <Card className="bg-white dark:bg-slate-950 border-slate-200/90 dark:border-slate-800 shadow-sm shrink-0" size="default">
       <CardHeader className="pb-0 pt-5 px-5">
         <CardTitle className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-[0.2em]">
           {t.curvatureSpecs}

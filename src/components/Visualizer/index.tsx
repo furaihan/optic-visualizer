@@ -7,6 +7,7 @@ import { FrameProfile } from './FrameProfile';
 import { FrontView } from './FrontView';
 import { TopDownView } from './TopDownView';
 import { Popover, PopoverContent, PopoverTrigger } from '../ui/popover';
+import { Card } from '../ui/card';
 
 export const Visualizer: React.FC<VisualizerProps> = React.memo(({
   lens,
@@ -67,7 +68,7 @@ export const Visualizer: React.FC<VisualizerProps> = React.memo(({
 
       {/* Floating Exceeded/Warning Alert Card */}
       {highlightedLimit && (
-        <div className="absolute top-8 right-8 max-w-[280px] p-4 bg-amber-500/10 dark:bg-amber-500/15 backdrop-blur-md border border-amber-500/30 rounded-2xl flex items-start gap-2.5 shadow-lg animate-in fade-in slide-in-from-top-4 duration-300 text-left z-20">
+        <Card className="absolute top-8 right-8 max-w-[280px] p-4 bg-amber-500/10 dark:bg-amber-500/15 backdrop-blur-md border-amber-500/30 rounded-2xl flex items-start gap-2.5 shadow-lg animate-in fade-in slide-in-from-top-4 duration-300 text-left z-20">
           <AlertCircle className="text-amber-500 shrink-0 mt-0.5" size={16} />
           <div>
             <h4 className="text-[10px] font-bold text-amber-600 dark:text-amber-400 uppercase tracking-widest mb-1 leading-none">
@@ -80,7 +81,7 @@ export const Visualizer: React.FC<VisualizerProps> = React.memo(({
               {highlightedLimit === 'ed' && t.limitWarningEd?.replace('{val}', String(frame.ed)).replace('{aVal}', String(frame.a))}
             </p>
           </div>
-        </div>
+        </Card>
       )}
 
       <svg width="100%" height="100%" viewBox={`0 0 ${VIEWBOX_W} ${VIEWBOX_H}`} preserveAspectRatio="xMidYMid meet" className="filter drop-shadow-xl cursor-crosshair">
@@ -212,7 +213,7 @@ export const Visualizer: React.FC<VisualizerProps> = React.memo(({
 
       {/* Dimension Labels Overlay / Collapsible Legend */}
       {isLegendOpen ? (
-        <div className="absolute bottom-6 right-6 p-3 bg-white/95 dark:bg-slate-950/95 border border-slate-200/80 dark:border-slate-800/80 backdrop-blur-md rounded-xl space-y-2 shadow-md min-w-[145px] text-left transition-all duration-200 animate-in fade-in zoom-in-95 select-none md:bottom-8 md:right-8 z-20">
+        <Card className="absolute bottom-6 right-6 p-3 bg-white/95 dark:bg-slate-950/95 border-slate-200/80 dark:border-slate-800/80 backdrop-blur-md rounded-xl space-y-2 shadow-md min-w-[145px] text-left transition-all duration-200 animate-in fade-in zoom-in-95 select-none md:bottom-8 md:right-8 z-20">
           <div className="flex items-center justify-between gap-4 border-b border-slate-100 dark:border-slate-800 pb-1 mb-1">
             <span className="text-[9px] font-extrabold text-slate-400 dark:text-slate-500 uppercase tracking-widest">
               {t.legend}
@@ -238,7 +239,7 @@ export const Visualizer: React.FC<VisualizerProps> = React.memo(({
               </div>
             )}
           </div>
-        </div>
+        </Card>
       ) : (
         /* Collapsed Panel utilizing Popover Shadcn */
         <div className="absolute bottom-6 right-6 z-20 md:bottom-8 md:right-8 transition-all duration-200 animate-in fade-in zoom-in-95">

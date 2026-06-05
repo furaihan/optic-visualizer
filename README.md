@@ -98,63 +98,64 @@ AMP memiliki algoritma canggih yang secara otomatis menganalisis parameter fisik
 
 ```bash
 /src
-├── App.tsx                    # Layout Utama, State global, pembagian Grid Desktop & Mobile
-├── index.css                  # Load Google Fonts & Tailwind CSS configuration core
-├── main.tsx                   # Bootloader VirtualDOM React 19
+├── App.tsx                    # Layout Utama & Sistem Grid Responsif (Desktop & Mobile)
+├── index.css                  # Konfigurasi Tailwind CSS v4 & Muatan Font Global
+├── main.tsx                   # Entry point aplikasi dengan integrasi TanStack Router
 ├── components/
-│   ├── Sidebar.tsx            # Input kontrol numerik parameter lensa, frame, & pasien
-│   ├── CurvatureCard.tsx      # Panel perbandingan lengkung depan (anterior) & belakang (posterior)
-│   ├── Visualizer.tsx         # Panel Visualisasi 3D Interaktif (WebGL via Three.js)
-│   ├── SummaryCard.tsx        # Panel ringkasan metrik instan (CT, ET, Penonjolan, Berat estimasi)
-│   └── RecommendationCard.tsx # Panel saran material cerdas terintegrasi
+│   ├── Sidebar.tsx            # Input parameter optometri presisi (Rx, Frame, Pasien)
+│   ├── CurvatureCard.tsx      # Analisis kelengkungan Base Curve anterior & posterior
+│   ├── Visualizer.tsx         # Render 3D Interaktif (WebGL via React Three Fiber)
+│   ├── SummaryCard.tsx        # Matriks utama (CT, ET, Protrusion) dengan peringatan ergonomis
+│   └── RecommendationCard.tsx # Panel AI heuristik penentuan material lensa
+├── hooks/
+│   ├── useOpticalState.ts     # Manajemen mutasi perhitungan lokal & status optik
+│   ├── useKeyboardShortcuts.ts# Injeksi navigasi cepat menggunakan keyboard
+│   └── useTheme.ts            # Toggling mode Gelap/Terang
 └── lib/
-    ├── i18n.ts                # Layanan multibahasa (Bahasa Indonesia & English)
-    ├── optical.ts             # Algoritma dan kalkulasi optis fundamental
-    └── utils.ts               # utilitas styling dinamis (clsx, tailwind-merge)
+    ├── translations/          # Lokalisasi modular terpusat (ID & EN)
+    ├── optical.ts             # Core Mathematical Engine kalkulator lensa
+    ├── optical.test.ts        # Unit test Vitest untuk verifikasi kalkulasi optik
+    └── utils.ts               # Utilitas pembantu (styling gabungan Tailwind/clsx)
 ```
 
 ---
 
 ## 💎 Precise Optometric Control System
-Menanggapi kebutuhan alat optik profesional yang menuntut tingkat akurasi tinggi, kontrol angka pada `Sidebar.tsx` telah dimodifikasi secara khusus dari slider reguler menjadi komponen **Discrete Numeric Input** dengan perlindungan khusus:
+Menanggapi kebutuhan alat optik profesional yang menuntut tingkat akurasi tinggi, kontrol kami dimodifikasi dengan standar industri:
 
-*   **Floating-Point Protection:** Menggunakan `.toFixed(10)` dan `parseFloat` ketika melakukan operasi matematika inkremental/dekremental untuk menghilangkan bug desimal bawaan Javascript (misalnya `0.1 + 0.2 = 0.30000000000000004`).
-*   **Step-Snapping on Blur:** Nilai SPH atau CYL akan disesuaikan otomatis mengikuti step standar optometri (`0.25 D`) ketika tombol ditekan atau pengguna mengetik angka manual lalu meninggalkan fokus masukan (`onBlur`) atau menekan tombol `Enter`.
-*   **Axis Boundaries & Width Optimization:** Input untuk Axis memiliki rasio lebar yang dipadatkan khusus (`w-12`), sedangkan SPH dan CYL memiliki ruang lebar lebih panjang (`w-16`) guna melayani karakter digit minus yang tinggi.
+*   **Keyboard & Discrete Stepping:** Slider rentan terhadap nilai sub-desimal acak. Kami mengimplementasikan komponen input numerik statis yang mematuhi kelipatan klinis (contoh: step `0.25 D` untuk Sphere/Cylinder).
+*   **Stateful Validations:** Parameter yang tidak mungkin (misal `PD` < 40mm atau `ET` negatif) dikelola oleh peredam mutasi input `useOpticalState`.
 
 ---
 
-## 🚀 Panduan Instalasi & Pengembangan
+## 🔧 Panduan Instalasi & Pengembangan
 
 ### Prasyarat
-Sistem membutuhkan runtime Node.js (versi v18 atau yang lebih baru direkomendasikan) serta NPM.
+Sistem membutuhkan runtime Node.js minimum versi `v18` atau `v20+`.
 
 ### Langkah-Langkah
 
-1.  **Clone / Ekstrak Berkas:**
-    Pastikan semua berkas project berada pada root direktori kerja Anda.
-
-2.  **Instalasi Dependensi:**
-    Jalankan perintah berikut untuk menginstal semua library pendukung (React 19, Three.js, Tailwind v4, Lucide React, Framer Motion, dll):
+1.  **Instalasi Dependensi:**
+    Jalankan perintah berikut untuk menginstal semua library pendukung (React 19, Three.js, Tailwind v4, Shadcn UI):
     ```bash
     npm install
     ```
 
-3.  **Jalankan Server Lokal (Development):**
-    Aktifkan server lokal Vite pada port 3000:
+2.  **Jalankan Server Lokal (Development):**
+    Aktifkan server Vite dengan Hot Module Replacement:
     ```bash
     npm run dev
     ```
     Buka `http://localhost:3000` pada peramban web/browser Anda.
 
-4.  **Memproses Kode Linter & Tipe Data:**
-    Untuk melakukan validasi tipe TypeScript tanpa melakukan kompilasi bundel:
+3.  **Pengujian Unit (Unit Testing):**
+    Validasi mesin kalkulasi optik menggunakan Vitest untuk memastikan persamaan matematika tidak mengalami regresi:
     ```bash
-    npm run lint
+    npm run test
     ```
 
-5.  **Kompilasi Produksi (Production Build):**
-    Membuat bundel statis berkas produksi yang dioptimalkan dalam folder `/dist`:
+4.  **Kompilasi Produksi (Production Build):**
+    Membuat static build dalam folder `/dist` untuk siap diluncurkan:
     ```bash
     npm run build
     ```
@@ -162,7 +163,7 @@ Sistem membutuhkan runtime Node.js (versi v18 atau yang lebih baru direkomendasi
 ---
 
 ## 💡 Versi Rilis
-Mesin AMP berjalan pada versi core **`AMP_V4.1.2`**.
-Visualisasi 3D dioptimalkan untuk performa tinggi di perangkat seluler maupun komputer meja dengan mereduksi kalkulasi geometri mesh internal secara dinamis.
+Mesin kalkulasi berjalan pada versi core **`AMP_V4.2.0`**.
+Aplikasi ini memanfaatkan arsitektur React modern berbasis fitur untuk efisiensi render (memperhitungkan TanStack Router untuk parameter URL persisten, React 19 API, Vite bundler).
 
-Didesain secara presisi, ergonomis, dan fungsional untuk Aktriyo.
+Didesain secara presisi, ergonomis, dan fungsional untuk **Akademi Optometri Yogyakarta (Aktriyo)**.

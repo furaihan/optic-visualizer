@@ -1,9 +1,10 @@
 import React from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { CalculationResult, FrameParameters, LensParameters } from '../lib/optical';
 import { translations, Language } from '../lib/translations';
 import { ArrowUpRight, ArrowDownRight, AlertTriangle, CheckCircle2, Info, ChevronDown, MoveHorizontal, Compass, Diameter, Scale, X } from 'lucide-react';
 import { Skeleton } from './ui/skeleton';
-import { Collapsible, CollapsibleContent, CollapsibleTrigger } from './ui/collapsible';
+import { Card, CardContent } from './ui/card';
 
 interface SummaryCardProps {
   result: CalculationResult;
@@ -38,8 +39,8 @@ export const SummaryCard: React.FC<SummaryCardProps> = ({ result, compareResult,
     const formatted = `${isPositive ? '+' : ''}${diff.toFixed(2)}`;
 
     return (
-      <span className={`inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded text-[10px] font-bold font-mono border ${colorClass} leading-none shadow-sm`}>
-        <Icon size={10} className="stroke-[3]" />
+      <span className={`inline-flex items-center gap-1 px-2 py-1 rounded-md text-[11px] font-bold font-mono border ${colorClass} leading-none shadow-sm transition-all duration-200 hover:shadow-md`}>
+        <Icon size={12} className="stroke-[2.5]" />
         {formatted}
       </span>
     );
@@ -71,38 +72,40 @@ export const SummaryCard: React.FC<SummaryCardProps> = ({ result, compareResult,
     const deltaNode = resultKey ? getDeltaElement(resultKey) : null;
     
     return (
-      <div className="bg-white dark:bg-slate-950 p-2.5 sm:p-3.5 flex flex-col justify-between hover:bg-slate-50/40 dark:hover:bg-slate-900/40 transition-colors h-full snap-start shrink-0 w-[36%] sm:w-[28%] md:w-auto md:flex-1 border-r border-slate-200 dark:border-slate-800/80 last:border-r-0">
-        <div className="space-y-1.5 flex-1 flex flex-col">
-          <div className="flex items-center gap-1">
-            {Icon && <Icon size={12} className={iconColor} strokeWidth={2.5} />}
-            <p className="text-[9px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider truncate">{label}</p>
+      <Card className="group bg-white dark:bg-slate-950 p-4 flex flex-col justify-between hover:shadow-md dark:hover:shadow-xl hover:shadow-slate-200/40 dark:hover:shadow-slate-900/80 hover:-translate-y-[2px] transition-all duration-300 h-full shadow-sm border border-slate-100 dark:border-slate-700/50 rounded-2xl backdrop-blur-sm bg-gradient-to-b from-white/98 dark:from-slate-950/98 to-white/95 dark:to-slate-950/95">
+        <div className="space-y-3 flex-1 flex flex-col">
+          <div className="flex items-center gap-2 group-hover:translate-x-0.5 transition-transform duration-200">
+            {Icon && <Icon size={16} className={`${iconColor} group-hover:text-blue-500 dark:group-hover:text-blue-400 transition-colors duration-200`} strokeWidth={2.2} />}
+            <p className="text-[10px] font-bold text-slate-600 dark:text-slate-400 uppercase tracking-widest truncate">
+              {label}
+            </p>
           </div>
           
-          <div className="flex items-baseline gap-1.5 flex-wrap mt-auto">
+          <div className="flex items-baseline gap-2 flex-wrap mt-auto group-hover:scale-y-[1.02] transition-transform duration-200 origin-left">
             {isLoading ? (
-              <Skeleton className="h-6 w-12" />
+              <Skeleton className="h-8 w-16 rounded-lg" />
             ) : (
               <>
-                <p className="text-lg md:text-xl font-mono font-bold text-slate-800 dark:text-slate-100 leading-none">
+                <p className="text-2xl font-mono font-black text-slate-900 dark:text-slate-50 leading-none tracking-tight">
                   {value.toFixed(2)}
-                  <span className="text-[9px] ml-0.5 font-sans font-medium text-slate-400 dark:text-slate-500 lowercase">{unit}</span>
+                  <span className="text-xs ml-1.5 font-sans font-semibold text-slate-400 dark:text-slate-500 lowercase tracking-widest">{unit}</span>
                 </p>
-                {deltaNode && <div className="scale-75 origin-left -ml-1 flex-shrink-0">{deltaNode}</div>}
+                {deltaNode && <div className="scale-90 origin-left flex-shrink-0">{deltaNode}</div>}
               </>
             )}
           </div>
         </div>
 
-        <div className="mt-2.5">
+        <div className="mt-4 pt-3 border-t border-slate-100/80 dark:border-slate-800/80">
           {isLoading ? (
-            <Skeleton className="h-3 w-10 rounded" />
+            <Skeleton className="h-6 w-16 rounded-md mt-1" />
           ) : (
-            <span className={`inline-block px-1.5 py-0.5 rounded text-[8px] font-semibold uppercase tracking-wider border ${statusColor} leading-none truncate max-w-full`}>
+            <span className={`inline-block px-2.5 py-1.5 rounded-md text-[10px] font-bold uppercase tracking-widest border transition-all duration-200 group-hover:shadow-sm ${statusColor} leading-none truncate max-w-full`}>
               {status}
             </span>
           )}
         </div>
-      </div>
+      </Card>
     );
   };
 
@@ -142,113 +145,172 @@ export const SummaryCard: React.FC<SummaryCardProps> = ({ result, compareResult,
   const hasWarnings = isUnsafe || isHighDecentration;
 
   return (
-    <div className="space-y-3 relative">
-      <div className="flex items-center justify-between mb-2">
-        <h2 className="text-sm font-black text-slate-800 dark:text-slate-100 tracking-tight ml-1 uppercase">{t.tabSummary || 'Summary'}</h2>
-        <div className="flex items-center bg-slate-100/80 dark:bg-slate-800/80 p-0.5 rounded-lg border border-slate-200 dark:border-slate-700/80 shadow-sm">
+    <div className="space-y-6 relative">
+      <div className="flex items-center justify-between mb-5">
+        <div className="flex items-center gap-2.5">
+          <div className="w-1 h-6 bg-gradient-to-b from-blue-400 to-blue-500 rounded-full" />
+          <h2 className="text-sm font-black text-slate-900 dark:text-slate-50 tracking-tighter uppercase">{t.tabSummary || 'Summary'}</h2>
+        </div>
+        <div className="flex items-center gap-2 bg-slate-50/80 dark:bg-slate-800/60 p-1.5 rounded-xl border border-slate-200/50 dark:border-slate-700/50 shadow-sm backdrop-blur-sm">
           {hasWarnings && (
-            <button
+            <motion.button
+              whileHover={{ scale: 1.02 }}
               onClick={() => setActivePanel(p => p === 'warnings' ? 'none' : 'warnings')}
-              className={`flex items-center gap-1.5 px-2.5 py-1.5 text-[10px] font-bold rounded-md transition-all ${
+              className={`flex items-center gap-2 px-3 py-2 text-[10px] font-bold rounded-lg transition-all duration-200 ${
                 activePanel === 'warnings' 
-                  ? 'bg-white dark:bg-slate-900 shadow text-amber-600 dark:text-amber-400' 
-                  : 'text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200 border border-transparent'
+                  ? 'bg-white dark:bg-slate-900/90 shadow-md text-amber-600 dark:text-amber-400 border border-amber-200/40 dark:border-amber-800/40' 
+                  : 'text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-slate-200 border border-transparent hover:bg-slate-100/50 dark:hover:bg-slate-700/30'
               }`}
             >
-              <AlertTriangle size={12} className={isUnsafe ? 'text-red-500' : 'text-amber-500'} />
-              <span className="uppercase tracking-wider">Warnings ({(isUnsafe ? 1 : 0) + (isHighDecentration ? 1 : 0)})</span>
-            </button>
+              <AlertTriangle size={12} className={isUnsafe ? 'text-red-500 animate-pulse' : 'text-amber-500'} />
+              <span className="uppercase tracking-wider font-semibold">Warnings ({(isUnsafe ? 1 : 0) + (isHighDecentration ? 1 : 0)})</span>
+            </motion.button>
           )}
-          <button
+          <motion.button
+            whileHover={{ scale: 1.02 }}
             onClick={() => setActivePanel(p => p === 'guide' ? 'none' : 'guide')}
-            className={`flex items-center gap-1.5 px-2.5 py-1.5 text-[10px] font-bold rounded-md transition-all ${
+            className={`flex items-center gap-2 px-3 py-2 text-[10px] font-bold rounded-lg transition-all duration-200 ${
               activePanel === 'guide' 
-                ? 'bg-white dark:bg-slate-900 shadow text-blue-600 dark:text-blue-400' 
-                : 'text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200 border border-transparent'
+                ? 'bg-white dark:bg-slate-900/90 shadow-md text-blue-600 dark:text-blue-400 border border-blue-200/40 dark:border-blue-800/40' 
+                : 'text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-slate-200 border border-transparent hover:bg-slate-100/50 dark:hover:bg-slate-700/30'
             }`}
           >
-            <Info size={12} />
-            <span className="uppercase tracking-wider">{t.guideTitle}</span>
-          </button>
+            <Info size={12} className="flex-shrink-0" />
+            <span className="uppercase tracking-wider font-semibold">{t.guideTitle}</span>
+          </motion.button>
         </div>
       </div>
 
-      {/* Warnings Panel */}
-      {activePanel === 'warnings' && hasWarnings && (
-        <div className="space-y-2 animate-in fade-in slide-in-from-top-2 duration-200">
-          {isUnsafe && (
-            <div className="bg-red-50/90 dark:bg-rose-950/30 border border-red-200/50 dark:border-rose-900/40 p-3.5 rounded-xl text-[11.5px] text-red-800 dark:text-rose-200 flex items-start gap-3 shadow-sm border-l-4 border-l-red-500 leading-relaxed group">
-              <AlertTriangle className="text-red-500 shrink-0 mt-0.5" size={16} aria-hidden="true" />
-              <div className="min-w-0 flex-1">
-                <p className="font-black text-rose-800 dark:text-rose-300 tracking-wide uppercase text-[10.5px] break-words mt-0.5">
-                  {t.lowCompatibility}
-                </p>
-                <div className="text-slate-600 dark:text-rose-200/80 font-medium space-y-1 mt-1.5 break-words">
-                  {isAnteriorUnsafe && (
-                    <p>{t.anteriorWarning.replace('{val}', result.anteriorProtrusion.toFixed(1))}</p>
-                  )}
-                  {isPosteriorUnsafe && (
-                    <p>{t.posteriorWarning.replace('{val}', result.posteriorProtrusion.toFixed(1))}</p>
-                  )}
-                </div>
-              </div>
+      <AnimatePresence initial={false} mode="wait">
+        {/* Warnings Panel */}
+        {activePanel === 'warnings' && hasWarnings && (
+          <motion.div 
+            initial={{ height: 0, opacity: 0, y: -8 }}
+            animate={{ height: "auto", opacity: 1, y: 0 }}
+            exit={{ height: 0, opacity: 0, y: -8 }}
+            transition={{ duration: 0.25, ease: "easeOut" }}
+            className="overflow-hidden"
+          >
+            <div className="space-y-3 py-2">
+              {isUnsafe && (
+                <motion.div
+                  initial={{ opacity: 0, x: -4 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ delay: 0.05 }}
+                  className="relative"
+                >
+                  <div className="absolute -left-1.5 top-0 bottom-0 w-1 bg-gradient-to-b from-red-500 to-rose-500 rounded-full" />
+                  <Card className="bg-red-50/95 dark:bg-rose-950/25 border-red-200/60 dark:border-rose-900/50 p-4 rounded-2xl text-xs text-red-800 dark:text-rose-200 flex items-start gap-4 shadow-sm backdrop-blur-sm leading-relaxed group">
+                    <AlertTriangle className="text-red-500 shrink-0 mt-0.5 group-hover:scale-110 transition-transform duration-200" size={18} aria-hidden="true" />
+                    <div className="min-w-0 flex-1">
+                      <p className="font-black text-rose-800 dark:text-rose-300 tracking-wide uppercase text-[11px] break-words mt-0.5">
+                        {t.lowCompatibility}
+                      </p>
+                      <div className="text-slate-700 dark:text-rose-200/85 font-medium space-y-1.5 mt-2 break-words">
+                        {isAnteriorUnsafe && (
+                          <p>{t.anteriorWarning.replace('{val}', result.anteriorProtrusion.toFixed(1))}</p>
+                        )}
+                        {isPosteriorUnsafe && (
+                          <p>{t.posteriorWarning.replace('{val}', result.posteriorProtrusion.toFixed(1))}</p>
+                        )}
+                      </div>
+                    </div>
+                  </Card>
+                </motion.div>
+              )}
+
+              {isHighDecentration && (
+                <motion.div
+                  initial={{ opacity: 0, x: -4 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ delay: 0.1 }}
+                  className="relative"
+                >
+                  <div className="absolute -left-1.5 top-0 bottom-0 w-1 bg-gradient-to-b from-amber-500 to-amber-400 rounded-full" />
+                  <Card className="bg-amber-50/95 dark:bg-amber-950/25 border-amber-200/60 dark:border-amber-900/50 p-4 rounded-2xl text-xs text-amber-800 dark:text-amber-200 flex items-start gap-4 shadow-sm backdrop-blur-sm leading-relaxed group">
+                    <AlertTriangle className="text-amber-500 shrink-0 mt-1 group-hover:scale-110 transition-transform duration-200" size={18} aria-hidden="true" />
+                    <div className="min-w-0 flex-1">
+                      <p className="font-black uppercase tracking-wide text-amber-900 dark:text-amber-300 text-[11px] break-words mt-1">
+                        {t.highDecentration}
+                      </p>
+                      <p className="mt-2 text-slate-700 dark:text-amber-200/85 font-medium font-sans break-words">
+                        {t.decentrationWarning.replace('{decentration}', result.decentration.toFixed(1)).replace('{prism}', inducedPrism.toFixed(1))}
+                      </p>
+                    </div>
+                  </Card>
+                </motion.div>
+              )}
             </div>
-          )}
+          </motion.div>
+        )}
 
-          {isHighDecentration && (
-            <div className="bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-900/40 p-3.5 rounded-xl text-[11px] text-amber-800 dark:text-amber-200 flex items-start gap-3 shadow-sm border-l-4 border-l-amber-500 leading-relaxed group">
-              <AlertTriangle className="text-amber-500 shrink-0 mt-1" size={15} aria-hidden="true" />
-              <div className="min-w-0 flex-1">
-                <p className="font-black uppercase tracking-wide text-amber-900 dark:text-amber-300 text-[10.5px] break-words mt-1">
-                  {t.highDecentration}
-                </p>
-                <p className="mt-1.5 text-slate-600 dark:text-amber-200/80 font-medium font-sans break-words">
-                  {t.decentrationWarning.replace('{decentration}', result.decentration.toFixed(1)).replace('{prism}', inducedPrism.toFixed(1))}
-                </p>
-              </div>
-            </div>
-          )}
-        </div>
-      )}
+        {/* Guide Panel */}
+        {activePanel === 'guide' && (
+          <motion.div 
+            initial={{ height: 0, opacity: 0, y: -8 }}
+            animate={{ height: "auto", opacity: 1, y: 0 }}
+            exit={{ height: 0, opacity: 0, y: -8 }}
+            transition={{ duration: 0.25, ease: "easeOut" }}
+            className="overflow-hidden"
+          >
+            <Card className="grid gap-4 p-5 my-2 rounded-2xl sm:grid-cols-2 lg:grid-cols-4 shadow-sm border-slate-200/60 dark:border-slate-700/50 bg-gradient-to-br from-slate-50/60 dark:from-slate-900/40 to-slate-50/40 dark:to-slate-950/20 backdrop-blur-sm">
+              <motion.div
+                initial={{ opacity: 0, y: 4 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.05 }}
+                className="space-y-2.5 bg-white dark:bg-slate-900/40 p-4 rounded-2xl border border-slate-100/50 dark:border-slate-700/30 hover:shadow-sm transition-all duration-200"
+              >
+                <h5 className="font-black text-slate-900 dark:text-slate-100 flex items-center gap-2.5 text-xs uppercase tracking-wider">
+                  <span className="w-2.5 h-2.5 rounded-full bg-blue-500 flex-shrink-0"></span>
+                  {t.guideEtLabel}
+                </h5>
+                <p className="text-slate-600 dark:text-slate-400 pl-5 leading-relaxed text-[11px] font-medium">{t.guideEtDesc}</p>
+              </motion.div>
+              
+              <motion.div
+                initial={{ opacity: 0, y: 4 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.1 }}
+                className="space-y-2.5 bg-white dark:bg-slate-900/40 p-4 rounded-2xl border border-slate-100/50 dark:border-slate-700/30 hover:shadow-sm transition-all duration-200"
+              >
+                <h5 className="font-black text-slate-900 dark:text-slate-100 flex items-center gap-2.5 text-xs uppercase tracking-wider">
+                  <span className="w-2.5 h-2.5 rounded-full bg-indigo-500 flex-shrink-0"></span>
+                  {t.guideCtLabel}
+                </h5>
+                <p className="text-slate-600 dark:text-slate-400 pl-5 leading-relaxed text-[11px] font-medium">{t.guideCtDesc}</p>
+              </motion.div>
+              
+              <motion.div
+                initial={{ opacity: 0, y: 4 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.15 }}
+                className="space-y-2.5 bg-white dark:bg-slate-900/40 p-4 rounded-2xl border border-slate-100/50 dark:border-slate-700/30 hover:shadow-sm transition-all duration-200"
+              >
+                <h5 className="font-black text-slate-900 dark:text-slate-100 flex items-center gap-2.5 text-xs uppercase tracking-wider">
+                  <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 flex-shrink-0"></span>
+                  {t.guideProtLabel}
+                </h5>
+                <p className="text-slate-600 dark:text-slate-400 pl-5 leading-relaxed text-[11px] font-medium">{t.guideProtDesc}</p>
+              </motion.div>
+              
+              <motion.div
+                initial={{ opacity: 0, y: 4 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.2 }}
+                className="space-y-2.5 bg-white dark:bg-slate-900/40 p-4 rounded-2xl border border-slate-100/50 dark:border-slate-700/30 hover:shadow-sm transition-all duration-200"
+              >
+                <h5 className="font-black text-slate-900 dark:text-slate-100 flex items-center gap-2.5 text-xs uppercase tracking-wider">
+                  <span className="w-2.5 h-2.5 rounded-full bg-amber-500 flex-shrink-0"></span>
+                  {t.guideWeightLabel}
+                </h5>
+                <p className="text-slate-600 dark:text-slate-400 pl-5 leading-relaxed text-[11px] font-medium">{t.guideWeightDesc}</p>
+              </motion.div>
+            </Card>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
-      {/* Guide Panel */}
-      {activePanel === 'guide' && (
-        <div className="border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950 grid gap-4 p-4 rounded-xl sm:grid-cols-2 lg:grid-cols-4 text-xs text-slate-600 dark:text-slate-300 leading-normal shadow-sm animate-in fade-in slide-in-from-top-2 duration-200">
-          <div className="space-y-1 bg-slate-50/40 dark:bg-slate-900/50 p-3 rounded-lg border border-slate-100 dark:border-slate-800">
-            <h5 className="font-bold text-slate-800 dark:text-slate-200 flex items-center gap-1.5">
-              <span className="w-1.5 h-1.5 rounded-full bg-blue-500"></span>
-              {t.guideEtLabel}
-            </h5>
-            <p className="text-slate-500 dark:text-slate-400 pl-3 leading-relaxed mt-1 text-[11px]">{t.guideEtDesc}</p>
-          </div>
-          
-          <div className="space-y-1 bg-slate-50/40 dark:bg-slate-900/50 p-3 rounded-lg border border-slate-100 dark:border-slate-800">
-            <h5 className="font-bold text-slate-800 dark:text-slate-200 flex items-center gap-1.5">
-              <span className="w-1.5 h-1.5 rounded-full bg-indigo-500"></span>
-              {t.guideCtLabel}
-            </h5>
-            <p className="text-slate-500 dark:text-slate-400 pl-3 leading-relaxed mt-1 text-[11px]">{t.guideCtDesc}</p>
-          </div>
-          
-          <div className="space-y-1 bg-slate-50/40 dark:bg-slate-900/50 p-3 rounded-lg border border-slate-100 dark:border-slate-800">
-            <h5 className="font-bold text-slate-800 dark:text-slate-200 flex items-center gap-1.5">
-              <span className="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
-              {t.guideProtLabel}
-            </h5>
-            <p className="text-slate-500 dark:text-slate-400 pl-3 leading-relaxed mt-1 text-[11px]">{t.guideProtDesc}</p>
-          </div>
-          
-          <div className="space-y-1 bg-slate-50/40 dark:bg-slate-900/50 p-3 rounded-lg border border-slate-100 dark:border-slate-800">
-            <h5 className="font-bold text-slate-800 dark:text-slate-200 flex items-center gap-1.5">
-              <span className="w-1.5 h-1.5 rounded-full bg-amber-500"></span>
-              {t.guideWeightLabel}
-            </h5>
-            <p className="text-slate-500 dark:text-slate-400 pl-3 leading-relaxed mt-1 text-[11px]">{t.guideWeightDesc}</p>
-          </div>
-        </div>
-      )}
-
-      <div className="bg-slate-200/60 dark:bg-slate-800 border border-slate-200 dark:border-slate-800/80 rounded-2xl flex overflow-x-auto snap-x snap-mandatory shadow-sm [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
+      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
         <StatItem 
           label={t.edgeThick} 
           value={result.et} unit="mm"
@@ -260,7 +322,7 @@ export const SummaryCard: React.FC<SummaryCardProps> = ({ result, compareResult,
         <StatItem 
           label={t.center} 
           value={result.ct} unit="mm"
-          status={t.optimized} statusColor="bg-blue-50 text-blue-700 border border-blue-100/50"
+          status={t.optimized} statusColor="bg-blue-50 text-blue-700 border border-blue-100/50 dark:bg-blue-950/20 dark:text-blue-350 dark:border-blue-900/60"
           icon={CheckCircle2} iconColor="text-blue-500"
           resultKey="ct"
           isLoading={isLoading}
@@ -291,50 +353,47 @@ export const SummaryCard: React.FC<SummaryCardProps> = ({ result, compareResult,
         />
       </div>
 
-      {/* Secondary Clinical Specs Row (highly visible on mobile & desktop without truncation) */}
+      {/* Secondary Clinical Specs Row */}
       {frame && (
-        <div className="bg-white dark:bg-slate-950 border border-slate-200/90 dark:border-slate-800 rounded-2xl flex overflow-x-auto snap-x snap-mandatory divide-x divide-slate-100 dark:divide-slate-800/80 shadow-sm [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
-          <div className="flex items-center justify-between sm:justify-start gap-3 p-2.5 px-3 hover:bg-slate-50/40 dark:hover:bg-slate-900/80 transition-colors shrink-0 w-[45%] sm:w-auto sm:flex-1 snap-start">
-            <div className="flex items-center gap-1.5 min-w-0">
-              <MoveHorizontal size={13} className="text-slate-400 group-hover:text-blue-500 shrink-0" aria-hidden="true" />
-              <span className="font-bold text-slate-500 dark:text-slate-400 text-[8px] sm:text-[9px] uppercase tracking-wider truncate hidden sm:inline-block">{t.framePd}</span>
-              <span className="font-bold text-slate-500 dark:text-slate-400 text-[8px] sm:text-[9px] uppercase tracking-wider truncate sm:hidden">F.PD</span>
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+          <Card className="group bg-white dark:bg-slate-950 border border-slate-100 dark:border-slate-800 rounded-2xl flex items-center justify-between gap-4 p-4 hover:shadow-md dark:hover:shadow-lg hover:shadow-slate-200/40 dark:hover:shadow-slate-900/60 transition-all duration-300 shadow-sm bg-gradient-to-b from-white/98 dark:from-slate-950/98 to-white/95 dark:to-slate-950/95 backdrop-blur-sm">
+            <div className="flex items-center gap-3 min-w-0 group-hover:translate-x-0.5 transition-transform duration-200">
+              <MoveHorizontal size={16} className="text-slate-400 dark:text-slate-500 group-hover:text-blue-500 dark:group-hover:text-blue-400 shrink-0 transition-colors duration-200" aria-hidden="true" />
+              <span className="font-bold text-slate-600 dark:text-slate-400 text-[11px] uppercase tracking-widest truncate">{t.framePd}</span>
             </div>
-            {isLoading ? <Skeleton className="h-4 w-10 ml-auto sm:ml-2" /> : (
-              <span className="font-mono font-bold text-slate-800 dark:text-slate-100 text-[13px] sm:text-sm ml-auto sm:ml-2">
+            {isLoading ? <Skeleton className="h-6 w-12 rounded-md" /> : (
+              <span className="font-mono font-black text-slate-800 dark:text-slate-100 text-lg tracking-tight">
                 {(frame.a + frame.dbl).toFixed(1)}
-                <span className="text-[9px] font-normal text-slate-400 ml-0.5">mm</span>
+                <span className="text-xs font-normal text-slate-400 dark:text-slate-500 ml-1.5">mm</span>
               </span>
             )}
-          </div>
+          </Card>
 
-          <div className="flex items-center justify-between sm:justify-start gap-3 p-2.5 px-3 hover:bg-slate-50/40 dark:hover:bg-slate-900/80 transition-colors shrink-0 w-[45%] sm:w-auto sm:flex-1 snap-start">
-            <div className="flex items-center gap-1.5 min-w-0">
-              <Compass size={13} className="text-slate-400 shrink-0" aria-hidden="true" />
-              <span className="font-bold text-slate-500 dark:text-slate-400 text-[8px] sm:text-[9px] uppercase tracking-wider truncate hidden sm:inline-block">{t.decentration}</span>
-              <span className="font-bold text-slate-500 dark:text-slate-400 text-[8px] sm:text-[9px] uppercase tracking-wider truncate sm:hidden">Dec.</span>
+          <Card className="group bg-white dark:bg-slate-950 border border-slate-100 dark:border-slate-800 rounded-2xl flex items-center justify-between gap-4 p-4 hover:shadow-md dark:hover:shadow-lg hover:shadow-slate-200/40 dark:hover:shadow-slate-900/60 transition-all duration-300 shadow-sm bg-gradient-to-b from-white/98 dark:from-slate-950/98 to-white/95 dark:to-slate-950/95 backdrop-blur-sm">
+            <div className="flex items-center gap-3 min-w-0 group-hover:translate-x-0.5 transition-transform duration-200">
+              <Compass size={16} className="text-slate-400 dark:text-slate-500 group-hover:text-blue-500 dark:group-hover:text-blue-400 shrink-0 transition-colors duration-200" aria-hidden="true" />
+              <span className="font-bold text-slate-600 dark:text-slate-400 text-[11px] uppercase tracking-widest truncate">{t.decentration}</span>
             </div>
-            {isLoading ? <Skeleton className="h-4 w-10 ml-auto sm:ml-2" /> : (
-              <span className="font-mono font-bold text-slate-800 dark:text-slate-100 text-[13px] sm:text-sm ml-auto sm:ml-2">
+            {isLoading ? <Skeleton className="h-6 w-12 rounded-md" /> : (
+              <span className="font-mono font-black text-slate-800 dark:text-slate-100 text-lg tracking-tight">
                 {result.decentration.toFixed(2)}
-                <span className="text-[9px] font-normal text-slate-400 ml-0.5">mm</span>
+                <span className="text-xs font-normal text-slate-400 dark:text-slate-500 ml-1.5">mm</span>
               </span>
             )}
-          </div>
+          </Card>
 
-          <div className="flex items-center justify-between sm:justify-start gap-3 p-2.5 px-3 hover:bg-slate-50/40 dark:hover:bg-slate-900/80 transition-colors shrink-0 w-[45%] sm:w-auto sm:flex-1 snap-start">
-            <div className="flex items-center gap-1.5 min-w-0">
-              <Diameter size={13} className="text-slate-400 shrink-0" aria-hidden="true" />
-              <span className="font-bold text-slate-500 dark:text-slate-400 text-[8px] sm:text-[9px] uppercase tracking-wider truncate hidden sm:inline-block">{t.minBlank}</span>
-              <span className="font-bold text-slate-500 dark:text-slate-400 text-[8px] sm:text-[9px] uppercase tracking-wider truncate sm:hidden">Blank</span>
+          <Card className="group bg-white dark:bg-slate-950 border border-slate-100 dark:border-slate-800 rounded-2xl flex items-center justify-between gap-4 p-4 hover:shadow-md dark:hover:shadow-lg hover:shadow-slate-200/40 dark:hover:shadow-slate-900/60 transition-all duration-300 shadow-sm bg-gradient-to-b from-white/98 dark:from-slate-950/98 to-white/95 dark:to-slate-950/95 backdrop-blur-sm">
+            <div className="flex items-center gap-3 min-w-0 group-hover:translate-x-0.5 transition-transform duration-200">
+              <Diameter size={16} className="text-slate-400 dark:text-slate-500 group-hover:text-blue-500 dark:group-hover:text-blue-400 shrink-0 transition-colors duration-200" aria-hidden="true" />
+              <span className="font-bold text-slate-600 dark:text-slate-400 text-[11px] uppercase tracking-widest truncate">{t.minBlank}</span>
             </div>
-            {isLoading ? <Skeleton className="h-4 w-10 ml-auto sm:ml-2" /> : (
-              <span className="font-mono font-bold text-slate-800 dark:text-slate-100 text-[13px] sm:text-sm ml-auto sm:ml-2">
+            {isLoading ? <Skeleton className="h-6 w-12 rounded-md" /> : (
+              <span className="font-mono font-black text-slate-800 dark:text-slate-100 text-lg tracking-tight">
                 {(result.y * 2 + 2).toFixed(0)}
-                <span className="text-[9px] font-normal text-slate-400 ml-0.5">mm</span>
+                <span className="text-xs font-normal text-slate-400 dark:text-slate-500 ml-1.5">mm</span>
               </span>
             )}
-          </div>
+          </Card>
         </div>
       )}
     </div>

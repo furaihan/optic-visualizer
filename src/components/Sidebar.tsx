@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { LensParameters, FrameParameters, PatientParameters, FrameType, LensIndex } from '../lib/optical';
 import { translations, Language } from '../lib/translations';
 import { 
@@ -17,6 +17,10 @@ import {
 } from 'lucide-react';
 import { Button } from './ui/button';
 import { ScrollArea } from './ui/scroll-area';
+import { Label } from './ui/label';
+import { Card } from './ui/card';
+import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from './ui/select';
+import { motion, AnimatePresence } from 'framer-motion';
 import { LabelWithTooltip } from './Sidebar/LabelWithTooltip';
 import { Control } from './Sidebar/Control';
 import { FrameInput } from './Sidebar/FrameInput';
@@ -100,8 +104,9 @@ export const Sidebar: React.FC<SidebarProps> = ({
     return (
       <div className="border-b border-slate-100 dark:border-slate-800 last:border-0 py-3">
         <button 
+          type="button"
           onClick={() => toggleGroup(groupKey)}
-          className="w-full text-[11px] font-bold text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-slate-200 uppercase tracking-wider flex items-center justify-between py-2 cursor-pointer transition-colors"
+          className="w-full text-[11px] font-bold text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-slate-200 uppercase tracking-wider flex items-center justify-between py-2 cursor-pointer transition-colors outline-none"
           aria-expanded={isOpen}
           aria-controls={`group-${groupKey}`}
         >
@@ -111,11 +116,22 @@ export const Sidebar: React.FC<SidebarProps> = ({
           </div>
           <ChevronDown size={14} className={`text-slate-400 transition-transform duration-200 ${isOpen ? 'rotate-180' : ''}`} />
         </button>
-        {isOpen && (
-          <div id={`group-${groupKey}`} className="grid gap-4 mt-3 animate-fade-in text-left">
-            {children}
-          </div>
-        )}
+        <AnimatePresence initial={false}>
+          {isOpen && (
+            <motion.div
+              id={`group-${groupKey}`}
+              initial={{ height: 0, opacity: 0 }}
+              animate={{ height: "auto", opacity: 1 }}
+              exit={{ height: 0, opacity: 0 }}
+              transition={{ duration: 0.2 }}
+              className="overflow-hidden"
+            >
+              <div className="grid gap-4 mt-3 text-left py-1">
+                {children}
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
       </div>
     );
   };
@@ -356,7 +372,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
         </div>
       </InputGroup>
 
-      <div className="mt-3 p-4 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200/60 dark:border-slate-800/80 space-y-4">
+      <Card className="mt-3 p-4 rounded-xl bg-slate-50 dark:bg-slate-900 border-slate-200/60 dark:border-slate-800/80 space-y-4 shadow-none">
         <div className="flex flex-row items-center justify-between">
           <LabelWithTooltip 
             label={t.compareMode} 
@@ -365,7 +381,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
             className="text-[10px] text-slate-600 dark:text-slate-300 font-bold uppercase tracking-wider" 
             icon={<Copy size={11} className="text-slate-400" aria-hidden="true" />} 
           />
-          <label className="relative inline-flex items-center cursor-pointer">
+          <Label className="relative inline-flex items-center cursor-pointer">
             <input 
               type="checkbox" 
               className="sr-only peer" 
@@ -374,7 +390,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
               aria-label={t.compareMode}
             />
             <div className="w-9 h-5 bg-slate-300 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 rounded-full peer dark:bg-slate-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600"></div>
-          </label>
+          </Label>
         </div>
         {compareMode && (
           <div className="grid grid-cols-3 gap-1" role="group" aria-label="Comparison material indices">
@@ -395,15 +411,15 @@ export const Sidebar: React.FC<SidebarProps> = ({
             ))}
           </div>
         )}
-      </div>
+      </Card>
     </>
   );
 
   if (isMobile) {
     return (
-      <div className="space-y-4 px-4 py-3 bg-white dark:bg-slate-950 rounded-2xl border border-slate-200/60 dark:border-slate-800/80 shadow-sm max-w-xl mx-auto">
+      <Card className="space-y-4 px-4 py-3 rounded-2xl border-slate-200/60 dark:border-slate-800/80 shadow-sm max-w-xl mx-auto">
         {renderFormContent()}
-      </div>
+      </Card>
     );
   }
 

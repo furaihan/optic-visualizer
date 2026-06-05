@@ -1,5 +1,6 @@
 import React, { Component, ErrorInfo, ReactNode } from 'react';
 import { AlertTriangle, RotateCcw, Copy, Check } from 'lucide-react';
+import { Card } from './ui/card';
 
 interface Props {
   children?: ReactNode;
@@ -59,7 +60,7 @@ export class ErrorBoundary extends Component<Props, State> {
 
       return (
         <div className="min-h-screen bg-slate-50 dark:bg-slate-950 flex items-center justify-center p-6 font-sans antialiased text-left transition-colors duration-200">
-          <div className="w-full max-w-md bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-6 md:p-8 shadow-xl space-y-6">
+          <Card className="w-full max-w-md bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-6 md:p-8 shadow-xl space-y-6">
             <div className="flex items-start gap-4">
               <div className="p-3 bg-red-50 dark:bg-red-950/20 rounded-2xl text-red-500 shrink-0">
                 <AlertTriangle size={24} />
@@ -108,7 +109,7 @@ export class ErrorBoundary extends Component<Props, State> {
                 {this.state.copied ? <Check size={14} className="text-emerald-500" /> : <Copy size={14} />}
               </button>
             </div>
-          </div>
+          </Card>
         </div>
       );
     }

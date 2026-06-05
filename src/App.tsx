@@ -9,18 +9,17 @@ import { Visualizer } from "./components/Visualizer";
 import { SummaryCard } from "./components/SummaryCard";
 import { CurvatureCard } from "./components/CurvatureCard";
 import { RecommendationCard } from "./components/RecommendationCard";
-import { useOpticalState } from "./hooks/useOpticalState";
+import { useOpticalContext } from "./contexts/OpticalContext";
 import { useTheme } from "./hooks/useTheme";
 import { useKeyboardShortcuts } from "./hooks/useKeyboardShortcuts";
 import { OPTICAL_ENGINE_VERSION } from "./lib/optical";
 import { translations, Language } from "./lib/translations";
 import { motion, AnimatePresence } from "motion/react";
 import { ScrollArea } from "./components/ui/scroll-area";
-import { TooltipProvider } from "./components/ui/tooltip";
 import { Undo2, Redo2, RotateCcw, AlertTriangle, Sun, Moon } from "lucide-react";
 import ErrorBoundary from "./components/ErrorBoundary";
-import { useNavigate } from '@tanstack/react-router';
-import { indexRoute } from './main';
+import { useSearch, useNavigate } from '@tanstack/react-router';
+import { type SimulatorSearchParams } from './routes/index';
 
 function useMediaQuery(query: string) {
   const [matches, setMatches] = useState(false);
@@ -37,8 +36,8 @@ function useMediaQuery(query: string) {
 }
 
 export default function App() {
-  const search = indexRoute.useSearch();
-  const navigate = useNavigate({ from: indexRoute.id });
+  const search = useSearch({ strict: false }) as SimulatorSearchParams;
+  const navigate = useNavigate({ from: '/' });
 
   const lang = search.lang || 'id';
   const setLang = (newLang: Language) => navigate({ search: (prev) => ({ ...prev, lang: newLang }) });
@@ -60,34 +59,30 @@ export default function App() {
 
   const [highlightedLimit, setHighlightedLimit] = useState<'a' | 'b' | 'dbl' | 'ed' | null>(null);
 
-  // Use centralized custom hook state with localStorage caching and Undo/Redo tracking
   const {
     lens,
     frame,
     patient,
     bevelPercent,
     frameType,
+    compareMode,
+    compareIndex,
     setLens,
     setFrame,
     setPatient,
     setBevelPercent,
     setFrameType,
-
-    compareMode,
     setCompareMode,
-    compareIndex,
     setCompareIndex,
-
     result,
     compareResult,
     validation,
-
     undo,
     redo,
     canUndo,
     canRedo,
-    resetSession
-  } = useOpticalState();
+    resetSession,
+  } = useOpticalContext();
 
   const [isRecalculating, setIsRecalculating] = useState(false);
   const prevDepsRef = useRef({ lens, frame, patient, compareMode, compareIndex, bevelPercent, frameType });
@@ -126,9 +121,8 @@ export default function App() {
   useKeyboardShortcuts(undo, redo);
 
   return (
-    <TooltipProvider delay={50}>
-      <div className={`flex h-screen w-full font-sans overflow-hidden transition-colors duration-200 ${theme === 'dark' ? 'bg-slate-950 text-slate-100' : 'bg-slate-50 text-slate-800'}`}>
-        <div className="hidden md:block shrink-0">
+    <div className="flex flex-1 h-full overflow-hidden">
+        <div className="hidden md:block shrink-0 bg-white dark:bg-slate-950 border-r border-slate-200 dark:border-slate-800">
           <Sidebar
             lens={lens}
             setLens={setLens}
@@ -150,7 +144,7 @@ export default function App() {
           />
         </div>
 
-        <main className="flex-1 flex flex-col h-screen overflow-hidden">
+        <div className="flex-1 flex flex-col h-full overflow-hidden relative">
           {/* Header Bar */}
           <header className="h-12 bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between px-4 md:px-6 shrink-0 z-20 shadow-sm transition-colors duration-200">
             <div className="flex items-center gap-3">
@@ -330,7 +324,7 @@ export default function App() {
 
               <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 shrink-0">
                 {/* Simulation Component - Large Center */}
-                <div className="lg:col-span-2 h-[480px] min-h-[380px]">
+                <div className="lg:col-span-2 min-h-[400px] h-[50vh] xl:h-[500px]">
                   <ErrorBoundary fallback={<div className="h-full w-full flex items-center justify-center border border-red-200 bg-red-50 text-red-600 rounded-xl text-xs">Visualizer Rendering Error</div>}>
                     <Visualizer
                       lens={lens}
@@ -489,8 +483,7 @@ export default function App() {
               <span className="uppercase">© 2026 {t.labs}</span>
             </div>
           </footer>
-        </main>
-      </div>
-    </TooltipProvider>
+        </div>
+    </div>
   );
 }

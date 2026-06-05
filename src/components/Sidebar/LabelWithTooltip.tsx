@@ -2,6 +2,7 @@ import React from 'react';
 import { HelpCircle } from 'lucide-react';
 import { Language, getTooltipByLabel } from '../../lib/translations';
 import { Tooltip, TooltipTrigger, TooltipContent } from '../ui/tooltip';
+import { Label } from '../ui/label';
 
 interface LabelWithTooltipProps {
   label: string;
@@ -19,12 +20,16 @@ export const LabelWithTooltip: React.FC<LabelWithTooltipProps> = ({
   icon 
 }) => {
   const tooltipText = getTooltipByLabel(label, lang);
+  const baseLabelClass = isUppercaseHeader 
+    ? `font-bold uppercase tracking-wider text-[10px] text-slate-500 cursor-help ${className || ''}` 
+    : `font-semibold text-slate-700 cursor-help ${className ? className : 'text-[11px]'}`;
+
   if (!tooltipText) {
     return (
-      <span className={className}>
+      <Label className={`text-[11px] ${className || ''}`}>
         {icon && <span className="mr-1.5">{icon}</span>}
         {label}
-      </span>
+      </Label>
     );
   }
   return (
@@ -34,9 +39,9 @@ export const LabelWithTooltip: React.FC<LabelWithTooltipProps> = ({
       }>
         <div className="flex items-center gap-1">
           {icon && <span className="shrink-0" aria-hidden="true">{icon}</span>}
-          <span className={isUppercaseHeader ? "font-bold uppercase tracking-wider text-[10px] text-slate-500" : "font-semibold text-slate-700"}>
+          <Label className={baseLabelClass}>
             {label}
-          </span>
+          </Label>
         </div>
         <HelpCircle size={10} className="text-slate-400 shrink-0" aria-hidden="true" />
       </TooltipTrigger>
