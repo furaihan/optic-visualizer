@@ -154,4 +154,10 @@ export const translations_id: AppTranslations = {
   guideWeightDesc: 'Berat estimasi per lensa tunggal setelah diasah agar pas ke dalam bingkai. Dihitung berdasarkan volume akhir lensa dan massa jenis monomer bahan.',
   bcRecLabel: 'Rekomendasi:',
   bcRecText: '4.00 - 8.00 D. Base datar untuk lensa minus tinggi, base cembung untuk plus.',
+  homeTitle: 'Selamat Datang di Aktriyo Measuring',
+  homeSubtitle: 'Pilih modul di bawah ini untuk memulai pengujian dan simulasi optik secara interaktif.',
+  homeLensVisualizer: 'Simulator Lensa Kacamata',
+  homeLensVisualizerDesc: 'Simulasikan ketebalan profil tepi, rekomendasi base curve, kurva asferis, dan audit geometri untuk lensa',
+  homeContactLenses: 'Simulator Lensa Kontak',
+  homeContactLensesDesc: 'Pemodelan fitting kornea parameter lensa kontak',
 };

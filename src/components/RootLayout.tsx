@@ -1,17 +1,17 @@
-import { Outlet, Link, useSearch } from '@tanstack/react-router';
+import { Outlet, Link, useSearch, useNavigate, useRouterState } from '@tanstack/react-router';
 import { useTheme } from '../hooks/useTheme';
 import { TooltipProvider } from './ui/tooltip';
-import { Glasses, Droplet } from 'lucide-react';
-import React from 'react';
+import { Glasses, Droplet, Home, Menu, ChevronLeft } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
 
 export function RootLayout() {
   const { theme } = useTheme();
 
   return (
     <TooltipProvider delay={50}>
-      <div className={`flex flex-col md:flex-row h-screen w-full font-sans overflow-hidden transition-colors duration-200 ${theme === 'dark' ? 'bg-slate-950 text-slate-100' : 'bg-slate-50 text-slate-800'}`}>
+      <div className={`flex flex-col-reverse md:flex-row h-dvh w-full font-sans overflow-hidden transition-colors duration-200 ${theme === 'dark' ? 'bg-slate-950 text-slate-100' : 'bg-slate-50 text-slate-800'}`}>
         <GlobalNav />
-        <main className="flex-1 flex flex-col h-screen overflow-hidden relative">
+        <main className="flex-1 flex flex-col min-h-0 overflow-hidden relative">
           <Outlet />
         </main>
       </div>
@@ -21,30 +21,98 @@ export function RootLayout() {
 
 function GlobalNav() {
   const search = useSearch({ strict: false }) as Record<string, string>;
-  const lang = search.lang || 'id';
+  const currentSearch = useRouterState({ select: (s) => s.location.search as Record<string, unknown> });
+  const navigate = useNavigate();
+  const lang = search.lang === 'en' ? 'en' : 'id';
   
+  const [isExpanded, setIsExpanded] = useState(() => {
+    try {
+      return localStorage.getItem('sidebarExpanded') !== 'false';
+    } catch {
+      return true;
+    }
+  });
+
+  useEffect(() => {
+    try {
+      localStorage.setItem('sidebarExpanded', isExpanded.toString());
+    } catch {}
+  }, [isExpanded]);
+
+  const toggleLang = () => {
+    navigate({ to: '.', search: { ...currentSearch, lang: lang === 'id' ? 'en' : 'id' } });
+  };
+
+  const navItems = [
+    { to: '/', icon: <Home size={20} />, label: lang === 'id' ? 'Beranda' : 'Home', exact: true },
+    { to: '/visualizer', icon: <Glasses size={20} />, label: lang === 'id' ? 'Lensa' : 'Lenses' },
+    { to: '/contact', icon: <Droplet size={20} />, label: lang === 'id' ? 'Kontak' : 'Contact' },
+  ];
+
   return (
-    <nav className="w-full h-14 md:h-screen md:w-16 bg-white dark:bg-slate-950 border-b md:border-b-0 md:border-r border-slate-200 dark:border-slate-800 shrink-0 flex md:flex-col items-center justify-between md:justify-start px-4 md:px-0 md:py-4 gap-2 md:gap-4 z-50">
-      <div className="flex md:flex-col gap-2 md:gap-4 w-full justify-center md:justify-start md:items-center">
-        <NavItem 
-          to="/"
-          icon={<Glasses size={20} />} 
-          label={lang === 'id' ? 'Lensa' : 'Lenses'} 
-        />
-        <NavItem 
-          to="/contact"
-          icon={<Droplet size={20} />} 
-          label={lang === 'id' ? 'Kontak' : 'Contact'} 
-        />
-      </div>
-    </nav>
+    <>
+      {!isExpanded && (
+        <button
+          onClick={() => setIsExpanded(true)}
+          type="button"
+          aria-expanded={isExpanded}
+          className="hidden md:flex fixed top-4 left-4 z-50 w-10 h-10 flex-col items-center justify-center rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-300 hover:text-blue-600 dark:hover:text-blue-400 shadow-sm transition-colors"
+          title={lang === 'id' ? 'Buka Menu' : 'Open Menu'}
+        >
+          <Menu size={20} />
+        </button>
+      )}
+
+      <nav className={`w-full bg-white dark:bg-slate-950 border-t md:border-t-0 md:border-r border-slate-200 dark:border-slate-800 shrink-0 flex md:flex-col items-center justify-between px-4 md:px-0 md:py-4 gap-2 md:gap-4 z-40 relative transition-all duration-300 h-16 ${isExpanded ? 'md:h-dvh md:w-16 md:flex' : 'md:hidden'}`}>
+        <div className="flex md:flex-col gap-2 md:gap-4 w-full h-full md:h-auto items-center justify-between md:justify-center">
+          <div className="flex md:flex-col gap-2 md:gap-4 justify-center md:items-center">
+            {navItems.map((item) => (
+              <NavItem 
+                key={item.to}
+                to={item.to}
+                icon={item.icon}
+                label={item.label}
+                exact={item.exact}
+                currentSearch={currentSearch}
+              />
+            ))}
+          </div>
+
+          <div className="flex flex-row md:flex-col items-center gap-2">
+            <button
+              onClick={toggleLang}
+              type="button"
+              className="w-10 h-10 md:w-12 md:h-12 flex items-center justify-center font-bold text-xs rounded-xl bg-slate-100 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-300 hover:text-blue-600 dark:hover:text-blue-400 transition-colors"
+              title={lang === 'id' ? 'Switch to English' : 'Ganti ke Bahasa Indonesia'}
+            >
+              {lang.toUpperCase()}
+            </button>
+            
+            <button
+              onClick={() => setIsExpanded(false)}
+              type="button"
+              aria-expanded={isExpanded}
+              className="hidden md:flex w-10 h-10 items-center justify-center rounded-xl bg-slate-100 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 transition-colors md:mt-2"
+              title={lang === 'id' ? 'Tutup Menu' : 'Close Menu'}
+            >
+              <ChevronLeft size={16} />
+            </button>
+          </div>
+        </div>
+      </nav>
+    </>
   );
 }
 
-function NavItem({ icon, label, to }: { icon: React.ReactNode, label: string, to: string }) {
+function NavItem({ icon, label, to, exact, currentSearch }: { icon: React.ReactNode, label: string, to: string, exact?: boolean, currentSearch: Record<string, unknown> }) {
+  const search = useSearch({ strict: false }) as Record<string, string>;
+  const lang = search.lang === 'en' ? 'en' : 'id';
+
   return (
     <Link 
       to={to}
+      search={{ ...currentSearch, lang }}
+      activeOptions={{ exact }}
       activeProps={{
         className: 'bg-blue-50 dark:bg-blue-900/40 text-blue-600 dark:text-blue-400 font-bold'
       }}

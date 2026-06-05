@@ -37,10 +37,9 @@ function useMediaQuery(query: string) {
 
 export default function App() {
   const search = useSearch({ strict: false }) as SimulatorSearchParams;
-  const navigate = useNavigate({ from: '/' });
+  const navigate = useNavigate({ from: '/visualizer' });
 
   const lang = search.lang || 'id';
-  const setLang = (newLang: Language) => navigate({ search: (prev) => ({ ...prev, lang: newLang }) });
 
   const view = search.view || 'side';
   const setView = (newView: "side" | "top" | "front") => navigate({ search: (prev) => ({ ...prev, view: newView }) });
@@ -223,22 +222,6 @@ export default function App() {
               >
                 {theme === 'light' ? <Moon size={16} className="md:w-3 md:h-3" aria-hidden="true" /> : <Sun size={16} className="md:w-3 md:h-3 text-amber-400" aria-hidden="true" />}
               </button>
-
-              {/* Language Switcher */}
-              <div className="flex gap-1 bg-slate-50 dark:bg-slate-950 p-0.5 rounded-lg border border-slate-200/50 dark:border-slate-800/80">
-                <button
-                  onClick={() => setLang("id")}
-                  className={`px-2 py-0.5 text-[8px] md:text-[9px] font-bold rounded-md border transition-all cursor-pointer ${lang === "id" ? "bg-white dark:bg-slate-900 shadow-sm border-slate-200 dark:border-slate-800 text-blue-600 dark:text-blue-400" : "border-transparent text-slate-400 hover:text-slate-600 dark:hover:text-slate-300"}`}
-                >
-                  ID
-                </button>
-                <button
-                  onClick={() => setLang("en")}
-                  className={`px-2 py-0.5 text-[8px] md:text-[9px] font-bold rounded-md border transition-all cursor-pointer ${lang === "en" ? "bg-white dark:bg-slate-900 shadow-sm border-slate-200 dark:border-slate-800 text-blue-600 dark:text-blue-400" : "border-transparent text-slate-400 hover:text-slate-600 dark:hover:text-slate-300"}`}
-                >
-                  EN
-                </button>
-              </div>
             </div>
           </header>
 

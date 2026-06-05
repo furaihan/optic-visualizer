@@ -1,26 +1,21 @@
 import { createRoute } from '@tanstack/react-router';
 import { rootRoute } from './root';
-import App from '../App';
+import { HomePage } from '../HomePage';
 
-export type SimulatorSearchParams = {
+export type GlobalSearchParams = { lang?: 'id' | 'en' };
+
+export type SimulatorSearchParams = GlobalSearchParams & {
   activeTab?: 'visualizer' | 'summary' | 'parameters';
   view?: 'side' | 'top' | 'front';
-  lang?: 'id' | 'en';
 };
 
 export const indexRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: '/',
-  validateSearch: (search: Record<string, unknown>): SimulatorSearchParams => ({
-    activeTab: ['visualizer', 'summary', 'parameters'].includes(search.activeTab as string) 
-      ? (search.activeTab as SimulatorSearchParams['activeTab']) 
-      : 'visualizer',
-    view: ['side', 'top', 'front'].includes(search.view as string)
-      ? (search.view as SimulatorSearchParams['view'])
-      : 'side',
+  validateSearch: (search: Record<string, unknown>): GlobalSearchParams => ({
     lang: ['id', 'en'].includes(search.lang as string)
-      ? (search.lang as SimulatorSearchParams['lang'])
+      ? (search.lang as GlobalSearchParams['lang'])
       : 'id',
   }),
-  component: App,
+  component: HomePage,
 });

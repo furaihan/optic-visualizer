@@ -146,4 +146,10 @@ export interface AppTranslations {
   guideWeightDesc: string;
   bcRecLabel: string;
   bcRecText: string;
+  homeTitle: string;
+  homeSubtitle: string;
+  homeLensVisualizer: string;
+  homeLensVisualizerDesc: string;
+  homeContactLenses: string;
+  homeContactLensesDesc: string;
 }

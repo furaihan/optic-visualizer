@@ -20,6 +20,7 @@ import { ScrollArea } from './ui/scroll-area';
 import { Label } from './ui/label';
 import { Card } from './ui/card';
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from './ui/select';
+import { Slider } from './ui/slider';
 import { motion, AnimatePresence } from 'framer-motion';
 import { LabelWithTooltip } from './Sidebar/LabelWithTooltip';
 import { Control } from './Sidebar/Control';
@@ -350,10 +351,10 @@ export const Sidebar: React.FC<SidebarProps> = ({
           </div>
           <div className="flex items-center gap-3">
             <span className="text-[9px] font-bold text-slate-400">{t.bevelFront}</span>
-            <input 
-              type="range" min={0} max={1} step={0.01} value={bevelPercent}
-              onChange={(e) => setBevelPercent(parseFloat(e.target.value))}
-              className="flex-1 h-3 bg-slate-100 dark:bg-slate-800 rounded-full appearance-none cursor-pointer accent-blue-600"
+            <Slider 
+              min={0} max={1} step={0.01} value={[bevelPercent]}
+              onValueChange={(val: readonly number[] | number) => setBevelPercent(Array.isArray(val) ? val[0] : (val as number))}
+              className="flex-1 cursor-pointer"
               aria-label="Bevel positioning slider"
             />
             <span className="text-[9px] font-bold text-slate-400">{t.bevelBack}</span>

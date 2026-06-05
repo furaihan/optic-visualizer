@@ -154,4 +154,10 @@ export const translations_en: AppTranslations = {
   guideWeightDesc: 'Estimated weight of a single edged lens. Values < 10g are highly comfortable for continuous wear. Computed based on final lens volume and material density.',
   bcRecLabel: 'Recommended:',
   bcRecText: '4.00 - 8.00 D. Flatter curves suit high minus, steeper curves suit high plus.',
+  homeTitle: 'Welcome to Aktriyo Measuring',
+  homeSubtitle: 'Choose a module below to start interactive lens simulation and geometrical audits.',
+  homeLensVisualizer: 'Spectacle Lens Simulator',
+  homeLensVisualizerDesc: 'Simulate cross-section edge thickness, base curve profiling, and structural audits for spectacle lenses.',
+  homeContactLenses: 'Contact Lens Simulator',
+  homeContactLensesDesc: 'Corneal fitting modeling and contact lens parametric calculations.',
 };
