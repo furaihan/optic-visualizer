@@ -1,5 +1,5 @@
 import React from 'react';
-import { HelpCircle } from 'lucide-react';
+import { HelpCircleIcon } from "lucide-react";
 import { Language, getTooltipByLabel } from '../../lib/translations';
 import { Tooltip, TooltipTrigger, TooltipContent } from '../ui/tooltip';
 import { Label } from '../ui/label';
@@ -26,10 +26,10 @@ export const LabelWithTooltip: React.FC<LabelWithTooltipProps> = ({
 
   if (!tooltipText) {
     return (
-      <Label className={`text-[11px] ${className || ''}`}>
-        {icon && <span className="mr-1.5">{icon}</span>}
+      <span className={`text-[11px] font-semibold text-slate-700 dark:text-slate-300 ${className || ''}`}>
+        {icon && <span className="mr-1.5 align-middle">{icon}</span>}
         {label}
-      </Label>
+      </span>
     );
   }
   return (
@@ -38,12 +38,12 @@ export const LabelWithTooltip: React.FC<LabelWithTooltipProps> = ({
         <button type="button" className={`inline-flex items-center gap-1 cursor-help hover:text-blue-600 dark:hover:text-blue-400 transition-colors ${className || ''}`} aria-label={tooltipText} />
       }>
         <div className="flex items-center gap-1">
-          {icon && <span className="shrink-0" aria-hidden="true">{icon}</span>}
-          <Label className={baseLabelClass}>
+          {icon && <span className="shrink-0 flex items-center" aria-hidden="true">{icon}</span>}
+          <span className={baseLabelClass}>
             {label}
-          </Label>
+          </span>
         </div>
-        <HelpCircle size={10} className="text-slate-400 shrink-0" aria-hidden="true" />
+        <HelpCircleIcon size={10} className="text-slate-400 shrink-0" aria-hidden="true" />
       </TooltipTrigger>
       <TooltipContent className="p-2.5 max-w-[220px] text-[10.5px] font-sans font-medium leading-normal bg-slate-900 border border-slate-800 text-slate-100 rounded-lg shadow-xl shrink-0 z-50">
         {tooltipText}

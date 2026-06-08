@@ -1,5 +1,5 @@
 import React, { useMemo, useState } from 'react';
-import { AlertCircle, X, HelpCircle } from 'lucide-react';
+import { AlertCircleIcon, XIcon, HelpCircleIcon } from "lucide-react";
 import { translations } from '../../lib/translations';
 import { VisualizerProps, HoverLabel, LensPosition } from './types';
 import { LensProfile } from './LensProfile';
@@ -8,6 +8,7 @@ import { FrontView } from './FrontView';
 import { TopDownView } from './TopDownView';
 import { Popover, PopoverContent, PopoverTrigger } from '../ui/popover';
 import { Card } from '../ui/card';
+import { Button } from '../ui/button';
 
 export const Visualizer: React.FC<VisualizerProps> = React.memo(({
   lens,
@@ -69,16 +70,16 @@ export const Visualizer: React.FC<VisualizerProps> = React.memo(({
       {/* Floating Exceeded/Warning Alert Card */}
       {highlightedLimit && (
         <Card className="absolute top-8 right-8 max-w-[280px] p-4 bg-amber-500/10 dark:bg-amber-500/15 backdrop-blur-md border-amber-500/30 rounded-2xl flex items-start gap-2.5 shadow-lg animate-in fade-in slide-in-from-top-4 duration-300 text-left z-20">
-          <AlertCircle className="text-amber-500 shrink-0 mt-0.5" size={16} />
+          <AlertCircleIcon className="text-amber-500 shrink-0 mt-0.5" size={16} />
           <div>
             <h4 className="text-[10px] font-bold text-amber-600 dark:text-amber-400 uppercase tracking-widest mb-1 leading-none">
-              {t.limitWarningTitle || "Batas Struktural Terlampaui!"}
+              {t.limitWarningTitle}
             </h4>
             <p className="text-[9.5px] text-slate-600 dark:text-slate-300 font-semibold leading-relaxed">
-              {highlightedLimit === 'a' && t.limitWarningA?.replace('{val}', String(frame.a)).replace('{blankVal}', (result.y * 2 + 2).toFixed(0))}
-              {highlightedLimit === 'b' && t.limitWarningB?.replace('{val}', String(frame.b))}
-              {highlightedLimit === 'dbl' && t.limitWarningDbl?.replace('{val}', String(frame.dbl))}
-              {highlightedLimit === 'ed' && t.limitWarningEd?.replace('{val}', String(frame.ed)).replace('{aVal}', String(frame.a))}
+              {highlightedLimit === 'a' && t.limitWarningA(frame.a, Number((result.y * 2 + 2).toFixed(0)))}
+              {highlightedLimit === 'b' && t.limitWarningB(frame.b)}
+              {highlightedLimit === 'dbl' && t.limitWarningDbl(frame.dbl)}
+              {highlightedLimit === 'ed' && t.limitWarningEd(frame.ed, frame.a)}
             </p>
           </div>
         </Card>
@@ -218,14 +219,16 @@ export const Visualizer: React.FC<VisualizerProps> = React.memo(({
             <span className="text-[9px] font-extrabold text-slate-400 dark:text-slate-500 uppercase tracking-widest">
               {t.legend}
             </span>
-            <button
+            <Button
+              variant="ghost"
+              size="icon"
               onClick={() => setIsLegendOpen(false)}
-              className="p-1 rounded-md text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-900 transition-colors cursor-pointer"
+              className="h-6 w-6 text-slate-400 hover:text-slate-600 dark:hover:text-slate-300"
               aria-label={t.collapseLegend}
               title={t.collapseLegend}
             >
-              <X size={10} />
-            </button>
+              <XIcon size={10} />
+            </Button>
           </div>
           <div className="space-y-1.5">
             <div className="flex items-center gap-2">
@@ -257,7 +260,7 @@ export const Visualizer: React.FC<VisualizerProps> = React.memo(({
               </span>
               
               {/* Mini help icon */}
-              <HelpCircle size={11} className="text-slate-400 group-hover:text-slate-600 dark:group-hover:text-slate-300 transition-colors" />
+              <HelpCircleIcon size={11} className="text-slate-400 group-hover:text-slate-600 dark:group-hover:text-slate-300 transition-colors" />
             </PopoverTrigger>
             <PopoverContent 
               side="top" 
@@ -296,12 +299,13 @@ export const Visualizer: React.FC<VisualizerProps> = React.memo(({
                   )}
                 </div>
                 
-                <button
+                <Button
+                  variant="secondary"
                   onClick={() => setIsLegendOpen(true)}
-                  className="w-full mt-1.5 py-1 text-center text-[9px] font-extrabold text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 bg-blue-50 dark:bg-blue-950/20 hover:bg-blue-100/70 dark:hover:bg-blue-950/40 border border-blue-200/30 dark:border-blue-900/40 rounded-lg transition-all uppercase tracking-wider cursor-pointer"
+                  className="w-full mt-1.5 h-7 text-[9px] font-extrabold uppercase tracking-wider"
                 >
                   {t.pinLegend}
-                </button>
+                </Button>
               </div>
             </PopoverContent>
           </Popover>

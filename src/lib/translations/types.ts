@@ -5,6 +5,8 @@ export interface AppTranslations {
   tabParameters: string;
   tabVisualizer: string;
   tabSummary: string;
+  tabImage: string;
+  tabStatistics: string;
   sideProfile: string;
   topDown: string;
   future: string;
@@ -91,10 +93,10 @@ export interface AppTranslations {
   tipBevelPos: string;
   tipCompareMode: string;
   limitWarningTitle: string;
-  limitWarningA: string;
-  limitWarningB: string;
-  limitWarningDbl: string;
-  limitWarningEd: string;
+  limitWarningA: (val: number, blankVal: number) => string;
+  limitWarningB: (val: number) => string;
+  limitWarningDbl: (val: number) => string;
+  limitWarningEd: (val: number, aVal: number) => string;
   undo: string;
   undoTitle: string;
   redo: string;

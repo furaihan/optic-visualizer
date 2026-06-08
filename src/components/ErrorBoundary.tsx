@@ -1,6 +1,7 @@
 import React, { Component, ErrorInfo, ReactNode } from 'react';
-import { AlertTriangle, RotateCcw, Copy, Check } from 'lucide-react';
+import { AlertTriangleIcon, RotateCcwIcon, CopyIcon, CheckIcon } from "lucide-react";
 import { Card } from './ui/card';
+import { Button } from './ui/button';
 
 interface Props {
   children?: ReactNode;
@@ -63,7 +64,7 @@ export class ErrorBoundary extends Component<Props, State> {
           <Card className="w-full max-w-md bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-6 md:p-8 shadow-xl space-y-6">
             <div className="flex items-start gap-4">
               <div className="p-3 bg-red-50 dark:bg-red-950/20 rounded-2xl text-red-500 shrink-0">
-                <AlertTriangle size={24} />
+                <AlertTriangleIcon size={24} />
               </div>
               <div className="space-y-1">
                 <h2 className="text-base font-extrabold text-slate-900 dark:text-slate-100 uppercase tracking-tight">
@@ -93,21 +94,24 @@ export class ErrorBoundary extends Component<Props, State> {
             </div>
 
             <div className="flex gap-2 pt-2">
-              <button
+              <Button
                 onClick={this.handleReset}
-                className="flex-1 py-3 px-4 bg-slate-900 dark:bg-slate-100 hover:bg-slate-800 dark:hover:bg-slate-200 text-white dark:text-slate-900 text-xs font-bold rounded-xl shadow-md transition-all flex items-center justify-center gap-2 cursor-pointer active:scale-[0.98]"
+                variant="default"
+                className="flex-1 rounded-xl shadow-md cursor-pointer active:scale-[0.98]"
               >
-                <RotateCcw size={14} />
+                <RotateCcwIcon size={14} className="mr-2" />
                 Setel Ulang Sesi
-              </button>
+              </Button>
 
-              <button
+              <Button
+                variant="outline"
+                size="icon"
                 onClick={this.handleCopyToClipboard}
                 title="Salin log kesalahan"
-                className="py-3 px-3.5 border border-slate-200 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800 text-slate-600 dark:text-slate-300 rounded-xl transition-all cursor-pointer flex items-center justify-center active:scale-[0.98]"
+                className="w-10 rounded-xl cursor-pointer active:scale-[0.98]"
               >
-                {this.state.copied ? <Check size={14} className="text-emerald-500" /> : <Copy size={14} />}
-              </button>
+                {this.state.copied ? <CheckIcon size={14} className="text-emerald-500" /> : <CopyIcon size={14} />}
+              </Button>
             </div>
           </Card>
         </div>

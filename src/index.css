@@ -1,6 +1,4 @@
 @import "tailwindcss";
-@import "tw-animate-css";
-@import "shadcn/tailwind.css";
 @import "@fontsource-variable/geist";
 
 @custom-variant dark (&:is(.dark *));
@@ -61,6 +59,31 @@ input[type="range"]::-webkit-slider-thumb {
 @theme inline {
   --font-heading: var(--font-sans);
   --font-sans: 'Geist Variable', sans-serif;
+  --color-brand-blue-dark: #156FB5;
+  --color-brand-blue-light: #31A8E0;
+  --color-brand-teal: #1F8A70;
+  --color-brand-green-dark: #16A34A;
+  --color-brand-green-light: #96C93D;
+
+  --color-blue-50: color-mix(in srgb, var(--color-brand-blue-light) 10%, white);
+  --color-blue-100: color-mix(in srgb, var(--color-brand-blue-light) 20%, white);
+  --color-blue-200: color-mix(in srgb, var(--color-brand-blue-light) 40%, white);
+  --color-blue-300: color-mix(in srgb, var(--color-brand-blue-light) 60%, white);
+  --color-blue-400: var(--color-brand-blue-light);
+  --color-blue-500: var(--color-brand-blue-dark);
+  --color-blue-600: color-mix(in srgb, var(--color-brand-blue-dark) 85%, black);
+  --color-blue-700: color-mix(in srgb, var(--color-brand-blue-dark) 70%, black);
+  --color-blue-800: color-mix(in srgb, var(--color-brand-blue-dark) 55%, black);
+  --color-blue-900: color-mix(in srgb, var(--color-brand-blue-dark) 40%, black);
+  --color-blue-950: color-mix(in srgb, var(--color-brand-blue-dark) 25%, black);
+
+  --color-emerald-400: var(--color-brand-green-light);
+  --color-emerald-500: var(--color-brand-green-dark);
+  --color-emerald-600: var(--color-brand-teal);
+
+  --color-amber-400: #F59E0B;
+  --color-amber-500: #D97706;
+
   --color-sidebar-ring: var(--sidebar-ring);
   --color-sidebar-border: var(--sidebar-border);
   --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
@@ -108,18 +131,18 @@ input[type="range"]::-webkit-slider-thumb {
   --card-foreground: oklch(0.145 0 0);
   --popover: oklch(1 0 0);
   --popover-foreground: oklch(0.145 0 0);
-  --primary: oklch(0.205 0 0);
-  --primary-foreground: oklch(0.985 0 0);
-  --secondary: oklch(0.97 0 0);
-  --secondary-foreground: oklch(0.205 0 0);
+  --primary: var(--color-brand-blue-dark);
+  --primary-foreground: #ffffff;
+  --secondary: var(--color-brand-blue-light);
+  --secondary-foreground: #ffffff;
   --muted: oklch(0.97 0 0);
   --muted-foreground: oklch(0.556 0 0);
-  --accent: oklch(0.97 0 0);
-  --accent-foreground: oklch(0.205 0 0);
+  --accent: var(--color-brand-teal);
+  --accent-foreground: #ffffff;
   --destructive: oklch(0.577 0.245 27.325);
   --border: oklch(0.922 0 0);
   --input: oklch(0.922 0 0);
-  --ring: oklch(0.708 0 0);
+  --ring: var(--color-brand-blue-dark);
   --chart-1: oklch(0.87 0 0);
   --chart-2: oklch(0.556 0 0);
   --chart-3: oklch(0.439 0 0);
@@ -128,12 +151,12 @@ input[type="range"]::-webkit-slider-thumb {
   --radius: 0.625rem;
   --sidebar: oklch(0.985 0 0);
   --sidebar-foreground: oklch(0.145 0 0);
-  --sidebar-primary: oklch(0.205 0 0);
-  --sidebar-primary-foreground: oklch(0.985 0 0);
+  --sidebar-primary: var(--color-brand-blue-dark);
+  --sidebar-primary-foreground: #ffffff;
   --sidebar-accent: oklch(0.97 0 0);
   --sidebar-accent-foreground: oklch(0.205 0 0);
   --sidebar-border: oklch(0.922 0 0);
-  --sidebar-ring: oklch(0.708 0 0);
+  --sidebar-ring: var(--color-brand-blue-dark);
 }
 
 .dark {
@@ -143,18 +166,18 @@ input[type="range"]::-webkit-slider-thumb {
   --card-foreground: oklch(0.985 0 0);
   --popover: oklch(0.205 0 0);
   --popover-foreground: oklch(0.985 0 0);
-  --primary: oklch(0.922 0 0);
-  --primary-foreground: oklch(0.205 0 0);
-  --secondary: oklch(0.269 0 0);
-  --secondary-foreground: oklch(0.985 0 0);
+  --primary: var(--color-brand-blue-light);
+  --primary-foreground: #000000;
+  --secondary: var(--color-brand-blue-dark);
+  --secondary-foreground: #ffffff;
   --muted: oklch(0.269 0 0);
   --muted-foreground: oklch(0.708 0 0);
-  --accent: oklch(0.269 0 0);
-  --accent-foreground: oklch(0.985 0 0);
+  --accent: var(--color-brand-teal);
+  --accent-foreground: #ffffff;
   --destructive: oklch(0.704 0.191 22.216);
   --border: oklch(1 0 0 / 10%);
   --input: oklch(1 0 0 / 15%);
-  --ring: oklch(0.556 0 0);
+  --ring: var(--color-brand-blue-light);
   --chart-1: oklch(0.87 0 0);
   --chart-2: oklch(0.556 0 0);
   --chart-3: oklch(0.439 0 0);
@@ -162,10 +185,10 @@ input[type="range"]::-webkit-slider-thumb {
   --chart-5: oklch(0.269 0 0);
   --sidebar: oklch(0.205 0 0);
   --sidebar-foreground: oklch(0.985 0 0);
-  --sidebar-primary: oklch(0.488 0.243 264.376);
-  --sidebar-primary-foreground: oklch(0.985 0 0);
+  --sidebar-primary: var(--color-brand-blue-light);
+  --sidebar-primary-foreground: #000000;
   --sidebar-accent: oklch(0.269 0 0);
   --sidebar-accent-foreground: oklch(0.985 0 0);
   --sidebar-border: oklch(1 0 0 / 10%);
-  --sidebar-ring: oklch(0.556 0 0);
+  --sidebar-ring: var(--color-brand-blue-light);
 }

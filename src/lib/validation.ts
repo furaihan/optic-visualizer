@@ -22,6 +22,7 @@ export const INPUT_SPECS = {
   sph: { step: 0.25, min: -20, max: 20, label: 'SPH' },
   cyl: { step: 0.25, min: -10, max: 0, label: 'CYL' },
   axis: { step: 1, min: 0, max: 180, label: 'AXIS' },
+  baseCurve: { step: 0.25, min: 0.25, max: 12, label: 'BC' },
   pd: { step: 0.5, min: 40, max: 80, label: 'PD' },
   fittingHeight: { step: 0.5, min: 5, max: 40, label: 'FH' },
   a: { step: 1, min: 35, max: 65, label: 'A_SIZE' },

@@ -1,6 +1,6 @@
-import { createRoute } from '@tanstack/react-router';
+import { createRoute, redirect, Outlet } from '@tanstack/react-router';
 import { rootRoute } from './root';
-import App from '../App';
+import VisualizerPage from '../VisualizerPage';
 import { type SimulatorSearchParams } from './index';
 
 export const visualizerRoute = createRoute({
@@ -17,5 +17,24 @@ export const visualizerRoute = createRoute({
       ? (search.lang as SimulatorSearchParams['lang'])
       : 'id',
   }),
-  component: App,
+  component: VisualizerPage,
 });
+
+export const visualizerIndexRoute = createRoute({
+  getParentRoute: () => visualizerRoute,
+  path: '/',
+  beforeLoad: () => {
+    throw redirect({ to: '/visualizer/simple', search: (prev: any) => prev });
+  }
+});
+
+export const visualizerSimpleRoute = createRoute({
+  getParentRoute: () => visualizerRoute,
+  path: '/simple',
+});
+
+export const visualizerAdvancedRoute = createRoute({
+  getParentRoute: () => visualizerRoute,
+  path: '/advanced',
+});
+

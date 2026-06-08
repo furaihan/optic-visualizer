@@ -1,8 +1,9 @@
 import { Outlet, Link, useSearch, useNavigate, useRouterState } from '@tanstack/react-router';
 import { useTheme } from '../hooks/useTheme';
 import { TooltipProvider } from './ui/tooltip';
-import { Glasses, Droplet, Home, Menu, ChevronLeft } from 'lucide-react';
+import { GlassesIcon, DropletIcon, HomeIcon, MenuIcon, ChevronLeftIcon } from "lucide-react";
 import React, { useState, useEffect } from 'react';
+import { Button } from './ui/button';
 
 export function RootLayout() {
   const { theme } = useTheme();
@@ -44,23 +45,24 @@ function GlobalNav() {
   };
 
   const navItems = [
-    { to: '/', icon: <Home size={20} />, label: lang === 'id' ? 'Beranda' : 'Home', exact: true },
-    { to: '/visualizer', icon: <Glasses size={20} />, label: lang === 'id' ? 'Lensa' : 'Lenses' },
-    { to: '/contact', icon: <Droplet size={20} />, label: lang === 'id' ? 'Kontak' : 'Contact' },
+    { to: '/', icon: <HomeIcon size={20} />, label: lang === 'id' ? 'Beranda' : 'HomeIcon', exact: true },
+    { to: '/visualizer', icon: <GlassesIcon size={20} />, label: lang === 'id' ? 'Lensa' : 'Lenses' },
+    { to: '/contact', icon: <DropletIcon size={20} />, label: lang === 'id' ? 'Kontak' : 'Contact' },
   ];
 
   return (
     <>
       {!isExpanded && (
-        <button
+        <Button
+          variant="outline"
+          size="icon"
           onClick={() => setIsExpanded(true)}
-          type="button"
           aria-expanded={isExpanded}
-          className="hidden md:flex fixed top-4 left-4 z-50 w-10 h-10 flex-col items-center justify-center rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-300 hover:text-blue-600 dark:hover:text-blue-400 shadow-sm transition-colors"
-          title={lang === 'id' ? 'Buka Menu' : 'Open Menu'}
+          className="hidden md:flex flex-col fixed top-4 left-4 z-50 w-10 h-10 items-center justify-center rounded-xl bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-300 hover:text-blue-600 dark:hover:text-blue-400 shadow-sm transition-colors"
+          title={lang === 'id' ? 'Buka MenuIcon' : 'Open MenuIcon'}
         >
-          <Menu size={20} />
-        </button>
+          <MenuIcon size={20} />
+        </Button>
       )}
 
       <nav className={`w-full bg-white dark:bg-slate-950 border-t md:border-t-0 md:border-r border-slate-200 dark:border-slate-800 shrink-0 flex md:flex-col items-center justify-between px-4 md:px-0 md:py-4 gap-2 md:gap-4 z-40 relative transition-all duration-300 h-16 ${isExpanded ? 'md:h-dvh md:w-16 md:flex' : 'md:hidden'}`}>
@@ -79,24 +81,26 @@ function GlobalNav() {
           </div>
 
           <div className="flex flex-row md:flex-col items-center gap-2">
-            <button
+            <Button
+              variant="outline"
+              size="icon"
               onClick={toggleLang}
-              type="button"
-              className="w-10 h-10 md:w-12 md:h-12 flex items-center justify-center font-bold text-xs rounded-xl bg-slate-100 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-300 hover:text-blue-600 dark:hover:text-blue-400 transition-colors"
+              className="w-10 h-10 md:w-12 md:h-12 flex items-center justify-center font-bold text-xs rounded-xl bg-slate-100 dark:bg-slate-900 border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-300 hover:text-blue-600 dark:hover:text-blue-400 transition-colors"
               title={lang === 'id' ? 'Switch to English' : 'Ganti ke Bahasa Indonesia'}
             >
               {lang.toUpperCase()}
-            </button>
+            </Button>
             
-            <button
+            <Button
+              variant="outline"
+              size="icon"
               onClick={() => setIsExpanded(false)}
-              type="button"
               aria-expanded={isExpanded}
-              className="hidden md:flex w-10 h-10 items-center justify-center rounded-xl bg-slate-100 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 transition-colors md:mt-2"
-              title={lang === 'id' ? 'Tutup Menu' : 'Close Menu'}
+              className="hidden md:flex w-10 h-10 items-center justify-center rounded-xl bg-slate-100 dark:bg-slate-900 border-slate-200 dark:border-slate-800 text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 transition-colors md:mt-2"
+              title={lang === 'id' ? 'Tutup MenuIcon' : 'Close MenuIcon'}
             >
-              <ChevronLeft size={16} />
-            </button>
+              <ChevronLeftIcon size={16} />
+            </Button>
           </div>
         </div>
       </nav>

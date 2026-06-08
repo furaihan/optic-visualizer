@@ -16,6 +16,7 @@ import {
 import { validateOpticalParams, ValidationResult } from '../lib/validation';
 
 export interface OpticalParametersState {
+  version?: number;
   lens: LensParameters;
   frame: FrameParameters;
   patient: PatientParameters;
@@ -23,7 +24,10 @@ export interface OpticalParametersState {
   frameType: FrameType;
 }
 
+const CURRENT_SCHEMA_VERSION = 1;
+
 const DEFAULT_STATE: OpticalParametersState = {
+  version: CURRENT_SCHEMA_VERSION,
   lens: {
     sph: -4.0,
     cyl: 0.0,
@@ -49,32 +53,29 @@ const DEFAULT_STATE: OpticalParametersState = {
 const STORAGE_KEY = 'amp_optical_session';
 
 export function useOpticalState() {
-  // 1. Core State History Stack
-  const [history, setHistory] = useState<OpticalParametersState[]>(() => {
+  const [state, setState] = useState<OpticalParametersState>(() => {
     try {
       const stored = localStorage.getItem(STORAGE_KEY);
       if (stored) {
         const parsed = JSON.parse(stored);
         if (parsed && typeof parsed === 'object' && parsed.lens && parsed.frame) {
-          return [parsed];
+          if (parsed.version !== CURRENT_SCHEMA_VERSION) {
+            console.log(`Schema version mismatch (found ${parsed.version}, expected ${CURRENT_SCHEMA_VERSION}). Migrating or dropping old data.`);
+            return DEFAULT_STATE;
+          }
+          return { ...DEFAULT_STATE, ...parsed };
         }
       }
     } catch (e) {
       console.warn('Failed to recover stored optic session. Using defaults.', e);
     }
-    return [DEFAULT_STATE];
+    return DEFAULT_STATE;
   });
-
-  const [currentIndex, setCurrentIndex] = useState<number>(0);
 
   // Compare mode states (does not need undo/redo tracking)
   const [compareMode, setCompareMode] = useState<boolean>(false);
   const [compareIndex, setCompareIndex] = useState<LensIndex>(1.74);
-
-  // Active current state
-  const state = useMemo(() => {
-    return history[currentIndex] || DEFAULT_STATE;
-  }, [history, currentIndex]);
+  const [highlightedLimit, setHighlightedLimit] = useState<'a' | 'b' | 'dbl' | 'ed' | null>(null);
 
   // Persist current state to localStorage
   useEffect(() => {
@@ -85,26 +86,9 @@ export function useOpticalState() {
     }
   }, [state]);
 
-  // Push new state to history
   const updateState = useCallback((updater: (prev: OpticalParametersState) => OpticalParametersState) => {
-    setHistory(prev => {
-      const nextState = updater(state);
-      // Avoid pushing identical duplicates
-      if (JSON.stringify(nextState) === JSON.stringify(state)) {
-        return prev;
-      }
-      const trimmedHistory = prev.slice(0, currentIndex + 1);
-      const newHistory = [...trimmedHistory, nextState];
-      // Limit history to 50 items to keep RAM clear
-      if (newHistory.length > 50) {
-        const sliced = newHistory.slice(newHistory.length - 50);
-        setCurrentIndex(sliced.length - 1);
-        return sliced;
-      }
-      setCurrentIndex(newHistory.length - 1);
-      return newHistory;
-    });
-  }, [state, currentIndex]);
+    setState(updater);
+  }, []);
 
   // Action methods to change specific parameter groups
   const setLens = useCallback((updatedLens: LensParameters | ((p: LensParameters) => LensParameters)) => {
@@ -142,26 +126,9 @@ export function useOpticalState() {
     }));
   }, [updateState]);
 
-  // Undo / Redo controls
-  const undo = useCallback(() => {
-    if (currentIndex > 0) {
-      setCurrentIndex(prev => prev - 1);
-    }
-  }, [currentIndex]);
-
-  const redo = useCallback(() => {
-    if (currentIndex < history.length - 1) {
-      setCurrentIndex(prev => prev + 1);
-    }
-  }, [currentIndex, history.length]);
-
-  const canUndo = currentIndex > 0;
-  const canRedo = currentIndex < history.length - 1;
-
   // Reset helper
   const resetSession = useCallback(() => {
-    setHistory([DEFAULT_STATE]);
-    setCurrentIndex(0);
+    setState(DEFAULT_STATE);
     setCompareMode(false);
     setCompareIndex(1.74);
   }, []);
@@ -191,7 +158,7 @@ export function useOpticalState() {
         recommendation: {
           index: 1.5,
           material: "CR-39",
-          reason: "Validation error. Please check parameters.",
+          reason: "simErrorDesc",
           thinness: "Standard",
           abbe: 58
         }
@@ -244,13 +211,10 @@ export function useOpticalState() {
     compareResult,
     validation,
 
-    // History Control
-    undo,
-    redo,
-    canUndo,
-    canRedo,
+    // Session Control
     resetSession,
-    historyDepth: history.length,
-    currentHistoryIndex: currentIndex
+
+    highlightedLimit,
+    setHighlightedLimit
   };
 }

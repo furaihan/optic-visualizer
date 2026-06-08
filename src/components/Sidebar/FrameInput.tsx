@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Input } from '../ui/input';
+import { InputGroup, InputGroupAddon, InputGroupInput } from '../ui/input-group';
 
 interface FrameInputProps {
   value: number;
@@ -34,17 +34,26 @@ export const FrameInput: React.FC<FrameInputProps> = ({
   };
 
   return (
-    <Input
-      type="text"
-      value={typed}
-      onChange={(e) => setTyped(e.target.value)}
-      onBlur={commit}
-      onKeyDown={(e) => e.key === 'Enter' && commit()}
-      className={`w-full text-center text-xs font-mono font-bold bg-white dark:bg-slate-950 border h-8 ${
+    <InputGroup
+      className={`bg-white dark:bg-slate-950 h-8 ${
         isExceeding 
-          ? 'border-amber-500 text-amber-600 dark:text-amber-400 focus:ring-amber-500 focus:border-amber-500' 
-          : 'border-slate-200 dark:border-slate-800 text-blue-600 dark:text-blue-400 focus:ring-blue-500 focus:border-blue-500'
+          ? 'border-amber-500 text-amber-600 dark:text-amber-400 focus-within:ring-amber-500 focus-within:border-amber-500' 
+          : 'border-slate-200 dark:border-slate-800 text-blue-600 dark:text-blue-400 focus-within:ring-blue-500 focus-within:border-blue-500'
       }`}
-    />
+    >
+      <InputGroupInput
+        type="text"
+        value={typed}
+        onChange={(e) => setTyped(e.target.value)}
+        onBlur={commit}
+        onKeyDown={(e) => e.key === 'Enter' && commit()}
+        className={`w-full text-center text-xs font-mono font-bold h-8 px-0 ${
+          isExceeding ? 'text-amber-600 dark:text-amber-400' : 'text-blue-600 dark:text-blue-400'
+        }`}
+      />
+      <InputGroupAddon align="inline-end" className="pr-2 pointer-events-none text-[10px] opacity-70">
+        mm
+      </InputGroupAddon>
+    </InputGroup>
   );
 };

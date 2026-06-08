@@ -1,7 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import { Minus, Plus, Lightbulb } from 'lucide-react';
+import { MinusIcon, PlusIcon, LightbulbIcon } from "lucide-react";
 import { Language, translations } from '../../lib/translations';
-import { Input } from '../ui/input';
+import { InputGroup, InputGroupAddon, InputGroupButton, InputGroupInput } from '../ui/input-group';
+import { Field, FieldLabel, FieldContent, FieldDescription } from '../ui/field';
+import { cn } from '../../lib/utils';
 import { LabelWithTooltip } from './LabelWithTooltip';
 
 interface ControlProps {
@@ -70,51 +72,58 @@ export const Control: React.FC<ControlProps> = ({
   };
 
   return (
-    <div className="space-y-1">
-      <div className="flex justify-between items-center text-[11px] py-1">
+    <Field orientation="vertical" className="py-1.5 gap-1.5">
+      <FieldLabel className="w-auto flex-none m-0 items-center">
         <LabelWithTooltip 
           label={label} 
           lang={lang} 
-          className="pr-1 select-none leading-tight dark:text-slate-300" 
+          className="select-none leading-tight dark:text-slate-300" 
           icon={icon} 
         />
-        <div className="flex items-center gap-1.5 shrink-0">
-          <div className={`flex items-center border border-slate-200 dark:border-slate-800 focus-within:border-blue-400 dark:focus-within:border-blue-500 focus-within:ring-2 focus-within:ring-blue-400/30 rounded-lg overflow-hidden bg-white dark:bg-slate-950 shadow-sm h-8 transition-colors duration-300 ${isRecalculating ? 'ring-2 ring-blue-400/50 border-blue-400 bg-blue-50/50 dark:bg-blue-900/30' : ''}`}>
-            <button 
+      </FieldLabel>
+      <FieldContent>
+        <InputGroup className={cn("h-8 transition-colors duration-300 w-full", isRecalculating ? "ring-2 ring-blue-400/50 border-blue-400 bg-blue-50/50 dark:bg-blue-900/30" : "")}>
+           <InputGroupAddon align="inline-start" className="pl-0 border-r border-slate-100 dark:border-slate-800">
+            <InputGroupButton
+              size="icon-xs"
               onClick={() => commitVal(value - step)}
-              className="w-8 h-8 flex items-center justify-center bg-slate-50/50 dark:bg-slate-900/40 hover:bg-slate-100 dark:hover:bg-slate-800/80 text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-slate-200 border-r border-slate-100 dark:border-slate-800/60 transition-colors active:bg-slate-200 dark:active:bg-slate-800 cursor-pointer animate-none"
               title="Decrease"
+              className="w-8 h-full rounded-none"
             >
-              <Minus size={11} strokeWidth={3} />
-            </button>
-            <Input 
-              type="text"
-              value={typedVal}
-              onChange={handleTypedChange}
-              onBlur={handleBlur}
-              onKeyDown={handleKeyDown}
-              className={`border-0 focus:ring-2 focus:ring-blue-400/30 focus-visible:ring-0 focus-visible:ring-offset-0 focus:bg-blue-50/30 dark:focus:bg-blue-950/20 rounded-none bg-white dark:bg-slate-950 text-center font-mono text-xs font-bold text-slate-800 dark:text-slate-100 p-0 h-8 ${inputWidthClass}`}
-            />
-            <button 
+              <MinusIcon size={11} strokeWidth={3} className="text-slate-500 dark:text-slate-400" />
+            </InputGroupButton>
+          </InputGroupAddon>
+          <InputGroupInput 
+            type="text"
+            value={typedVal}
+            onChange={handleTypedChange}
+            onBlur={handleBlur}
+            onKeyDown={handleKeyDown}
+            className="text-center font-mono text-xs font-bold text-slate-800 dark:text-slate-100 px-0 h-8 w-full"
+          />
+           <InputGroupAddon align="inline-end" className="pr-0 border-l border-slate-100 dark:border-slate-800">
+            <InputGroupButton
+              size="icon-xs"
               onClick={() => commitVal(value + step)}
-              className="w-8 h-8 flex items-center justify-center bg-slate-50/50 dark:bg-slate-900/40 hover:bg-slate-100 dark:hover:bg-slate-800/80 text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-slate-200 border-l border-slate-100 dark:border-slate-800/60 transition-colors active:bg-slate-200 dark:active:bg-slate-800 cursor-pointer animate-none"
               title="Increase"
+              className="w-8 h-full rounded-none"
             >
-              <Plus size={11} strokeWidth={3} />
-            </button>
-          </div>
-          <span className="text-slate-400 dark:text-slate-500 font-mono font-bold w-6 text-[10px] text-left shrink-0 pl-1 select-none">{unit}</span>
-        </div>
-      </div>
-
+              <PlusIcon size={11} strokeWidth={3} className="text-slate-500 dark:text-slate-400" />
+            </InputGroupButton>
+          </InputGroupAddon>
+          <InputGroupAddon align="inline-end" className="pr-2 pl-1 pointer-events-none text-[10px] text-slate-400 font-mono font-bold w-6 text-right">
+            {unit}
+          </InputGroupAddon>
+        </InputGroup>
+      </FieldContent>
       {label.includes("(BC)") && (
-        <div className="text-[10px] text-slate-500 leading-normal mt-1 bg-blue-50/50 dark:bg-blue-950/20 p-2 rounded-lg border border-blue-100/30 dark:border-blue-900/30 flex gap-2">
-          <Lightbulb size={14} className="text-blue-500 shrink-0 mt-0.5" />
+        <FieldDescription className="mt-0 bg-blue-50/50 dark:bg-blue-950/20 p-2 rounded-lg border border-blue-100/30 dark:border-blue-900/30 flex gap-2 w-full flex-none">
+          <LightbulbIcon size={14} className="text-blue-500 shrink-0 mt-0.5" />
           <span>
             <span><strong>{translations[lang].bcRecLabel}</strong> {translations[lang].bcRecText}</span>
           </span>
-        </div>
+        </FieldDescription>
       )}
-    </div>
+    </Field>
   );
 };
