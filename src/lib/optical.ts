@@ -35,6 +35,8 @@ export interface PatientParameters {
 }
 
 export interface CalculationResult {
+  error?: boolean;
+  errorMessage?: string;
   ct: number; // Center Thickness
   et: number; // Edge Thickness
   anteriorProtrusion: number;
@@ -100,36 +102,48 @@ export function calculateLens(
 
   // 4. Sagitta calculator (s = R - sqrt(R^2 - y^2))
   function getSag(r: number, yVal: number): number {
-    if (r === Infinity || isNaN(r)) return 0;
+    if (r === Infinity || isNaN(r) || !Number.isFinite(r)) return 0;
     const absR = Math.abs(r);
-    if (yVal >= absR) return absR; // clamp to maximum physical deflection
-    const val = Math.pow(absR, 2) - Math.pow(yVal, 2);
-    if (val < 0) return 0;
-    return absR - Math.sqrt(val);
+    const yAbs = Math.abs(yVal);
+    
+    // Clamp yVal to prevent negative discriminant
+    // This is physically meaningful: y cannot exceed radius
+    const yEffective = Math.min(yAbs, absR * 0.999); // 99.9% prevents numerical issues
+    
+    const discriminant = absR * absR - yEffective * yEffective;
+    if (discriminant < 0) return 0; // Already clamped, but safety check
+    
+    return absR - Math.sqrt(discriminant);
   }
 
   const s1 = getSag(r1, y);
   const s2 = getSag(r2, y);
 
   // 5. Thickness matching (Center vs Edge)
+  // Document sign convention clearly:
+  // getSag() returns absolute physical distance. Surfacing direction determines addition/subtraction.
   let ct: number, et: number;
 
-  if (calculationPower >= 0) {
+  if (calculationPower >= 0) {  // Plus (converging)
     et = minThickness;
+    // s1 always positive (front curves outward)
+    // s2 sign depends on back surface: negative if meniscus (curves inward), positive if biconvex (curves outward)
     if (backPower <= 0) {
-       ct = et + s1 - s2;
+       ct = et + Math.abs(s1) - Math.abs(s2);
     } else {
-       ct = et + s1 + s2;
+       ct = et + Math.abs(s1) + Math.abs(s2);
     }
-  } else {
+  } else {  // Minus (diverging)
     ct = minThickness;
+    // Similar logic: ensure thickness components correctly combine
     if (backPower <= 0) {
-       et = ct + s2 - s1;
+       et = ct + Math.abs(s2 - s1);
     } else {
-       et = ct + s1 + s2;
+       et = ct + Math.abs(s1) + Math.abs(s2);
     }
   }
 
+  // Enforce minimum thickness as hard constraint
   ct = Math.max(ct, minThickness);
   et = Math.max(et, minThickness);
 

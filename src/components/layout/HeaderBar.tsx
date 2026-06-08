@@ -1,8 +1,7 @@
 import { useSearch, useNavigate } from '@tanstack/react-router';
 import { useOpticalContext } from '../../contexts/OpticalContext';
-import { useTheme } from '../../hooks/useTheme';
 import { translations } from '../../lib/translations';
-import { RotateCcwIcon, SunIcon, MoonIcon } from "lucide-react";
+import { RotateCcwIcon } from "lucide-react";
 import type { SimulatorSearchParams } from '../../routes/index';
 import { Button } from '../ui/button';
 import { Tabs, TabsList, TabsTrigger } from '../ui/tabs';
@@ -19,8 +18,6 @@ export function HeaderBar() {
     navigate({ search: (prev) => ({ ...prev, view: newView }) });
   
   const activeTab = search.activeTab || 'visualizer';
-
-  const { theme, toggleTheme } = useTheme();
   
   const {
     resetSession,
@@ -56,17 +53,6 @@ export function HeaderBar() {
         >
           <RotateCcwIcon size={14} className="md:w-3 md:h-3" aria-hidden="true" />
           <span className="hidden sm:inline">{t.reset}</span>
-        </Button>
-
-        <Button
-          variant="outline"
-          size="icon"
-          onClick={toggleTheme}
-          className="h-11 w-11 md:h-8 md:w-8 rounded-lg transition-all bg-slate-50 dark:bg-slate-950 hover:bg-slate-100 dark:hover:bg-slate-900 border-slate-200/50 dark:border-slate-800/80"
-          title={theme === 'light' ? t.toggleDark : t.toggleLight}
-          aria-label={theme === 'light' ? t.toggleDark : t.toggleLight}
-        >
-          {theme === 'light' ? <MoonIcon size={16} className="md:w-3 md:h-3" aria-hidden="true" /> : <SunIcon size={16} className="md:w-3 md:h-3 text-amber-400" aria-hidden="true" />}
         </Button>
       </div>
     </header>

@@ -1,16 +1,16 @@
 import { Outlet, Link, useSearch, useNavigate, useRouterState } from '@tanstack/react-router';
-import { useTheme } from '../hooks/useTheme';
 import { TooltipProvider } from './ui/tooltip';
-import { GlassesIcon, DropletIcon, HomeIcon, MenuIcon, ChevronLeftIcon } from "lucide-react";
+import { GlassesIcon, DropletIcon, HomeIcon, MenuIcon, ChevronLeftIcon, MoonIcon, SunIcon } from "lucide-react";
 import React, { useState, useEffect } from 'react';
 import { Button } from './ui/button';
+import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem } from './ui/dropdown-menu';
+import { Toggle } from './ui/toggle';
+import { useTheme } from '../hooks/useTheme';
 
 export function RootLayout() {
-  const { theme } = useTheme();
-
   return (
     <TooltipProvider delay={50}>
-      <div className={`flex flex-col-reverse md:flex-row h-dvh w-full font-sans overflow-hidden transition-colors duration-200 ${theme === 'dark' ? 'bg-slate-950 text-slate-100' : 'bg-slate-50 text-slate-800'}`}>
+      <div className="flex flex-col-reverse md:flex-row h-dvh w-full font-sans overflow-hidden transition-colors duration-200 bg-slate-50 dark:bg-slate-950 text-slate-800 dark:text-slate-100">
         <GlobalNav />
         <main className="flex-1 flex flex-col min-h-0 overflow-hidden relative">
           <Outlet />
@@ -25,7 +25,8 @@ function GlobalNav() {
   const currentSearch = useRouterState({ select: (s) => s.location.search as Record<string, unknown> });
   const navigate = useNavigate();
   const lang = search.lang === 'en' ? 'en' : 'id';
-  
+  const { theme, toggleTheme } = useTheme();
+
   const [isExpanded, setIsExpanded] = useState(() => {
     try {
       return localStorage.getItem('sidebarExpanded') !== 'false';
@@ -39,10 +40,6 @@ function GlobalNav() {
       localStorage.setItem('sidebarExpanded', isExpanded.toString());
     } catch {}
   }, [isExpanded]);
-
-  const toggleLang = () => {
-    navigate({ to: '.', search: { ...currentSearch, lang: lang === 'id' ? 'en' : 'id' } });
-  };
 
   const navItems = [
     { to: '/', icon: <HomeIcon size={20} />, label: lang === 'id' ? 'Beranda' : 'HomeIcon', exact: true },
@@ -81,15 +78,32 @@ function GlobalNav() {
           </div>
 
           <div className="flex flex-row md:flex-col items-center gap-2">
-            <Button
-              variant="outline"
-              size="icon"
-              onClick={toggleLang}
-              className="w-10 h-10 md:w-12 md:h-12 flex items-center justify-center font-bold text-xs rounded-xl bg-slate-100 dark:bg-slate-900 border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-300 hover:text-blue-600 dark:hover:text-blue-400 transition-colors"
-              title={lang === 'id' ? 'Switch to English' : 'Ganti ke Bahasa Indonesia'}
+            <DropdownMenu>
+              <DropdownMenuTrigger
+                className="w-10 h-10 md:w-12 md:h-12 outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 flex items-center justify-center font-bold text-xs rounded-xl bg-slate-100 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-300 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-slate-200 dark:hover:bg-slate-800 transition-colors"
+                title={lang === 'id' ? 'Switch to English' : 'Ganti ke Bahasa Indonesia'}
+              >
+                <span className="text-lg leading-none">{lang === 'id' ? '🇮🇩' : '🇬🇧'}</span>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" side="right" alignOffset={10}>
+                <DropdownMenuItem onClick={() => navigate({ to: '.', search: { ...currentSearch, lang: 'id' } })}>
+                  <span className="mr-2 text-lg">🇮🇩</span> Indonesia
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => navigate({ to: '.', search: { ...currentSearch, lang: 'en' } })}>
+                  <span className="mr-2 text-lg">🇬🇧</span> English
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+
+            <Toggle 
+              pressed={theme === 'dark'}
+              onPressedChange={toggleTheme}
+              className="w-10 h-10 md:w-12 md:h-12 rounded-xl bg-slate-100 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-300 hover:text-amber-500 dark:hover:text-amber-400 data-[state=on]:bg-slate-200 dark:data-[state=on]:bg-slate-800 transition-colors"
+              title={lang === 'id' ? 'Ganti Tema Terang/Gelap' : 'Toggle Dark/Light Theme'}
+              aria-label="Toggle Theme"
             >
-              {lang.toUpperCase()}
-            </Button>
+              {theme === 'dark' ? <MoonIcon size={18} /> : <SunIcon size={18} />}
+            </Toggle>
             
             <Button
               variant="outline"

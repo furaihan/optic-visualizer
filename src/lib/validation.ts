@@ -87,6 +87,15 @@ export function validateOpticalParams(
   }
 
   // 3. Ergonomic / Out-of-bounds Warnings
+  if (!Number.isFinite(lens.axis) || lens.axis < 0 || lens.axis > 180) {
+    errors.push({
+      field: 'axis',
+      messageId: 'Axis harus antara 0-180°.',
+      messageEn: 'Axis must be between 0-180°.',
+      isFatal: false
+    });
+  }
+
   if (patient.pd < ERGONOMIC_LIMITS.pd.min || patient.pd > ERGONOMIC_LIMITS.pd.max) {
     errors.push({
       field: 'pd',

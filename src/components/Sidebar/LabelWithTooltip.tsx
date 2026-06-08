@@ -22,7 +22,7 @@ export const LabelWithTooltip: React.FC<LabelWithTooltipProps> = ({
   const tooltipText = getTooltipByLabel(label, lang);
   const baseLabelClass = isUppercaseHeader 
     ? `font-bold uppercase tracking-wider text-[10px] text-slate-500 cursor-help ${className || ''}` 
-    : `font-semibold text-slate-700 cursor-help ${className ? className : 'text-[11px]'}`;
+    : `font-semibold text-[11px] text-slate-700 cursor-help ${className || ''}`;
 
   if (!tooltipText) {
     return (

@@ -141,7 +141,10 @@ export function useOpticalState() {
   // 3. Calculation Engine (Pure calculations)
   const result: CalculationResult = useMemo(() => {
     if (!validation.isValid) {
+      console.warn('Invalid optical parameters, returning fallback:', validation.errors);
       return {
+        error: true,
+        errorMessage: validation.errors[0]?.messageEn || 'Invalid parameters',
         ct: 2.0,
         et: 2.0,
         anteriorProtrusion: 0,

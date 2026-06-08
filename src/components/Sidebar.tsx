@@ -23,6 +23,7 @@ import { Input } from './ui/input';
 import { Switch } from './ui/switch';
 import { Collapsible, CollapsibleTrigger, CollapsibleContent } from './ui/collapsible';
 import { ToggleGroup, ToggleGroupItem } from './ui/toggle-group';
+import { RadioGroup, RadioGroupItem } from './ui/radio-group';
 import { motion, AnimatePresence } from 'framer-motion';
 import { LabelWithTooltip } from './Sidebar/LabelWithTooltip';
 import { Control } from './Sidebar/Control';
@@ -228,37 +229,32 @@ const FrameTypeSelector: React.FC<FrameTypeSelectorProps> = ({
 
   return (
     <Field orientation="vertical">
-      <FieldLabel className="w-auto flex-none m-0 items-center">
+      <FieldLabel className="w-auto flex-none m-0 items-center mb-2">
         <LabelWithTooltip
           label={t.frameType}
           lang={lang}
-          className="text-[11px]"
+          className="select-none leading-tight dark:text-slate-300"
           icon={<FrameIcon size={13} className="text-emerald-500" />}
         />
       </FieldLabel>
       <FieldContent>
-        <ToggleGroup className="grid grid-cols-3 gap-1 w-full mt-1">
+        <RadioGroup
+          value={frameType}
+          onValueChange={(val) => onFrameTypeChange(val as FrameType)}
+          className="flex flex-col gap-2.5 mt-1"
+        >
           {types.map(({ value, label }) => (
-            <ToggleGroupItem
-              key={value}
-              pressed={frameType === value}
-              onPressedChange={(pressed) => {
-                if (pressed) onFrameTypeChange(value);
-              }}
-              aria-label={label}
-              className={cn(
-                "w-full h-auto py-2 px-3 rounded text-[10px] font-bold text-center",
-                "transition-all border cursor-pointer border-transparent",
-                "focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-500",
-                "bg-slate-50 dark:bg-slate-900 border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-400",
-                "hover:border-slate-300 dark:hover:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-slate-800 dark:hover:text-slate-200",
-                "data-[state=on]:bg-emerald-600 data-[state=on]:border-emerald-600 dark:data-[state=on]:bg-emerald-500 dark:data-[state=on]:border-emerald-500 data-[state=on]:text-white data-[state=on]:shadow-sm data-[state=on]:hover:bg-emerald-700 dark:data-[state=on]:hover:bg-emerald-600 data-[state=on]:hover:text-white"
-              )}
-            >
-              {label}
-            </ToggleGroupItem>
+            <div className="flex items-center space-x-2" key={value}>
+              <RadioGroupItem value={value} id={`frame-type-${value}`} />
+              <Label
+                htmlFor={`frame-type-${value}`}
+                className="text-xs font-medium cursor-pointer"
+              >
+                {label}
+              </Label>
+            </div>
           ))}
-        </ToggleGroup>
+        </RadioGroup>
       </FieldContent>
     </Field>
   );
@@ -293,28 +289,30 @@ const BevelControl: React.FC<BevelControlProps> = ({
           icon={<ZapIcon size={11} className="text-orange-500" />}
         />
       </FieldLabel>
-      <FieldContent className="flex-row items-center gap-2 sm:gap-3 mt-1">
+      <div className="flex flex-row items-center gap-2 sm:gap-3 mt-1 w-full">
         {/* Label Front */}
         <span className="text-[9px] font-bold text-slate-400 min-w-fit">{t.bevelFront}</span>
 
         {/* Slider */}
-        <Slider
-          min={0}
-          max={1}
-          step={0.01}
-          value={[bevelPercent]}
-          onValueChange={(val: readonly number[] | number) =>
-            onBevelChange(Array.isArray(val) ? val[0] : (val as number))
-          }
-          className="flex-1 cursor-pointer"
-          aria-label="Bevel positioning slider"
-        />
+        <div className="flex-1 w-full min-w-0">
+          <Slider
+            min={0}
+            max={1}
+            step={0.01}
+            value={[bevelPercent]}
+            onValueChange={(val: readonly number[] | number) =>
+              onBevelChange(Array.isArray(val) ? val[0] : (val as number))
+            }
+            className="w-full cursor-pointer"
+            aria-label="Bevel positioning slider"
+          />
+        </div>
 
         {/* Label Back */}
         <span className="text-[9px] font-bold text-slate-400 min-w-fit">{t.bevelBack}</span>
 
         {/* Percentage Input */}
-        <div className="w-14 shrink-0">
+        <div className="w-18 min-w-[72px] shrink-0">
           <InputGroup className="h-7 w-full border-slate-200 dark:border-slate-800 focus-within:border-blue-500 focus-within:ring-1 focus-within:ring-blue-500">
             <InputGroupInput
               type="number"
@@ -325,15 +323,15 @@ const BevelControl: React.FC<BevelControlProps> = ({
               onChange={(e) =>
                 onBevelChange(Math.min(100, Math.max(0, parseFloat(e.target.value || "0"))) / 100)
               }
-              className="w-full h-7 pl-2 pr-0 text-[10px] text-center font-mono font-bold hover:bg-slate-50 dark:hover:bg-slate-900"
+              className="w-full h-7 pl-2 pr-1 text-[11px] font-mono font-bold hover:bg-slate-50 dark:hover:bg-slate-900"
               aria-label="Bevel percentage numeric input"
             />
-            <InputGroupAddon align="inline-end" className="pr-1.5 pl-0 text-[8px] text-slate-400 pointer-events-none">
+            <InputGroupAddon align="inline-end" className="pr-2 pl-0 text-[10px] text-slate-400 pointer-events-none">
               %
             </InputGroupAddon>
           </InputGroup>
         </div>
-      </FieldContent>
+      </div>
     </Field>
   );
 };
@@ -676,7 +674,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
             <LabelWithTooltip
               label={t.refractiveIndex}
               lang={lang}
-              className="text-[11px]"
+              className="select-none leading-tight dark:text-slate-300"
               icon={<EyeIcon size={13} className="text-blue-500" />}
             />
           </FieldLabel>
