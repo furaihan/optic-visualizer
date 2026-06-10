@@ -1,19 +1,14 @@
-/**
- * @license
- * SPDX-License-Identifier: Apache-2.0
- */
-
 import { useState, useMemo, useEffect, useCallback } from 'react';
 import { 
   LensParameters, 
   FrameParameters, 
   PatientParameters, 
-  FrameType, 
-  calculateLens, 
+  FrameType,  
   CalculationResult,
   LensIndex
-} from '../lib/optical';
-import { validateOpticalParams, ValidationResult } from '../lib/validation';
+} from '../lib/optic-engine/types';
+import { calculateLens } from '../lib/optic-engine/optical';
+import { validateOpticalParams, ValidationResult } from '../lib/optic-engine/validation';
 
 export interface OpticalParametersState {
   version?: number;

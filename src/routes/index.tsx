@@ -1,6 +1,6 @@
 import { createRoute } from '@tanstack/react-router';
 import { rootRoute } from './root';
-import { HomePage } from '../HomePage';
+import { HomePage } from '../pages/HomePage';
 
 export type GlobalSearchParams = { lang?: 'id' | 'en' };
 

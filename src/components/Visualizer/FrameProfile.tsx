@@ -1,5 +1,5 @@
 import React from 'react';
-import { FrameParameters, CalculationResult } from '../../lib/optical';
+import { CalculationResult, FrameParameters } from '../../lib/optic-engine/types';
 import { Language, translations } from '../../lib/translations';
 import { LensPosition } from './types';
 

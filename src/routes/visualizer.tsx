@@ -1,6 +1,6 @@
 import { createRoute, redirect, Outlet } from '@tanstack/react-router';
 import { rootRoute } from './root';
-import VisualizerPage from '../VisualizerPage';
+import VisualizerPage from '../pages/VisualizerPage';
 import { type SimulatorSearchParams } from './index';
 
 export const visualizerRoute = createRoute({

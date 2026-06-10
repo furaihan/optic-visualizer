@@ -1,12 +1,12 @@
 import React, { useState, useEffect } from "react";
 import { ArrowLeftIcon, ZapIcon, SparklesIcon, Code2Icon, RocketIcon, StarIcon, HeartIcon, AlertCircleIcon, CheckCircle2Icon, MailIcon, PhoneIcon, MapPinIcon, GlobeIcon, Share2Icon, MessageCircleIcon } from "lucide-react";
-import { Button } from "./components/ui/button";
-import { Badge } from "./components/ui/badge";
-import { ScrollArea } from "./components/ui/scroll-area";
+import { Button } from "@components/ui/button";
+import { Badge } from "@components/ui/badge";
+import { ScrollArea } from "@components/ui/scroll-area";
 import {
   Card,
   CardContent,
-} from "./components/ui/card";
+} from "@components/ui/card";
 
 export function ContactPage() {
   const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });

@@ -7,7 +7,7 @@ import {
   ArrowDownRight,
 } from 'lucide-react';
 
-import { CalculationResult } from '../../lib/optical';
+import { CalculationResult } from '../../lib/optic-engine/types';
 import { translations, Language } from '../../lib/translations';
 import { Card, CardHeader, CardTitle, CardContent } from '../ui/card';
 

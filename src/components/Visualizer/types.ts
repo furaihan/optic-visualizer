@@ -1,5 +1,11 @@
-import { LensParameters, FrameParameters, PatientParameters, CalculationResult, FrameType } from '../../lib/optical';
-import { Language } from '../../lib/translations';
+import {
+  LensParameters,
+  FrameParameters,
+  PatientParameters,
+  CalculationResult,
+  FrameType,
+} from "../../lib/optic-engine/types";
+import { Language } from "../../lib/translations";
 
 export interface VisualizerProps {
   lens: LensParameters;
@@ -9,9 +15,9 @@ export interface VisualizerProps {
   compareResult?: CalculationResult;
   compareLens?: LensParameters;
   lang: Language;
-  view: 'side' | 'top' | 'front';
+  view: "side" | "top" | "front";
   frameType?: FrameType;
-  highlightedLimit?: 'a' | 'b' | 'dbl' | 'ed' | null;
+  highlightedLimit?: "a" | "b" | "dbl" | "ed" | null;
 }
 
 export interface LensPosition {
@@ -28,3 +34,4 @@ export interface HoverLabel {
   x: number;
   y: number;
 }
+

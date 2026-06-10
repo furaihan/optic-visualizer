@@ -1,6 +1,6 @@
 import React from 'react';
 import { motion } from 'motion/react';
-import { LensParameters, CalculationResult } from '../../lib/optical';
+import { LensParameters, CalculationResult } from '../../lib/optic-engine/types';
 import { Language, translations } from '../../lib/translations';
 import { LensPosition, HoverLabel } from './types';
 

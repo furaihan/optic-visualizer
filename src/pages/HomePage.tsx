@@ -1,8 +1,8 @@
 import { useSearch, Link } from "@tanstack/react-router";
 import { GlassesIcon, ArrowRightIcon } from "lucide-react";
 
-import { type SimulatorSearchParams } from "./routes/index";
-import { translations } from "./lib/translations";
+import { type SimulatorSearchParams } from "@/src/routes/index";
+import { translations } from "@/src/lib/translations";
 
 import {
   Card,
@@ -10,10 +10,10 @@ import {
   CardDescription,
   CardHeader,
   CardTitle,
-} from "./components/ui/card";
+} from "../components/ui/card";
 
-import { Badge } from "./components/ui/badge";
-import { buttonVariants } from "./components/ui/button";
+import { Badge } from "@components/ui/badge";
+import { buttonVariants } from "@components/ui/button";
 
 export function HomePage() {
   const search = useSearch({ strict: false }) as SimulatorSearchParams;

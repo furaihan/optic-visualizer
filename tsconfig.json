@@ -22,7 +22,8 @@
       "@hooks/*": ["./src/hooks/*"],
       "@lib/*": ["./src/lib/*"],
       "@data/*": ["./src/data/*"],
-      "@types/*": ["./src/types/*"]
+      "@types/*": ["./src/types/*"],
+      "@shadcn/*": ["./src/components/ui/*"]
     },
     "allowImportingTsExtensions": true,
     "noEmit": true

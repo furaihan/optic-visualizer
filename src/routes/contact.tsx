@@ -1,6 +1,6 @@
 import { createRoute } from '@tanstack/react-router';
 import { rootRoute } from './root';
-import { ContactPage } from '../ContactPage';
+import { ContactPage } from '../pages/ContactPage';
 import { type GlobalSearchParams } from './index';
 
 export const contactRoute = createRoute({

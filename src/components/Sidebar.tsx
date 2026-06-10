@@ -1,36 +1,51 @@
-import React, { useState } from 'react';
-import { LensParameters, FrameParameters, PatientParameters, FrameType, LensIndex } from '../lib/optical';
-import { translations, Language } from '../lib/translations';
+import React, { useState } from "react";
 import {
-  LayersIcon, FrameIcon, UserIcon, ChevronDownIcon, EyeIcon, RulerIcon,
-  ApertureIcon, GaugeIcon, ZapIcon, CopyIcon, ArrowRightIcon, AlertCircleIcon
+  FrameParameters,
+  LensIndex,
+  FrameType,
+} from "../lib/optic-engine/types";
+import { translations, Language } from "../lib/translations";
+import {
+  LayersIcon,
+  FrameIcon,
+  UserIcon,
+  ChevronDownIcon,
+  EyeIcon,
+  RulerIcon,
+  ApertureIcon,
+  GaugeIcon,
+  ZapIcon,
+  CopyIcon,
+  ArrowRightIcon,
+  AlertCircleIcon,
 } from "lucide-react";
-import { Button, buttonVariants } from './ui/button';
-import { ScrollArea } from './ui/scroll-area';
-import { Label } from './ui/label';
-import { Card } from './ui/card';
-import { cn } from '../lib/utils';
-import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from './ui/select';
+import { Button, buttonVariants } from "./ui/button";
+import { ScrollArea } from "./ui/scroll-area";
+import { Label } from "./ui/label";
+import { Card } from "./ui/card";
+import { cn } from "../lib/utils";
 import {
   DropdownMenu,
   DropdownMenuTrigger,
   DropdownMenuContent,
   DropdownMenuRadioGroup,
   DropdownMenuRadioItem,
-} from './ui/dropdown-menu';
-import { Slider } from './ui/slider';
-import { Input } from './ui/input';
-import { Switch } from './ui/switch';
-import { Collapsible, CollapsibleTrigger, CollapsibleContent } from './ui/collapsible';
-import { ToggleGroup, ToggleGroupItem } from './ui/toggle-group';
-import { RadioGroup, RadioGroupItem } from './ui/radio-group';
-import { motion, AnimatePresence } from 'framer-motion';
-import { LabelWithTooltip } from './Sidebar/LabelWithTooltip';
-import { Control } from './Sidebar/Control';
-import { FrameInput } from './Sidebar/FrameInput';
+} from "./ui/dropdown-menu";
+import { Slider } from "./ui/slider";
+import { Switch } from "./ui/switch";
+import {
+  Collapsible,
+  CollapsibleTrigger,
+  CollapsibleContent,
+} from "./ui/collapsible";
+import { RadioGroup, RadioGroupItem } from "./ui/radio-group";
+import { motion, AnimatePresence } from "framer-motion";
+import { LabelWithTooltip } from "./Sidebar/LabelWithTooltip";
+import { Control } from "./Sidebar/Control";
+import { FrameInput } from "./Sidebar/FrameInput";
 
-import { useOpticalContext } from '../contexts/OpticalContext';
-import { INPUT_SPECS } from '../lib/validation';
+import { useOpticalContext } from "../contexts/OpticalContext";
+import { INPUT_SPECS } from "../lib/optic-engine/validation";
 
 interface SidebarProps {
   lang: Language;
@@ -45,7 +60,7 @@ interface SidebarProps {
  * LimitAlertButton - Single source of truth untuk frame param alerts
  */
 interface LimitAlertButtonProps {
-  fieldName: 'a' | 'b' | 'dbl' | 'ed';
+  fieldName: "a" | "b" | "dbl" | "ed";
   isExceeding: boolean;
   title: string;
   onMouseEnter: () => void;
@@ -74,7 +89,7 @@ const LimitAlertButton: React.FC<LimitAlertButtonProps> = ({
       "hover:scale-110 active:scale-95",
       isExceeding
         ? "text-amber-500 hover:text-amber-600 animate-pulse-soft bg-amber-500/10"
-        : "text-slate-300 hover:text-slate-400 dark:text-slate-600 dark:hover:text-slate-500"
+        : "text-slate-300 hover:text-slate-400 dark:text-slate-600 dark:hover:text-slate-500",
     )}
     title={title}
     aria-label={`Toggle ${fieldName} limit warning highlight`}
@@ -93,11 +108,11 @@ interface FrameParamFieldProps {
   min: number;
   max: number;
   isExceeding: boolean;
-  fieldName: 'a' | 'b' | 'dbl' | 'ed';
+  fieldName: "a" | "b" | "dbl" | "ed";
   onValueChange: (value: number) => void;
-  onMouseEnter: (field: 'a' | 'b' | 'dbl' | 'ed' | null) => void;
+  onMouseEnter: (field: "a" | "b" | "dbl" | "ed" | null) => void;
   onMouseLeave: () => void;
-  highlightedLimit: 'a' | 'b' | 'dbl' | 'ed' | null;
+  highlightedLimit: "a" | "b" | "dbl" | "ed" | null;
   alertTitle: string;
   lang: Language;
 }
@@ -133,7 +148,9 @@ const FrameParamField: React.FC<FrameParamFieldProps> = ({
         onMouseEnter={() => onMouseEnter(fieldName)}
         onMouseLeave={onMouseLeave}
         isHighlighted={highlightedLimit === fieldName}
-        onClick={() => onMouseEnter(highlightedLimit === fieldName ? null : fieldName)}
+        onClick={() =>
+          onMouseEnter(highlightedLimit === fieldName ? null : fieldName)
+        }
       />
     </div>
     <FieldContent>
@@ -180,7 +197,7 @@ const ParameterGroup: React.FC<ParameterGroupProps> = ({
         "w-full text-[11px] font-bold text-slate-500 hover:text-slate-800",
         "dark:text-slate-400 dark:hover:text-slate-200 uppercase tracking-wider",
         "flex items-center justify-between py-2 cursor-pointer transition-colors outline-none",
-        "hover:bg-slate-50 dark:hover:bg-slate-900/50 rounded px-1 -mx-1"
+        "hover:bg-slate-50 dark:hover:bg-slate-900/50 rounded px-1 -mx-1",
       )}
     >
       <div className="flex items-center gap-1.5">
@@ -191,20 +208,18 @@ const ParameterGroup: React.FC<ParameterGroupProps> = ({
         size={14}
         className={cn(
           "text-slate-400 transition-transform duration-200",
-          isOpen && "rotate-180"
+          isOpen && "rotate-180",
         )}
       />
     </CollapsibleTrigger>
     <CollapsibleContent>
-      <FieldGroup className="mt-3 text-left py-1 gap-4">
-        {children}
-      </FieldGroup>
+      <FieldGroup className="mt-3 text-left py-1 gap-4">{children}</FieldGroup>
     </CollapsibleContent>
   </Collapsible>
 );
 
-import { ItemGroup, Item, ItemTitle } from './ui/item';
-import { Field, FieldLabel, FieldContent, FieldGroup } from './ui/field';
+import { ItemGroup, Item, ItemTitle } from "./ui/item";
+import { Field, FieldLabel, FieldContent, FieldGroup } from "./ui/field";
 
 /**
  * FrameTypeSelector - Toggle buttons for frame type
@@ -222,9 +237,9 @@ const FrameTypeSelector: React.FC<FrameTypeSelectorProps> = ({
 }) => {
   const t = translations[lang];
   const types: Array<{ value: FrameType; label: string }> = [
-    { value: 'full', label: t.fullRim },
-    { value: 'half', label: t.halfRim },
-    { value: 'rimless', label: t.rimless },
+    { value: "full", label: t.fullRim },
+    { value: "half", label: t.halfRim },
+    { value: "rimless", label: t.rimless },
   ];
 
   return (
@@ -269,7 +284,7 @@ interface BevelControlProps {
   lang: Language;
 }
 
-import { InputGroup, InputGroupAddon, InputGroupInput } from './ui/input-group';
+import { InputGroup, InputGroupAddon, InputGroupInput } from "./ui/input-group";
 
 const BevelControl: React.FC<BevelControlProps> = ({
   bevelPercent,
@@ -291,7 +306,9 @@ const BevelControl: React.FC<BevelControlProps> = ({
       </FieldLabel>
       <div className="flex flex-row items-center gap-2 sm:gap-3 mt-1 w-full">
         {/* Label Front */}
-        <span className="text-[9px] font-bold text-slate-400 min-w-fit">{t.bevelFront}</span>
+        <span className="text-[9px] font-bold text-slate-400 min-w-fit">
+          {t.bevelFront}
+        </span>
 
         {/* Slider */}
         <div className="flex-1 w-full min-w-0">
@@ -309,7 +326,9 @@ const BevelControl: React.FC<BevelControlProps> = ({
         </div>
 
         {/* Label Back */}
-        <span className="text-[9px] font-bold text-slate-400 min-w-fit">{t.bevelBack}</span>
+        <span className="text-[9px] font-bold text-slate-400 min-w-fit">
+          {t.bevelBack}
+        </span>
 
         {/* Percentage Input */}
         <div className="w-18 min-w-[72px] shrink-0">
@@ -321,12 +340,20 @@ const BevelControl: React.FC<BevelControlProps> = ({
               step={1}
               value={Math.round(bevelPercent * 100)}
               onChange={(e) =>
-                onBevelChange(Math.min(100, Math.max(0, parseFloat(e.target.value || "0"))) / 100)
+                onBevelChange(
+                  Math.min(
+                    100,
+                    Math.max(0, parseFloat(e.target.value || "0")),
+                  ) / 100,
+                )
               }
               className="w-full h-7 pl-2 pr-1 text-[11px] font-mono font-bold hover:bg-slate-50 dark:hover:bg-slate-900"
               aria-label="Bevel percentage numeric input"
             />
-            <InputGroupAddon align="inline-end" className="pr-2 pl-0 text-[10px] text-slate-400 pointer-events-none">
+            <InputGroupAddon
+              align="inline-end"
+              className="pr-2 pl-0 text-[10px] text-slate-400 pointer-events-none"
+            >
               %
             </InputGroupAddon>
           </InputGroup>
@@ -391,8 +418,8 @@ const ComparisonModeToggle: React.FC<ComparisonModeToggleProps> = ({
                 <DropdownMenu>
                   <DropdownMenuTrigger
                     className={cn(
-                      buttonVariants({ variant: 'outline' }),
-                      "w-full justify-between h-8 px-3 font-semibold text-xs"
+                      buttonVariants({ variant: "outline" }),
+                      "w-full justify-between h-8 px-3 font-semibold text-xs",
                     )}
                     aria-label="Comparison material indices"
                   >
@@ -402,12 +429,17 @@ const ComparisonModeToggle: React.FC<ComparisonModeToggleProps> = ({
                     </div>
                     <ChevronDownIcon size={14} className="opacity-50" />
                   </DropdownMenuTrigger>
-                  <DropdownMenuContent className="w-[var(--anchor-width)] min-w-0" align="start">
+                  <DropdownMenuContent
+                    className="w-[var(--anchor-width)] min-w-0"
+                    align="start"
+                  >
                     <DropdownMenuRadioGroup
                       value={compareIndex.toString()}
-                      onValueChange={(val) => onCompareIndexChange(parseFloat(val) as LensIndex)}
+                      onValueChange={(val) =>
+                        onCompareIndexChange(parseFloat(val) as LensIndex)
+                      }
                     >
-                      {indices.map(idx => (
+                      {indices.map((idx) => (
                         <DropdownMenuRadioItem
                           key={idx}
                           value={idx.toString()}
@@ -436,8 +468,8 @@ interface FrameGeometrySectionProps {
   frameType: FrameType;
   onFrameChange: (frame: FrameParameters) => void;
   onFrameTypeChange: (type: FrameType) => void;
-  highlightedLimit: 'a' | 'b' | 'dbl' | 'ed' | null;
-  onHighlightedLimitChange: (limit: 'a' | 'b' | 'dbl' | 'ed' | null) => void;
+  highlightedLimit: "a" | "b" | "dbl" | "ed" | null;
+  onHighlightedLimitChange: (limit: "a" | "b" | "dbl" | "ed" | null) => void;
   validation: { errors: Array<{ field: string }> };
   requiredBlank: number;
   lang: Language;
@@ -459,43 +491,50 @@ const FrameGeometrySection: React.FC<FrameGeometrySectionProps> = ({
   // Frame parameter definitions
   const frameParams = [
     {
-      key: 'a' as const,
+      key: "a" as const,
       label: t.aSize,
       specs: INPUT_SPECS.a,
       alertTitle: t.ergonomicLimitsA,
     },
     {
-      key: 'b' as const,
+      key: "b" as const,
       label: t.bSize,
       specs: INPUT_SPECS.b,
       alertTitle: t.ergonomicLimitsB,
     },
     {
-      key: 'dbl' as const,
-      label: 'DBL',
+      key: "dbl" as const,
+      label: "DBL",
       specs: INPUT_SPECS.dbl,
       alertTitle: t.ergonomicLimitsDbl,
     },
     {
-      key: 'ed' as const,
-      label: 'ED',
+      key: "ed" as const,
+      label: "ED",
       specs: INPUT_SPECS.ed,
       alertTitle: t.ergonomicLimitsEd,
     },
   ];
 
   // Validation helper
-  const hasError = (field: string) => validation.errors.some(e => e.field === field);
+  const hasError = (field: string) =>
+    validation.errors.some((e) => e.field === field);
 
   // Validation checks
   const exceeding = {
-    a: frame.a < INPUT_SPECS.a.min || frame.a > INPUT_SPECS.a.max || requiredBlank > 85,
-    b: frame.b < INPUT_SPECS.b.min || frame.b > INPUT_SPECS.b.max || hasError('fittingHeight'),
+    a:
+      frame.a < INPUT_SPECS.a.min ||
+      frame.a > INPUT_SPECS.a.max ||
+      requiredBlank > 85,
+    b:
+      frame.b < INPUT_SPECS.b.min ||
+      frame.b > INPUT_SPECS.b.max ||
+      hasError("fittingHeight"),
     dbl: frame.dbl < INPUT_SPECS.dbl.min || frame.dbl > INPUT_SPECS.dbl.max,
     ed: frame.ed < frame.a || frame.ed > INPUT_SPECS.ed.max,
   };
 
-  const isAnyExceeding = Object.values(exceeding).some(v => v);
+  const isAnyExceeding = Object.values(exceeding).some((v) => v);
 
   return (
     <>
@@ -503,7 +542,7 @@ const FrameGeometrySection: React.FC<FrameGeometrySectionProps> = ({
       <div className="space-y-4">
         {/* Top Row: A & B */}
         <div className="grid grid-cols-2 gap-3">
-          {frameParams.slice(0, 2).map(param => (
+          {frameParams.slice(0, 2).map((param) => (
             <FrameParamField
               key={param.key}
               label={param.label}
@@ -512,7 +551,9 @@ const FrameGeometrySection: React.FC<FrameGeometrySectionProps> = ({
               max={param.specs.max}
               isExceeding={exceeding[param.key]}
               fieldName={param.key}
-              onValueChange={(val) => onFrameChange({ ...frame, [param.key]: val })}
+              onValueChange={(val) =>
+                onFrameChange({ ...frame, [param.key]: val })
+              }
               onMouseEnter={onHighlightedLimitChange}
               onMouseLeave={() => onHighlightedLimitChange(null)}
               highlightedLimit={highlightedLimit}
@@ -524,7 +565,7 @@ const FrameGeometrySection: React.FC<FrameGeometrySectionProps> = ({
 
         {/* Bottom Row: DBL & ED */}
         <div className="grid grid-cols-2 gap-3">
-          {frameParams.slice(2, 4).map(param => (
+          {frameParams.slice(2, 4).map((param) => (
             <FrameParamField
               key={param.key}
               label={param.label}
@@ -533,7 +574,9 @@ const FrameGeometrySection: React.FC<FrameGeometrySectionProps> = ({
               max={param.specs.max}
               isExceeding={exceeding[param.key]}
               fieldName={param.key}
-              onValueChange={(val) => onFrameChange({ ...frame, [param.key]: val })}
+              onValueChange={(val) =>
+                onFrameChange({ ...frame, [param.key]: val })
+              }
               onMouseEnter={onHighlightedLimitChange}
               onMouseLeave={() => onHighlightedLimitChange(null)}
               highlightedLimit={highlightedLimit}
@@ -575,8 +618,14 @@ const FrameGeometrySection: React.FC<FrameGeometrySectionProps> = ({
             className="overflow-hidden"
           >
             <div className="text-[9px] text-amber-700 dark:text-amber-400 bg-amber-50 dark:bg-amber-900/20 px-2.5 py-2 rounded-lg flex items-start gap-1.5 border border-amber-200/50 dark:border-amber-800/30">
-              <AlertCircleIcon size={12} className="shrink-0 mt-px" aria-hidden="true" />
-              <span className="leading-snug font-medium">{t.ergonomicWarning}</span>
+              <AlertCircleIcon
+                size={12}
+                className="shrink-0 mt-px"
+                aria-hidden="true"
+              />
+              <span className="leading-snug font-medium">
+                {t.ergonomicWarning}
+              </span>
             </div>
           </motion.div>
         )}
@@ -589,20 +638,26 @@ const FrameGeometrySection: React.FC<FrameGeometrySectionProps> = ({
 // Main Sidebar Component
 // ============================================
 
-export const Sidebar: React.FC<SidebarProps> = ({
-  lang,
-  isMobile = false
-}) => {
+export const Sidebar: React.FC<SidebarProps> = ({ lang, isMobile = false }) => {
   const {
-    lens, setLens,
-    frame, setFrame,
-    patient, setPatient,
-    compareMode, setCompareMode,
-    compareIndex, setCompareIndex,
-    bevelPercent, setBevelPercent,
-    frameType, setFrameType,
-    highlightedLimit, setHighlightedLimit,
-    result, validation
+    lens,
+    setLens,
+    frame,
+    setFrame,
+    patient,
+    setPatient,
+    compareMode,
+    setCompareMode,
+    compareIndex,
+    setCompareIndex,
+    bevelPercent,
+    setBevelPercent,
+    frameType,
+    setFrameType,
+    highlightedLimit,
+    setHighlightedLimit,
+    result,
+    validation,
   } = useOpticalContext();
 
   const t = translations[lang];
@@ -616,7 +671,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
   });
 
   const toggleGroup = (key: string) => {
-    setOpenGroup(prev => ({ ...prev, [key]: !prev[key] }));
+    setOpenGroup((prev) => ({ ...prev, [key]: !prev[key] }));
   };
 
   // Render form content - shared between mobile & desktop
@@ -681,19 +736,31 @@ export const Sidebar: React.FC<SidebarProps> = ({
           <FieldContent>
             <DropdownMenu>
               <DropdownMenuTrigger
-                className={cn(buttonVariants({ variant: 'outline' }), "w-full justify-between h-9 px-3 font-semibold text-xs")}
+                className={cn(
+                  buttonVariants({ variant: "outline" }),
+                  "w-full justify-between h-9 px-3 font-semibold text-xs",
+                )}
                 aria-label={t.refractiveIndex}
               >
                 {lens.index.toFixed(2)}
                 <ChevronDownIcon size={14} className="opacity-50" />
               </DropdownMenuTrigger>
-              <DropdownMenuContent className="w-[var(--anchor-width)] min-w-0" align="start">
+              <DropdownMenuContent
+                className="w-[var(--anchor-width)] min-w-0"
+                align="start"
+              >
                 <DropdownMenuRadioGroup
                   value={lens.index.toString()}
-                  onValueChange={(val) => setLens({ ...lens, index: parseFloat(val) as LensIndex })}
+                  onValueChange={(val) =>
+                    setLens({ ...lens, index: parseFloat(val) as LensIndex })
+                  }
                 >
-                  {indices.map(idx => (
-                    <DropdownMenuRadioItem key={idx} value={idx.toString()} className="font-medium text-xs">
+                  {indices.map((idx) => (
+                    <DropdownMenuRadioItem
+                      key={idx}
+                      value={idx.toString()}
+                      className="font-medium text-xs"
+                    >
                       {idx.toFixed(2)}
                     </DropdownMenuRadioItem>
                   ))}
@@ -803,22 +870,60 @@ export const Sidebar: React.FC<SidebarProps> = ({
 
   // Desktop Layout
   return (
-    <aside className={cn(
-      "shrink-0 bg-white dark:bg-slate-950",
-      "border-r border-slate-100 dark:border-slate-850",
-      "flex flex-col h-full shadow-[4px_0_24px_rgba(0,0,0,0.015)]",
-      "text-left transition-all duration-200",
-      "w-[300px] lg:w-[340px]"
-    )}>
+    <aside
+      className={cn(
+        "shrink-0 bg-white dark:bg-slate-950",
+        "border-r border-slate-100 dark:border-slate-850",
+        "flex flex-col h-full shadow-[4px_0_24px_rgba(0,0,0,0.015)]",
+        "text-left transition-all duration-200",
+        "w-[300px] lg:w-[340px]",
+      )}
+    >
       {/* Header */}
       <div className="p-5 border-b border-slate-100 dark:border-slate-850">
         <div className="flex items-center gap-3">
           <div className="w-10 h-10 bg-white dark:bg-slate-900 p-1 rounded-lg border border-slate-100 dark:border-slate-800 flex items-center justify-center shrink-0">
-            <svg viewBox="0 0 100 100" className="w-full h-full" aria-hidden="true">
-              <rect x="42" y="10" width="16" height="35" fill="#1e73be" rx="2" transform="rotate(-45 50 50)" />
-              <rect x="42" y="55" width="16" height="35" fill="#2d9e4b" rx="2" transform="rotate(-45 50 50)" />
-              <rect x="42" y="10" width="16" height="35" fill="#31a8dd" rx="2" transform="rotate(45 50 50)" />
-              <rect x="42" y="55" width="16" height="35" fill="#84cc16" rx="2" transform="rotate(45 50 50)" />
+            <svg
+              viewBox="0 0 100 100"
+              className="w-full h-full"
+              aria-hidden="true"
+            >
+              <rect
+                x="42"
+                y="10"
+                width="16"
+                height="35"
+                fill="#1e73be"
+                rx="2"
+                transform="rotate(-45 50 50)"
+              />
+              <rect
+                x="42"
+                y="55"
+                width="16"
+                height="35"
+                fill="#2d9e4b"
+                rx="2"
+                transform="rotate(-45 50 50)"
+              />
+              <rect
+                x="42"
+                y="10"
+                width="16"
+                height="35"
+                fill="#31a8dd"
+                rx="2"
+                transform="rotate(45 50 50)"
+              />
+              <rect
+                x="42"
+                y="55"
+                width="16"
+                height="35"
+                fill="#84cc16"
+                rx="2"
+                transform="rotate(45 50 50)"
+              />
               <circle cx="50" cy="50" r="4" fill="#1e73be" />
             </svg>
           </div>
@@ -843,9 +948,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
 
       {/* Content */}
       <ScrollArea className="flex-1 min-h-0">
-        <div className="px-5 py-4 space-y-2">
-          {renderFormContent()}
-        </div>
+        <div className="px-5 py-4 space-y-2">{renderFormContent()}</div>
       </ScrollArea>
     </aside>
   );

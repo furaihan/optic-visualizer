@@ -1,17 +1,12 @@
-/**
- * @license
- * SPDX-License-Identifier: Apache-2.0
- */
-
 import { useEffect } from "react";
-import { HeaderBar } from "./components/layout/HeaderBar";
-import { MobileTabManager } from "./components/layout/MobileTabManager";
-import { ValidationAlerts } from "./components/layout/ValidationAlerts";
-import { DesktopGrid } from "./components/layout/DesktopGrid";
-import { MobileViews } from "./components/layout/MobileViews";
-import { AppFooter } from "./components/layout/AppFooter";
+import { HeaderBar } from "@components/layout/HeaderBar";
+import { MobileTabManager } from "@components/layout/MobileTabManager";
+import { ValidationAlerts } from "@components/layout/ValidationAlerts";
+import { DesktopGrid } from "@components/layout/DesktopGrid";
+import { MobileViews } from "@components/layout/MobileViews";
+import { AppFooter } from "@components/layout/AppFooter";
 import { useSearch, useNavigate } from '@tanstack/react-router';
-import type { SimulatorSearchParams } from './routes/index';
+import type { SimulatorSearchParams } from '@/src/routes/index';
 
 export default function VisualizerPage() {
   const search = useSearch({ strict: false }) as SimulatorSearchParams;

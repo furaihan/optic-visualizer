@@ -1,7 +1,7 @@
 import { useOpticalContext } from '../../contexts/OpticalContext';
 import { useSearch } from '@tanstack/react-router';
 import { translations } from '../../lib/translations';
-import { OPTICAL_ENGINE_VERSION } from '../../lib/optical';
+import { OPTICAL_ENGINE_VERSION } from '../../lib/optic-engine/optical';
 import type { SimulatorSearchParams } from '../../routes/index';
 
 export function AppFooter() {

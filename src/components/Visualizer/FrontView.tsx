@@ -1,5 +1,5 @@
 import React from 'react';
-import { FrameParameters, PatientParameters, CalculationResult } from '../../lib/optical';
+import { FrameParameters, PatientParameters, CalculationResult } from '../../lib/optic-engine/types';
 import { Language, translations } from '../../lib/translations';
 
 interface FrontViewProps {

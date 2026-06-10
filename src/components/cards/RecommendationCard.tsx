@@ -6,7 +6,7 @@ import {
   CircleGaugeIcon,
 } from 'lucide-react';
 
-import { CalculationResult } from '../../lib/optical';
+import { CalculationResult } from '../../lib/optic-engine/types';
 import { translations, Language } from '../../lib/translations';
 import { Card, CardContent } from '../ui/card';
 import { Skeleton } from '../ui/skeleton';

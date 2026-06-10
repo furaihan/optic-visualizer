@@ -1,6 +1,6 @@
 import React from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { CalculationResult, FrameParameters, LensParameters } from '../../lib/optical';
+import { FrameParameters, LensParameters, CalculationResult } from '../../lib/optic-engine/types';
 import { translations, Language } from '../../lib/translations';
 import { ArrowUpRightIcon, ArrowDownRightIcon, AlertTriangleIcon, CheckCircle2Icon, InfoIcon, MoveHorizontalIcon, CompassIcon, DiameterIcon, ScaleIcon } from "lucide-react";
 import { Skeleton } from '../ui/skeleton';
