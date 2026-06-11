@@ -8,7 +8,7 @@ import {
 /**
  * Calculate aspheric sag: z(y) = (y²/R) / (1 + √(1 - (1+K)(y/R)²)) + polynomial
  */
-function getAsphericSag(
+export function getAsphericSag(
   R: number,
   yVal: number,
   conic: number,

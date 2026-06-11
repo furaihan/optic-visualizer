@@ -162,4 +162,19 @@ export const translations_en: AppTranslations = {
   homeLensVisualizerDesc: 'Simulate cross-section edge thickness, base curve profiling, and structural audits for spectacle lenses.',
   homeContactLenses: 'Contact Lens Simulator',
   homeContactLensesDesc: 'Corneal fitting modeling and contact lens parametric calculations.',
+
+  // Aspheric
+  asphericMode: 'Aspheric Mode',
+  asphericSurfaceFront: 'Front Surface',
+  asphericSurfaceBack: 'Back Surface',
+  surfaceActive: 'Active',
+  conicConstant: 'Conic (K)',
+  coeffA2: 'A2',
+  coeffA4: 'A4',
+  coeffA6: 'A6',
+  coeffA8: 'A8',
+  sphAberration: 'SA₀',
+  coma: 'Coma X',
+  asphericNav: 'Aspheric Lenses',
+  asphericParams: 'Aspheric Parameters',
 };

@@ -1,169 +1,213 @@
-# Aktriyo Measuring Project (AMP)
-> Professional simulator for optical lens thickness, frame protrusion, and 3D visual analysis developed for Aktriyo.
+# Optical Tools
 
-AMP is a highly precise, full-stack reactive viewport and calculation engine that assists opticians, optometrists, and frame/lens laboratories in simulating and predicting **lens edge thickness**, **center thickness**, and **spatial protrusion** within a chosen frame.
+> Professional simulator for optical lens thickness, frame protrusion, and 2D visual analysis.
 
-Built with **React**, **Three.js (React Three Fiber)**, and **Tailwind CSS**, it features a real-time responsive 3D visualization and an advanced recommendation engine that takes into account Rx prescriptions, frame dimensions, and patient characteristics.
+A precise, full-stack reactive viewport and calculation engine that assists opticians, optometrists, and frame/lens laboratories in simulating and predicting **lens edge thickness**, **center thickness**, and **spatial protrusion** within a chosen frame.
 
----
-
-## 📖 Ringkasan / Overview
-Di dalam optometri profesional, salah satu masalah estetika dan kenyamanan terbesar adalah tebal lensa di pinggir (untuk penderita lensa minus tinggi) atau tebal di tengah (untuk lensa plus tinggi), serta seberapa jauh ujung lensa menonjol keluar dari bingkai kacamata (Frame Protrusion).
-
-Aplikasi ini menyimulasikan:
-1. **Ketebalan Tepi & Pusat Lensa ($CT$ & $ET$)** berdasarkan resep bola (*Sphere*), silinder (*Cylinder*), dan sumbu (*Axis*).
-2. **Desentrasi Horizontal & Vertikal** berdasarkan kecocokan Pupil Distance ($PD$) dan Fitting Height pasien dengan ukuran frame kacamata ($A, B, DBL$).
-3. **Penonjolan Depan-Belakang (Anterior & Posterior Protrusion)** berdasarkan penempatan letak alur/bevel kacamata (*groove/bevel percent*).
-4. **Mesin Rekomendasi Material Pintar** yang menentukan material paling ideal (CR-39, MR-8, dll) sesuai kekuatan resep serta ketahanan mekanik tipe frame (Rimless, Half-Frame, Full-Frame).
+Built with **React 19**, **TypeScript**, **Tailwind CSS v4**, and **SVG**. Features real-time responsive 2D visualization, an advanced recommendation engine, multi-page routing, and full i18n support (English/Indonesian).
 
 ---
 
-## 📐 Rumus Fisika & Mekanisme Optik (Core Engine)
-Mesin perhitungan kami berada pada modul berkas `/src/lib/optical.ts`. Berikut merupakan rangkaian perumusan matematis yang diimplementasikan secara presisi:
+## Features
 
-### 1. Desentrasi Kombinasi ($d_{\text{combined}}$)
-Desentrasi terjadi akibat ketidakselarasan antara pusat optik lensa (yang sejajar pupil mata pasien) dengan pusat geometris kotak lensa pada frame. Hal ini secara signifikan memindahkan area tebal lensa ke sisi temporal atau nasal.
+- **Multi-page routing** — Home, Visualizer (Simple/Advanced modes), Aspheric, and Contact pages
+- **Three visualization views** — Side cross-section, Top-down, and Front view
+- **Lens comparison mode** — Compare two material indices side-by-side
+- **Dedicated Aspheric Lens route** (`/aspheric`) — Independent engine with per-surface conic K + A2/A4/A6/A8 controls, true aspheric SVG path rendering, and aberration metrics (SA₀, Coma X)
+- **Smart material recommendation** — Automatically selects optimal index based on SE power, frame type, and eye size
+- **Validation engine** — Real-time clinical and ergonomic input validation with alerts
+- **Dark/light theme** — Persistent theme toggle
+- **i18n (ID/EN)** — Language switching via URL search param (`?lang=`)
+- **Mobile-responsive** — Dedicated mobile layout with tab-based navigation
+- **Resizable panels** — Desktop grid layout with resizable sections
+- **Undo/Redo** — Session state history management
 
-*   **Pusat Bingkai Horisontal (Frame PD):**
-    $$F_{PD} = \text{A-Size} (a) + \text{Bridge} (dbl)$$
-*   **Desentrasi Horisontal ($d_H$):**
-    $$d_H = \frac{|F_{PD} - PD|}{2}$$
-*   **Desentrasi Vertikal ($d_V$):**
-    $$d_V = |\text{Fitting Height} - \frac{b}{2}|$$
-*   **Desentrasi Kombinasi ($d_{\text{combined}}$):**
-    $$d_{\text{combined}} = \sqrt{d_H^2 + d_V^2}$$
+---
 
-### 2. Radius Efektif Batas Lensa ($y$)
-Lensa dipotong sesuai diameter efektif terbesar ($ED$) bingkai ditambah akumulasi nilai desentrasi:
+## Core Engine Formulas
+
+The calculation engine lives in `src/lib/optic-engine/optical.ts`. Below are the implemented mathematical formulations:
+
+### 1. Combined Decentration ($d_{\text{combined}}$)
+
+- **Frame PD**: $F_{PD} = A + DBL$
+- **Horizontal Decentration**: $d_H = \frac{|F_{PD} - PD|}{2}$
+- **Vertical Decentration**: $d_V = |\text{Fitting Height} - \frac{B}{2}|$
+- **Combined**: $d_{\text{combined}} = \sqrt{d_H^2 + d_V^2}$
+
+### 2. Effective Radius ($y$)
+
 $$y = \frac{ED}{2} + d_{\text{combined}}$$
 
-### 3. Jari-jari Kelengkungan Permukaan Depan & Belakang ($R_1$ dan $R_2$)
-Kelengkungan permukaan lensa dikalkulasikan menggunakan indeks bias material ($n$) dan nilai kekuatan kelengkungan basis (*Base Curve* / $BC$):
-*   **Radius Permukaan Depan ($R_1$, dalam mm):**
-    $$R_1 = \frac{1000 \cdot (n - 1)}{BC}$$
-*   **Kekuatan Permukaan Belakang ($P_{\text{back}}$):**
-    $$P_{\text{back}} = P_{\text{calc}} - BC$$
-    *(Di mana $P_{\text{calc}}$ adalah kekuatan lensa pada meridian terkuat untuk memprediksi ketebalan terburuk/worst-case)*
-*   **Radius Permukaan Belakang ($R_2$, dalam mm):**
-    $$R_2 = \begin{cases} \infty, & \text{jika } P_{\text{back}} = 0 \\ \frac{1000 \cdot (n - 1)}{|P_{\text{back}}|}, & \text{jika } P_{\text{back}} \neq 0 \end{cases}$$
+### 3. Surface Radii ($R_1$, $R_2$)
 
-### 4. Formula Sagitta ($s_1$ dan $s_2$)
-Formula sagitta digunakan untuk menghitung kedalaman lengkung dari masing-masing permukaan anterior ($s_1$) dan posterior ($s_2$):
+- **Front radius**: $R_1 = \frac{1000 \cdot (n - 1)}{BC}$
+- **Back surface power**: $P_{\text{back}} = P_{\text{calc}} - BC$
+- **Back radius**: $R_2 = \begin{cases} \infty, & \text{if } P_{\text{back}} = 0 \\ \frac{1000 \cdot (n - 1)}{|P_{\text{back}}|}, & \text{if } P_{\text{back}} \neq 0 \end{cases}$
+
+### 4. Sagitta Formula ($s_1$, $s_2$)
+
 $$s = R - \sqrt{R^2 - y^2}$$
-*Jika lensa datar ($R = \infty$), maka nilai sagitta $s = 0$.*
 
-### 5. Ketebalan Pusat ($CT$) & Ketebalan Samping ($ET$)
-Sistem menetapkan batasan kelayakan mekanis dengan ketebalan minimum ($t_{\text{min}}$) sebesar `1.0 mm` (bisa bervariasi bergantung setelan):
-*   **Untuk Lensa Plus ($P_{\text{calc}} \ge 0$):**
-    Ketebalan tepi ($ET$) diposisikan pada batas minimum $t_{\text{min}}$. Ketebalan pusat ($CT$) dihitung sebagai:
-    $$CT = t_{\text{min}} + s_1 - s_2 \quad (\text{untuk } P_{\text{back}} \le 0)$$
-    $$CT = t_{\text{min}} + s_1 + s_2 \quad (\text{untuk } P_{\text{back}} > 0)$$
-*   **Untuk Lensa Minus ($P_{\text{calc}} < 0$):**
-    Ketebalan pusat ($CT$) diposisikan pada batas minimum $t_{\text{min}}$. Ketebalan tepi ($ET$) dihitung sebagai:
-    $$ET = t_{\text{min}} + s_2 - s_1 \quad (\text{untuk } P_{\text{back}} \le 0)$$
-    $$ET = t_{\text{min}} + s_1 + s_2 \quad (\text{untuk } P_{\text{back}} > 0)$$
+(If $R = \infty$, $s = 0$)
 
-### 6. Projeksi Penonjolan Lensa pada Frame (Protrusion)
-Lensa diletakkan pada bingkai menggunakan persentase alur bezel (*Groove/Bevel Percent*). Nilai ini menentukan seberapa besar sisa lensa menonjol keluar bingkai ke bagian depan (*Anterior*) maupun ke bagian belakang (*Posterior*):
-*   **Posisi Bevel ($x_{\text{groove}}$):**
-    $$x_{\text{groove}} = \text{Frame Depth} \times \text{Bevel Percent}$$
-*   **Penonjolan Depan ($Anterior$):**
-    $$Front_{X} = \left(x_{\text{groove}} - \frac{ET}{2}\right) - s_1$$
-    $$\text{Anterior Protrusion} = \max(0, -Front_{X})$$
-*   **Penonjolan Belakang ($Posterior$):**
-    $$Back_{X} = x_{\text{groove}} + \frac{ET}{2}$$
-    $$\text{Posterior Protrusion} = \max(0, Back_{X} - \text{Frame Depth})$$
+### 5. Center Thickness ($CT$) & Edge Thickness ($ET$)
+
+Minimum thickness $t_{\text{min}} = 1.0\text{mm}$:
+
+- **Plus lenses** ($P_{\text{calc}} \ge 0$): $ET = t_{\text{min}}$, then $CT = t_{\text{min}} + s_1 \pm s_2$
+- **Minus lenses** ($P_{\text{calc}} < 0$): $CT = t_{\text{min}}$, then $ET = t_{\text{min}} + s_2 \pm s_1$
+
+(Sign depends on $P_{\text{back}}$)
+
+### 6. Frame Protrusion
+
+- **Groove position**: $x_{\text{groove}} = \text{Frame Depth} \times \text{Bevel Percent}$
+- **Anterior Protrusion**: $\max(0,\; x_{\text{groove}} - \frac{ET}{2} - s_1)$
+- **Posterior Protrusion**: $\max(0,\; x_{\text{groove}} + \frac{ET}{2} - \text{Frame Depth})$
 
 ---
 
-## 🛠️ Rekomendasi Material Pintar (Recommendation Engine)
-AMP memiliki algoritma canggih yang secara otomatis menganalisis parameter fisik resep dan bingkai Anda untuk menyarankan jenis material indeks bias optimal:
+## Aspheric Engine
 
-| Rentang S.E (Sph Equivalent) | Rekomendasi Indeks | Nama Umum Material | Klasifikasi & Nilai Abbe ($V_d$) | Alasan Utama & Keunggulan |
-| :--- | :---: | :---: | :---: | :--- |
-| **$\le 2.00$ D** | **1.50** | CR-39 | Abbe 58 (Highest Clarity) | Daya jernih maksimal, minim aberasi kromatik. |
-| **$> 2.00$ s/d $\le 3.00$ D** | **1.56** | Mid-Index (NK-55) | Abbe 38 (Standard Mid) | Keseimbangan biaya ekonomis dengan reduksi ketebalan ~15%. |
-| **$> 3.00$ s/d $\le 5.00$ D** | **1.61** | High-Index (MR-8) | Abbe 42 (Tough Poly) | Sangat tahan benturan, reduksi tebal ~25% dengan nilai Abbe baik. |
-| **$> 5.00$ s/d $\le 8.00$ D** | **1.67** | Ultra High-Index (MR-10) | Abbe 32 | Reduksi ketebalan signifikan hingga ~35% untuk power tinggi. |
-| **$> 8.00$ D** | **1.74** | Premium (MR-174) | Abbe 33 (Thinnest Option) | Hasil estetika paling tipis (~45% reduksi tebal), sangat disarankan. |
+The aspheric calculation engine lives in `src/lib/optic-engine/aspheric.ts` and powers the `/aspheric` route independently from the spherical engine.
 
-### Aturan Override Khusus (Mekanika Frame):
-1.  **Half-Rim Frame Override:** Jika terdeteksi tipe bingkai gantung (*half-rim*), indeks minimum dipaksa ke **1.56** (NK-55) guna memastikan kekuatan tarik tinggi untuk alur senar nilon agar lensa tidak mudah gupil (*chipping*).
-2.  **Rimless Frame Override:** Jika terdeteksi tipe bingkai bor (*rimless*), indeks minimum dipaksa ke **1.61** (MR-8) sebab material MR-8 memiliki elastisitas tinggi dan tidak akan pecah saat dibor (*stress-fracture resistant*).
-3.  **Large Eye Size Penalty:** Jika ukuran horizontal mata lensa ($A$) melebihi **54mm** pada lensa minus, mesin akan otomatis meningkatkan rekomendasi indeks bias 1 tingkat lebih tinggi dari aturan standar karena ukuran kacamata lebar akan melipatgandakan ketebalan tepi luar secara drastis.
+### Aspheric Sagitta Formula
+
+$$z(y) = \frac{y^2}{R} \bigg/ \left(1 + \sqrt{1 - (1 + K)\frac{y^2}{R^2}}\right) + A_2 y^2 + A_4 y^4 + A_6 y^6 + A_8 y^8$$
+
+Where:
+- $R$ = base radius of curvature
+- $K$ = conic constant ($K = 0$ sphere, $K \lt -1$ hyperbola, $K = -1$ parabola)
+- $A_2, A_4, A_6, A_8$ = even aspheric polynomial coefficients
+
+### Per-Surface Control
+
+Each surface (front/back) has an independent `isActive` toggle, allowing:
+- Spherical front + Aspheric back
+- Aspheric front + Spherical back
+- Both aspheric
+- Both spherical (degenerates to standard spherical calculation)
+
+### Aberration Metrics
+
+- **Spherical Aberration (SA₀)**: $\text{SA}_0 = |K \times 0.05|$ (simplified)
+- **Coma (Coma X)**: Reserved for future higher-order implementation
 
 ---
 
-## 📦 Struktur Komponen Utama (Architecture)
+## Smart Material Recommendation
 
-```bash
-/src
-├── App.tsx                    # Layout Utama & Sistem Grid Responsif (Desktop & Mobile)
-├── index.css                  # Konfigurasi Tailwind CSS v4 & Muatan Font Global
-├── main.tsx                   # Entry point aplikasi dengan integrasi TanStack Router
+| SE Range (D) | Recommended Index | Material Name | Abbe Value | Thickness Reduction |
+|:---|---:|:---|:---:|:---|
+| $\le 2.00$ | **1.50** | CR-39 (Standard) | 58 | 0% |
+| $> 2.00$ to $\le 3.00$ | **1.56** | Mid-Index (NK-55) | 38 | ~15% |
+| $> 3.00$ to $\le 5.00$ | **1.61** | High-Index (MR-8) | 42 | ~25% |
+| $> 5.00$ to $\le 8.00$ | **1.67** | Ultra High-Index (MR-10) | 32 | ~35% |
+| $> 8.00$ | **1.74** | Premium Index (MR-174) | 33 | ~45% |
+
+### Frame-Type Overrides
+1. **Half-Rim** — Minimum index forced to **1.56** (NK-55) for nylon string groove tensile strength
+2. **Rimless** — Minimum index forced to **1.61** (MR-8) for drill-hole durability
+3. **Large Eye Size ($A \ge 54$mm)** — Index automatically bumped one level higher for minus lenses
+
+---
+
+## Architecture
+
+```
+src/
 ├── components/
-│   ├── Sidebar.tsx            # Input parameter optometri presisi (Rx, Frame, Pasien)
-│   ├── CurvatureCard.tsx      # Analisis kelengkungan Base Curve anterior & posterior
-│   ├── Visualizer.tsx         # Render 3D Interaktif (WebGL via React Three Fiber)
-│   ├── SummaryCard.tsx        # Matriks utama (CT, ET, Protrusion) dengan peringatan ergonomis
-│   └── RecommendationCard.tsx # Panel AI heuristik penentuan material lensa
+│   ├── cards/               # CurvatureCard, RecommendationCard, SummaryCard
+│   ├── layout/              # AppFooter, DesktopGrid, HeaderBar, MobileTabManager,
+│   │                        # MobileViews, ValidationAlerts
+│   ├── Sidebar/             # BevelControl, Control, FittingSpecsSection,
+│   │                        # FrameGeometrySection, FrameInput, FrameParamField,
+│   │                        # FrameTypeSelector, LabelWithTooltip,
+│   │                        # LensParametersSection, LimitAlertButton,
+│   │                        # RefractiveIndexDropdown, SidebarHeader
+│   ├── ui/                  # 25 shadcn/ui primitives (button, card, select, slider, etc.)
+│   ├── Visualizer/          # FrameProfile, FrontView, LensProfile, TopDownView,
+│   │                        # index.tsx, types.ts
+│   ├── AsphericSidebar.tsx  # Aspheric surface controls (conic, coefficients)
+│   ├── AsphericVisualizer.tsx # SVG visualizer with true aspheric path rendering
+│   ├── AsphericDesktopGrid.tsx # Aspheric-specific desktop layout
+│   ├── ErrorBoundary.tsx
+│   ├── RootLayout.tsx
+│   └── Sidebar.tsx
+├── contexts/
+│   ├── OpticalContext.tsx    # React Context for spherical optical state management
+│   └── AsphericContext.tsx   # React Context for aspheric optical state management
+├── data/
+│   └── materials.ts         # Centralized material database & ergonomic limits
 ├── hooks/
-│   ├── useOpticalState.ts     # Manajemen mutasi perhitungan lokal & status optik
-│   ├── useKeyboardShortcuts.ts# Injeksi navigasi cepat menggunakan keyboard
-│   └── useTheme.ts            # Toggling mode Gelap/Terang
-└── lib/
-    ├── translations/          # Lokalisasi modular terpusat (ID & EN)
-    ├── optical.ts             # Core Mathematical Engine kalkulator lensa
-    ├── optical.test.ts        # Unit test Vitest untuk verifikasi kalkulasi optik
-    └── utils.ts               # Utilitas pembantu (styling gabungan Tailwind/clsx)
+│   ├── useMediaQuery.ts     # Responsive breakpoint detection
+│   ├── useOpticalState.ts   # Core spherical state management, calculation dispatch, undo/redo
+│   ├── useAsphericState.ts  # Dedicated aspheric state management, calculation dispatch
+│   └── useTheme.tsx         # Dark/light theme toggle
+├── lib/
+│   ├── optic-engine/        # optical.ts, aspheric.ts, types.ts, validation.ts, optical.test.ts
+│   ├── translations/        # en.ts, id.ts, index.ts, types.ts
+│   └── utils.ts             # Tailwind class merging utility
+├── pages/
+│   ├── HomePage.tsx         # Landing page with module selection
+│   ├── VisualizerPage.tsx   # Spherical simulator page (simple + advanced tabs)
+│   ├── AsphericPage.tsx     # Aspheric simulator page (simple + advanced tabs)
+│   └── ContactPage.tsx      # Contact information page
+├── routes/
+│   ├── root.tsx             # Root route with OpticalProvider + AsphericProvider
+│   ├── index.tsx            # Home route (/) configuration
+│   ├── contact.tsx          # Contact route configuration
+│   ├── visualizer.tsx       # Spherical visualizer routes (/visualizer/simple, /visualizer/advanced)
+│   ├── aspheric.tsx         # Aspheric visualizer routes (/aspheric/simple, /aspheric/advanced)
+│   └── router.tsx           # TanStack Router instantiation with route tree
+├── index.css                # Tailwind CSS v4 styles & global fonts
+├── main.tsx                 # Application entry point
+└── types.d.ts               # Global type declarations (Vite client types)
 ```
 
 ---
 
-## 💎 Precise Optometric Control System
-Menanggapi kebutuhan alat optik profesional yang menuntut tingkat akurasi tinggi, kontrol kami dimodifikasi dengan standar industri:
+## Installation & Development
 
-*   **Keyboard & Discrete Stepping:** Slider rentan terhadap nilai sub-desimal acak. Kami mengimplementasikan komponen input numerik statis yang mematuhi kelipatan klinis (contoh: step `0.25 D` untuk Sphere/Cylinder).
-*   **Stateful Validations:** Parameter yang tidak mungkin (misal `PD` < 40mm atau `ET` negatif) dikelola oleh peredam mutasi input `useOpticalState`.
+### Prerequisites
 
----
+Node.js **v18** or **v20+**.
 
-## 🔧 Panduan Instalasi & Pengembangan
+### Setup
 
-### Prasyarat
-Sistem membutuhkan runtime Node.js minimum versi `v18` atau `v20+`.
+```bash
+# Install dependencies
+npm install
 
-### Langkah-Langkah
+# Start development server (port 3000 with HMR)
+npm run dev
 
-1.  **Instalasi Dependensi:**
-    Jalankan perintah berikut untuk menginstal semua library pendukung (React 19, Three.js, Tailwind v4, Shadcn UI):
-    ```bash
-    npm install
-    ```
+# Type-check with TypeScript
+npm run lint
 
-2.  **Jalankan Server Lokal (Development):**
-    Aktifkan server Vite dengan Hot Module Replacement:
-    ```bash
-    npm run dev
-    ```
-    Buka `http://localhost:3000` pada peramban web/browser Anda.
+# Run unit tests (Vitest)
+npm run test
 
-3.  **Pengujian Unit (Unit Testing):**
-    Validasi mesin kalkulasi optik menggunakan Vitest untuk memastikan persamaan matematika tidak mengalami regresi:
-    ```bash
-    npm run test
-    ```
+# Production build
+npm run build
 
-4.  **Kompilasi Produksi (Production Build):**
-    Membuat static build dalam folder `/dist` untuk siap diluncurkan:
-    ```bash
-    npm run build
-    ```
+# Preview production build
+npm run preview
+```
 
 ---
 
-## 💡 Versi Rilis
-Mesin kalkulasi berjalan pada versi core **`AMP_V4.2.0`**.
-Aplikasi ini memanfaatkan arsitektur React modern berbasis fitur untuk efisiensi render (memperhitungkan TanStack Router untuk parameter URL persisten, React 19 API, Vite bundler).
+## Deployment
 
-Didesain secara presisi, ergonomis, dan fungsional untuk **Akademi Optometri Yogyakarta (Aktriyo)**.
+See:
+- [`deploy-guide.md`](./deploy-guide.md) — Static SPA deployment
+- [`deploy-guide-docker.md`](./deploy-guide-docker.md) — Docker multi-stage build deployment
+
+---
+
+## Version
+
+**v0.5.0** — Engine core: `AMP_V4.2.0` / `AMP_ASPH_V1.0.0`
+
+Designed for **Akademi Optometri Yogyakarta (Aktriyo)**.

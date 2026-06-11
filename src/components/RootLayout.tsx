@@ -1,6 +1,6 @@
 import { Outlet, Link, useSearch, useNavigate, useRouterState } from '@tanstack/react-router';
 import { TooltipProvider } from './ui/tooltip';
-import { GlassesIcon, DropletIcon, HomeIcon, MenuIcon, ChevronLeftIcon, MoonIcon, SunIcon } from "lucide-react";
+import { GlassesIcon, DropletIcon, HomeIcon, MenuIcon, ChevronLeftIcon, MoonIcon, SunIcon, SparklesIcon } from "lucide-react";
 import React, { useState, useEffect } from 'react';
 import { Button } from './ui/button';
 import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem } from './ui/dropdown-menu';
@@ -44,6 +44,7 @@ function GlobalNav() {
   const navItems = [
     { to: '/', icon: <HomeIcon size={20} />, label: lang === 'id' ? 'Beranda' : 'HomeIcon', exact: true },
     { to: '/visualizer', icon: <GlassesIcon size={20} />, label: lang === 'id' ? 'Lensa' : 'Lenses' },
+    { to: '/aspheric', icon: <SparklesIcon size={20} />, label: lang === 'id' ? 'Aspheric' : 'Aspheric' },
     { to: '/contact', icon: <DropletIcon size={20} />, label: lang === 'id' ? 'Kontak' : 'Contact' },
   ];
 

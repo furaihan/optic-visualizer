@@ -162,4 +162,19 @@ export const translations_id: AppTranslations = {
   homeLensVisualizerDesc: 'Simulasikan ketebalan profil tepi, rekomendasi base curve, kurva asferis, dan audit geometri untuk lensa',
   homeContactLenses: 'Simulator Lensa Kontak',
   homeContactLensesDesc: 'Pemodelan fitting kornea parameter lensa kontak',
+
+  // Aspheric
+  asphericMode: 'Mode Aspheric',
+  asphericSurfaceFront: 'Permukaan Depan',
+  asphericSurfaceBack: 'Permukaan Belakang',
+  surfaceActive: 'Aktif',
+  conicConstant: 'Konik (K)',
+  coeffA2: 'A2',
+  coeffA4: 'A4',
+  coeffA6: 'A6',
+  coeffA8: 'A8',
+  sphAberration: 'SA₀',
+  coma: 'Coma X',
+  asphericNav: 'Lensa Aspheric',
+  asphericParams: 'Parameter Aspheric',
 };

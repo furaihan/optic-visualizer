@@ -154,4 +154,19 @@ export interface AppTranslations {
   homeLensVisualizerDesc: string;
   homeContactLenses: string;
   homeContactLensesDesc: string;
+
+  // Aspheric
+  asphericMode: string;
+  asphericSurfaceFront: string;
+  asphericSurfaceBack: string;
+  surfaceActive: string;
+  conicConstant: string;
+  coeffA2: string;
+  coeffA4: string;
+  coeffA6: string;
+  coeffA8: string;
+  sphAberration: string;
+  coma: string;
+  asphericNav: string;
+  asphericParams: string;
 }

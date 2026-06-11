@@ -1,5 +1,6 @@
 import { createRootRoute } from '@tanstack/react-router';
 import { OpticalProvider } from '../contexts/OpticalContext';
+import { AsphericProvider } from '../contexts/AsphericContext';
 import { RootLayout } from '../components/RootLayout';
 
 type GlobalSearchParams = { lang?: 'id' | 'en' };
@@ -12,7 +13,9 @@ export const rootRoute = createRootRoute({
   }),
   component: () => (
     <OpticalProvider>
-      <RootLayout />
+      <AsphericProvider>
+        <RootLayout />
+      </AsphericProvider>
     </OpticalProvider>
   ),
 });
