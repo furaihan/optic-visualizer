@@ -47,7 +47,7 @@ export const RefractiveIndexDropdown: React.FC<RefractiveIndexDropdownProps> = (
           <ChevronDownIcon size={14} className="opacity-50" />
         </DropdownMenuTrigger>
         <DropdownMenuContent
-          className="w-[var(--anchor-width)] min-w-0"
+          className="w-(--anchor-width) min-w-0"
           align="start"
         >
           <DropdownMenuRadioGroup
@@ -96,7 +96,7 @@ export const RefractiveIndexDropdown: React.FC<RefractiveIndexDropdownProps> = (
             <ChevronDownIcon size={14} className="opacity-50" />
           </DropdownMenuTrigger>
           <DropdownMenuContent
-            className="w-[var(--anchor-width)] min-w-0"
+            className="w-(--anchor-width) min-w-0"
             align="start"
           >
             <DropdownMenuRadioGroup

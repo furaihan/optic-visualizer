@@ -43,7 +43,7 @@ export function HomePage() {
               </Badge>
             </div>
 
-            <h1 className="bg-gradient-to-b from-foreground to-foreground/70 bg-clip-text text-5xl font-bold tracking-tighter sm:text-7xl text-transparent">
+            <h1 className="bg-linear-to-b from-foreground to-foreground/70 bg-clip-text text-5xl font-bold tracking-tighter sm:text-7xl text-transparent">
               {t.homeTitle}
             </h1>
 
@@ -56,7 +56,7 @@ export function HomePage() {
           <section className="mx-auto grid max-w-4xl gap-6 md:grid-cols-1">
             <Card className="group relative overflow-hidden border transition-all duration-300 hover:shadow-md hover:-translate-y-0.5 hover:border-foreground/10">
               {/* Hover background effect */}
-              <div className="absolute inset-0 bg-gradient-to-br from-transparent to-foreground/[0.01] opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
+              <div className="absolute inset-0 bg-linear-to-br from-transparent to-foreground/1 opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
 
               <CardHeader className="relative">
                 <div className="mb-6 flex h-14 w-14 items-center justify-center rounded-lg bg-blue-500/10 text-blue-600 transition-transform duration-300 group-hover:scale-110">

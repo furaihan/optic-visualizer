@@ -79,7 +79,7 @@ export const translations_id: AppTranslations = {
   primarySpec: 'Spek Utama',
   comparison: 'Perbandingan',
   frontView: 'Tampilan Depan',
-  threeDView: 'Tampilan 3D',
+
   overhang: 'Overhang',
   pupil: 'Pupil',
   groove: 'Alur (Groove)',

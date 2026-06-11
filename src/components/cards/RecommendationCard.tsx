@@ -267,7 +267,7 @@ export const RecommendationCard: React.FC<RecommendationCardProps> = ({
                     className="
                       h-full
                       rounded-full
-                      bg-gradient-to-r
+                      bg-linear-to-r
                       from-blue-500
                       via-cyan-400
                       to-cyan-300

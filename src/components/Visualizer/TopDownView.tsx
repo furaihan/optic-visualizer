@@ -1,5 +1,4 @@
 import React from "react";
-import { motion } from "motion/react";
 import {
   LensParameters,
   FrameParameters,
@@ -151,10 +150,8 @@ export const TopDownView: React.FC<TopDownViewProps> = ({
         return (
           <g key={`lenses-${side}`}>
             {compareResult && compareLens && (
-              <motion.path
-                animate={{
-                  d: getLensPathTop(compareResult, compareLens, side),
-                }}
+              <path
+                d={getLensPathTop(compareResult, compareLens, side)}
                 fill="url(#diagonal-stripes)"
                 fillOpacity="1.0"
                 stroke="#10b981"
@@ -162,8 +159,8 @@ export const TopDownView: React.FC<TopDownViewProps> = ({
                 strokeOpacity="0.5"
               />
             )}
-            <motion.path
-              animate={{ d: getLensPathTop(result, lens, side) }}
+            <path
+              d={getLensPathTop(result, lens, side)}
               fill="#3b82f6"
               fillOpacity={
                 highlightedLimit === "a" || highlightedLimit === "ed"

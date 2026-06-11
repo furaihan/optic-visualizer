@@ -6,7 +6,7 @@ export interface LensParameters {
   sph: number;
   cyl: number;
   axis: number;
-  index: number;
+  index: LensIndex;
   baseCurve: number;
 }
 
@@ -36,7 +36,7 @@ export interface AsphericLensParameters {
   sph: number;
   cyl: number;
   axis: number;
-  index: number;
+  index: LensIndex;
   baseCurve: number;
   asphericFront: AsphericSurfaceConfig;
   asphericBack: AsphericSurfaceConfig;

@@ -85,7 +85,7 @@ export const CurvatureCard: React.FC<CurvatureCardProps> = ({ result, lang }) =>
           pb-4
           border-b
           border-slate-100 dark:border-slate-800
-          bg-gradient-to-r
+          bg-linear-to-r
           from-slate-50
           to-white
           dark:from-slate-900

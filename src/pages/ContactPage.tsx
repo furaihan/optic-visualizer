@@ -39,7 +39,7 @@ export function ContactPage() {
   }, []);
 
   return (
-    <div className="relative h-screen w-full overflow-hidden bg-gradient-to-br from-background via-background to-muted/30 text-foreground">
+    <div className="relative h-screen w-full overflow-hidden bg-linear-to-br from-background via-background to-muted/30 text-foreground">
       {/* Spotlight Effect - Disabled on mobile/touch for performance */}
       {!isMobile && (
         <div
@@ -167,7 +167,7 @@ export function ContactPage() {
 
       {/* Main content */}
       <ScrollArea className="h-screen w-full relative z-10">
-        <div className="flex flex-col items-center justify-center min-h-full px-4 py-8 sm:px-6 lg:px-8 min-h-[100vh]">
+        <div className="flex flex-col items-center justify-center px-4 py-8 sm:px-6 lg:px-8 min-h-screen">
           <div className="w-full max-w-2xl mx-auto text-center space-y-6 sm:space-y-8">
           {/* Badge with icons */}
           <div className="inline-block">
@@ -212,7 +212,7 @@ export function ContactPage() {
               <br />
 
               <span
-                className="inline-block bg-gradient-to-r from-primary via-cyan-500 to-blue-500 bg-clip-text text-transparent relative"
+                className="inline-block bg-linear-to-r from-primary via-cyan-500 to-blue-500 bg-clip-text text-transparent relative"
                 style={{
                   animation:
                     "slide-in-letter 0.6s ease-out 0.5s forwards",
@@ -222,7 +222,7 @@ export function ContactPage() {
                 Placeholder Page
                 {/* Animated underline */}
                 <span 
-                  className="absolute -bottom-1 sm:-bottom-2 left-0 h-1 sm:h-[4px] rounded-full bg-gradient-to-r from-primary via-cyan-500 to-purple-500 bg-[length:200%_auto] w-full origin-left scale-x-0 transition-transform duration-500 ease-out group-hover:scale-x-100"
+                  className="absolute -bottom-1 sm:-bottom-2 left-0 h-1 sm:h-[4px] rounded-full bg-linear-to-r from-primary via-cyan-500 to-purple-500 bg-size-[200%_auto] w-full origin-left scale-x-0 transition-transform duration-500 ease-out group-hover:scale-x-100"
                   style={{
                     animation: "gradient-shift 3s linear infinite",
                   }}
@@ -241,13 +241,13 @@ export function ContactPage() {
           >
             Lorem ipsum dolor sit amet lorep ipsum dolor sit amet
             <span 
-              className="absolute -bottom-0.5 sm:-bottom-1 left-0 h-[1px] sm:h-[2px] rounded-full bg-muted-foreground/30 w-full origin-left scale-x-0 transition-transform duration-500 ease-out group-hover:scale-x-100"
+              className="absolute -bottom-0.5 sm:-bottom-1 left-0 h-px sm:h-[2px] rounded-full bg-muted-foreground/30 w-full origin-left scale-x-0 transition-transform duration-500 ease-out group-hover:scale-x-100"
             />
           </p>
 
           {/* Notice Card with Border Gradient and icons */}
           <div
-            className="mt-8 sm:mt-12 p-[1px] rounded-lg sm:rounded-xl bg-gradient-to-r from-primary/50 via-cyan-500/50 to-purple-500/50 bg-[length:200%_auto] relative group hover:-translate-y-2 transition-all duration-500 ease-out hover:shadow-2xl hover:shadow-primary/20 w-full"
+            className="mt-8 sm:mt-12 p-px rounded-lg sm:rounded-xl bg-linear-to-r from-primary/50 via-cyan-500/50 to-purple-500/50 bg-size-[200%_auto] relative group hover:-translate-y-2 transition-all duration-500 ease-out hover:shadow-2xl hover:shadow-primary/20 w-full"
             style={{
               animation:
                 "fade-in-up 0.8s ease-out 0.8s forwards, gradient-shift 4s linear infinite",
@@ -255,7 +255,7 @@ export function ContactPage() {
             }}
           >
             {/* Glow behind card */}
-            <div className="absolute inset-0 bg-gradient-to-r from-primary/30 via-cyan-500/30 to-purple-500/30 blur-xl opacity-0 group-hover:opacity-100 transition-opacity duration-500 rounded-lg sm:rounded-xl" />
+            <div className="absolute inset-0 bg-linear-to-r from-primary/30 via-cyan-500/30 to-purple-500/30 blur-xl opacity-0 group-hover:opacity-100 transition-opacity duration-500 rounded-lg sm:rounded-xl" />
             
             <Card
               className="bg-background/80 backdrop-blur-md border-none overflow-hidden relative z-10 w-full"
@@ -266,7 +266,7 @@ export function ContactPage() {
             >
               <CardContent className="pt-4 sm:pt-6 px-4 sm:px-6">
                 <div className="flex flex-col sm:flex-row items-start gap-3 sm:gap-4 text-left">
-                  <AlertCircleIcon size={28} className="text-yellow-500 flex-shrink-0" />
+                  <AlertCircleIcon size={28} className="text-yellow-500 shrink-0" />
 
                   <div className="min-w-0 flex-1">
                     <h3 className="font-mono font-bold text-xs sm:text-sm uppercase tracking-wider mb-2 text-primary flex items-center gap-2">
@@ -368,9 +368,9 @@ export function ContactPage() {
               onClick={() => window.history.back()}
               className="group relative overflow-hidden mt-4 sm:mt-6 hover:-translate-y-1 transition-all duration-300 hover:shadow-lg hover:shadow-primary/25 w-full sm:w-auto"
             >
-              <ArrowLeftIcon className="h-4 w-4 mr-2 group-hover:-translate-x-1 transition-transform flex-shrink-0" />
+              <ArrowLeftIcon className="h-4 w-4 mr-2 group-hover:-translate-x-1 transition-transform shrink-0" />
               <span>Back to Homepage</span>
-              <RocketIcon className="h-4 w-4 ml-2 group-hover:translate-x-1 transition-transform flex-shrink-0" />
+              <RocketIcon className="h-4 w-4 ml-2 group-hover:translate-x-1 transition-transform shrink-0" />
 
               <span
                 className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity"

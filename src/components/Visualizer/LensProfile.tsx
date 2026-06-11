@@ -1,5 +1,4 @@
 import React from 'react';
-import { motion } from 'motion/react';
 import { LensParameters, CalculationResult } from '../../lib/optic-engine/types';
 import { Language, translations } from '../../lib/translations';
 import { LensPosition, HoverLabel } from './types';
@@ -61,15 +60,13 @@ export const LensProfile: React.FC<LensProfileProps> = ({
 
   return (
     <g transform={`translate(${centerX}, ${centerY})`} key={label}>
-      <motion.path
-        initial={false}
-        animate={{ d: lensPath }}
+      <path
+        d={lensPath}
         fill={label === 'secondary' ? "url(#diagonal-stripes)" : color}
         fillOpacity={label === 'secondary' ? 1.0 : opacity}
         stroke={color}
         strokeWidth={label === 'secondary' ? "1.5" : "1"}
         strokeOpacity={opacity + 0.3}
-        transition={{ duration: 0.5, ease: "easeInOut" }}
       />
       
       {/* Dimensions Labels */}

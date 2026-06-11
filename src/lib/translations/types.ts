@@ -73,7 +73,7 @@ export interface AppTranslations {
   primarySpec: string;
   comparison: string;
   frontView: string;
-  threeDView: string;
+
   overhang: string;
   pupil: string;
   groove: string;

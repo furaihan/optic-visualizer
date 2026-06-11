@@ -13,7 +13,7 @@ export function AppFooter() {
 
   return (
     <footer className="h-7 bg-white dark:bg-slate-950 border-t border-slate-200 dark:border-slate-900 text-slate-400 dark:text-slate-500 px-4 md:px-6 flex items-center justify-between text-[8px] font-mono shrink-0 z-20 overflow-hidden shadow-sm">
-      <div className="flex gap-4 md:gap-6 uppercase tracking-[0.1em] truncate mr-2">
+      <div className="flex gap-4 md:gap-6 uppercase tracking-widest truncate mr-2">
         <span className="flex gap-1 md:gap-1.5">
           <span className="text-slate-300 dark:text-slate-600">{t.framePd}:</span>{" "}
           {(frame.a + frame.dbl).toFixed(1)}mm

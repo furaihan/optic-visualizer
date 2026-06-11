@@ -79,7 +79,7 @@ export const translations_en: AppTranslations = {
   primarySpec: 'Primary Spec',
   comparison: 'Comparison',
   frontView: 'Front View',
-  threeDView: '3D View',
+
   overhang: 'Overhang',
   pupil: 'Pupil',
   groove: 'Groove',

@@ -34,7 +34,6 @@ import {
   CollapsibleContent,
 } from "./ui/collapsible";
 import { RadioGroup, RadioGroupItem } from "./ui/radio-group";
-import { motion, AnimatePresence } from "framer-motion";
 import { LabelWithTooltip } from "./Sidebar/LabelWithTooltip";
 import { Control } from "./Sidebar/Control";
 import { FrameInput } from "./Sidebar/FrameInput";
@@ -406,26 +405,20 @@ const ComparisonModeToggle: React.FC<ComparisonModeToggleProps> = ({
         </div>
 
         <FieldContent>
-          <AnimatePresence>
-            {compareMode && (
-              <motion.div
-                initial={{ opacity: 0, height: 0 }}
-                animate={{ opacity: 1, height: "auto" }}
-                exit={{ opacity: 0, height: 0 }}
-                transition={{ duration: 0.2 }}
-                className="overflow-hidden"
-              >
-                <RefractiveIndexDropdown
-                  index={compareIndex}
-                  onChange={onCompareIndexChange}
-                  indices={indices}
-                  lang={lang}
-                  showLabel={false}
-                  showIcon={false}
-                />
-              </motion.div>
-            )}
-          </AnimatePresence>
+          <div
+            className={`overflow-hidden transition-all duration-200 ease-out ${
+              compareMode ? 'max-h-[300px] opacity-100' : 'max-h-0 opacity-0'
+            }`}
+          >
+            <RefractiveIndexDropdown
+              index={compareIndex}
+              onChange={onCompareIndexChange}
+              indices={indices}
+              lang={lang}
+              showLabel={false}
+              showIcon={false}
+            />
+          </div>
         </FieldContent>
       </Field>
     </Card>

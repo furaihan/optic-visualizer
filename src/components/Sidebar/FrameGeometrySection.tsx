@@ -1,7 +1,7 @@
 import { FrameParameters, FrameType } from "@/src/lib/optic-engine/types";
 import { INPUT_SPECS } from "@/src/lib/optic-engine/validation";
 import { translations, Language } from "@/src/lib/translations";
-import { AnimatePresence, motion } from "framer-motion";
+
 import { AlertCircleIcon, GaugeIcon } from "lucide-react";
 import { FrameParamField } from "./FrameParamField";
 import { Control } from "./Control";
@@ -154,27 +154,22 @@ export const FrameGeometrySection: React.FC<FrameGeometrySectionProps> = ({
       />
 
       {/* Warning Message */}
-      <AnimatePresence>
-        {isAnyExceeding && (
-          <motion.div
-            initial={{ opacity: 0, height: 0, marginTop: 0 }}
-            animate={{ opacity: 1, height: "auto", marginTop: 12 }}
-            exit={{ opacity: 0, height: 0, marginTop: 0 }}
-            className="overflow-hidden"
-          >
-            <div className="text-[9px] text-amber-700 dark:text-amber-400 bg-amber-50 dark:bg-amber-900/20 px-2.5 py-2 rounded-lg flex items-start gap-1.5 border border-amber-200/50 dark:border-amber-800/30">
-              <AlertCircleIcon
-                size={12}
-                className="shrink-0 mt-px"
-                aria-hidden="true"
-              />
-              <span className="leading-snug font-medium">
-                {t.ergonomicWarning}
-              </span>
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
+      <div
+        className={`overflow-hidden transition-all duration-200 ease-out ${
+          isAnyExceeding ? 'max-h-[200px] opacity-100 mt-3' : 'max-h-0 opacity-0 mt-0'
+        }`}
+      >
+        <div className="text-[9px] text-amber-700 dark:text-amber-400 bg-amber-50 dark:bg-amber-900/20 px-2.5 py-2 rounded-lg flex items-start gap-1.5 border border-amber-200/50 dark:border-amber-800/30">
+          <AlertCircleIcon
+            size={12}
+            className="shrink-0 mt-px"
+            aria-hidden="true"
+          />
+          <span className="leading-snug font-medium">
+            {t.ergonomicWarning}
+          </span>
+        </div>
+      </div>
     </>
   );
 };
