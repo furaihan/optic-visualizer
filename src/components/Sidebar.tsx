@@ -6,18 +6,13 @@ import {
 } from "../lib/optic-engine/types";
 import { translations, Language } from "../lib/translations";
 import {
-  LayersIcon,
   FrameIcon,
-  UserIcon,
   ChevronDownIcon,
-  EyeIcon,
-  RulerIcon,
-  ApertureIcon,
-  GaugeIcon,
-  ZapIcon,
   CopyIcon,
-  ArrowRightIcon,
   AlertCircleIcon,
+  ZapIcon,
+  GaugeIcon,
+  RulerIcon,
 } from "lucide-react";
 import { Button, buttonVariants } from "./ui/button";
 import { ScrollArea } from "./ui/scroll-area";
@@ -43,6 +38,10 @@ import { motion, AnimatePresence } from "framer-motion";
 import { LabelWithTooltip } from "./Sidebar/LabelWithTooltip";
 import { Control } from "./Sidebar/Control";
 import { FrameInput } from "./Sidebar/FrameInput";
+import { LensParametersSection } from "./Sidebar/LensParametersSection";
+import { FittingSpecsSection } from "./Sidebar/FittingSpecsSection";
+import { RefractiveIndexDropdown } from "./Sidebar/RefractiveIndexDropdown";
+import { SidebarHeader } from "./Sidebar/SidebarHeader";
 
 import { useOpticalContext } from "../contexts/OpticalContext";
 import { INPUT_SPECS } from "../lib/optic-engine/validation";
@@ -285,6 +284,7 @@ interface BevelControlProps {
 }
 
 import { InputGroup, InputGroupAddon, InputGroupInput } from "./ui/input-group";
+import { FrameGeometrySection } from "./Sidebar/FrameGeometrySection";
 
 const BevelControl: React.FC<BevelControlProps> = ({
   bevelPercent,
@@ -415,42 +415,14 @@ const ComparisonModeToggle: React.FC<ComparisonModeToggleProps> = ({
                 transition={{ duration: 0.2 }}
                 className="overflow-hidden"
               >
-                <DropdownMenu>
-                  <DropdownMenuTrigger
-                    className={cn(
-                      buttonVariants({ variant: "outline" }),
-                      "w-full justify-between h-8 px-3 font-semibold text-xs",
-                    )}
-                    aria-label="Comparison material indices"
-                  >
-                    <div className="flex items-center gap-2">
-                      <ArrowRightIcon size={12} className="text-slate-500" />
-                      <span>{compareIndex.toFixed(2)}</span>
-                    </div>
-                    <ChevronDownIcon size={14} className="opacity-50" />
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent
-                    className="w-[var(--anchor-width)] min-w-0"
-                    align="start"
-                  >
-                    <DropdownMenuRadioGroup
-                      value={compareIndex.toString()}
-                      onValueChange={(val) =>
-                        onCompareIndexChange(parseFloat(val) as LensIndex)
-                      }
-                    >
-                      {indices.map((idx) => (
-                        <DropdownMenuRadioItem
-                          key={idx}
-                          value={idx.toString()}
-                          className="font-medium text-xs"
-                        >
-                          {idx.toFixed(2)}
-                        </DropdownMenuRadioItem>
-                      ))}
-                    </DropdownMenuRadioGroup>
-                  </DropdownMenuContent>
-                </DropdownMenu>
+                <RefractiveIndexDropdown
+                  index={compareIndex}
+                  onChange={onCompareIndexChange}
+                  indices={indices}
+                  lang={lang}
+                  showLabel={false}
+                  showIcon={false}
+                />
               </motion.div>
             )}
           </AnimatePresence>
@@ -460,179 +432,8 @@ const ComparisonModeToggle: React.FC<ComparisonModeToggleProps> = ({
   );
 };
 
-/**
- * FrameGeometrySection - All frame parameters in data-driven layout
- */
-interface FrameGeometrySectionProps {
-  frame: FrameParameters;
-  frameType: FrameType;
-  onFrameChange: (frame: FrameParameters) => void;
-  onFrameTypeChange: (type: FrameType) => void;
-  highlightedLimit: "a" | "b" | "dbl" | "ed" | null;
-  onHighlightedLimitChange: (limit: "a" | "b" | "dbl" | "ed" | null) => void;
-  validation: { errors: Array<{ field: string }> };
-  requiredBlank: number;
-  lang: Language;
-}
 
-const FrameGeometrySection: React.FC<FrameGeometrySectionProps> = ({
-  frame,
-  frameType,
-  onFrameChange,
-  onFrameTypeChange,
-  highlightedLimit,
-  onHighlightedLimitChange,
-  validation,
-  requiredBlank,
-  lang,
-}) => {
-  const t = translations[lang];
 
-  // Frame parameter definitions
-  const frameParams = [
-    {
-      key: "a" as const,
-      label: t.aSize,
-      specs: INPUT_SPECS.a,
-      alertTitle: t.ergonomicLimitsA,
-    },
-    {
-      key: "b" as const,
-      label: t.bSize,
-      specs: INPUT_SPECS.b,
-      alertTitle: t.ergonomicLimitsB,
-    },
-    {
-      key: "dbl" as const,
-      label: "DBL",
-      specs: INPUT_SPECS.dbl,
-      alertTitle: t.ergonomicLimitsDbl,
-    },
-    {
-      key: "ed" as const,
-      label: "ED",
-      specs: INPUT_SPECS.ed,
-      alertTitle: t.ergonomicLimitsEd,
-    },
-  ];
-
-  // Validation helper
-  const hasError = (field: string) =>
-    validation.errors.some((e) => e.field === field);
-
-  // Validation checks
-  const exceeding = {
-    a:
-      frame.a < INPUT_SPECS.a.min ||
-      frame.a > INPUT_SPECS.a.max ||
-      requiredBlank > 85,
-    b:
-      frame.b < INPUT_SPECS.b.min ||
-      frame.b > INPUT_SPECS.b.max ||
-      hasError("fittingHeight"),
-    dbl: frame.dbl < INPUT_SPECS.dbl.min || frame.dbl > INPUT_SPECS.dbl.max,
-    ed: frame.ed < frame.a || frame.ed > INPUT_SPECS.ed.max,
-  };
-
-  const isAnyExceeding = Object.values(exceeding).some((v) => v);
-
-  return (
-    <>
-      {/* Frame Parameters Grid */}
-      <div className="space-y-4">
-        {/* Top Row: A & B */}
-        <div className="grid grid-cols-2 gap-3">
-          {frameParams.slice(0, 2).map((param) => (
-            <FrameParamField
-              key={param.key}
-              label={param.label}
-              value={frame[param.key]}
-              min={param.specs.min}
-              max={param.specs.max}
-              isExceeding={exceeding[param.key]}
-              fieldName={param.key}
-              onValueChange={(val) =>
-                onFrameChange({ ...frame, [param.key]: val })
-              }
-              onMouseEnter={onHighlightedLimitChange}
-              onMouseLeave={() => onHighlightedLimitChange(null)}
-              highlightedLimit={highlightedLimit}
-              alertTitle={param.alertTitle}
-              lang={lang}
-            />
-          ))}
-        </div>
-
-        {/* Bottom Row: DBL & ED */}
-        <div className="grid grid-cols-2 gap-3">
-          {frameParams.slice(2, 4).map((param) => (
-            <FrameParamField
-              key={param.key}
-              label={param.label}
-              value={frame[param.key]}
-              min={param.specs.min}
-              max={param.specs.max}
-              isExceeding={exceeding[param.key]}
-              fieldName={param.key}
-              onValueChange={(val) =>
-                onFrameChange({ ...frame, [param.key]: val })
-              }
-              onMouseEnter={onHighlightedLimitChange}
-              onMouseLeave={() => onHighlightedLimitChange(null)}
-              highlightedLimit={highlightedLimit}
-              alertTitle={param.alertTitle}
-              lang={lang}
-            />
-          ))}
-        </div>
-      </div>
-
-      {/* Frame Depth */}
-      <Control
-        label={t.frameDepth}
-        unit="mm"
-        min={1}
-        max={10}
-        step={0.1}
-        value={frame.depth}
-        onChange={(v) => onFrameChange({ ...frame, depth: v })}
-        lang={lang}
-        icon={<GaugeIcon size={13} className="text-emerald-500" />}
-        isRecalculating={false}
-      />
-
-      {/* Frame Type Selector */}
-      <FrameTypeSelector
-        frameType={frameType}
-        onFrameTypeChange={onFrameTypeChange}
-        lang={lang}
-      />
-
-      {/* Warning Message */}
-      <AnimatePresence>
-        {isAnyExceeding && (
-          <motion.div
-            initial={{ opacity: 0, height: 0, marginTop: 0 }}
-            animate={{ opacity: 1, height: "auto", marginTop: 12 }}
-            exit={{ opacity: 0, height: 0, marginTop: 0 }}
-            className="overflow-hidden"
-          >
-            <div className="text-[9px] text-amber-700 dark:text-amber-400 bg-amber-50 dark:bg-amber-900/20 px-2.5 py-2 rounded-lg flex items-start gap-1.5 border border-amber-200/50 dark:border-amber-800/30">
-              <AlertCircleIcon
-                size={12}
-                className="shrink-0 mt-px"
-                aria-hidden="true"
-              />
-              <span className="leading-snug font-medium">
-                {t.ergonomicWarning}
-              </span>
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
-    </>
-  );
-};
 
 // ============================================
 // Main Sidebar Component
@@ -678,111 +479,14 @@ export const Sidebar: React.FC<SidebarProps> = ({ lang, isMobile = false }) => {
   const renderFormContent = () => (
     <>
       {/* Lens Parameters */}
-      <ParameterGroup
-        title={t.lensParams}
-        icon={LayersIcon}
-        iconColor="text-blue-500"
-        groupKey="lens"
+      <LensParametersSection
+        lens={lens}
+        onLensChange={setLens}
+        lang={lang}
+        indices={indices}
         isOpen={openGroup.lens}
         onToggle={toggleGroup}
-      >
-        <Control
-          label={t.sphere}
-          unit=" D"
-          min={INPUT_SPECS.sph.min}
-          max={INPUT_SPECS.sph.max}
-          step={INPUT_SPECS.sph.step}
-          value={lens.sph}
-          onChange={(v) => setLens({ ...lens, sph: v })}
-          lang={lang}
-          icon={<ApertureIcon size={13} className="text-blue-500" />}
-          isRecalculating={false}
-        />
-        <Control
-          label={t.cylinder}
-          unit=" D"
-          min={INPUT_SPECS.cyl.min}
-          max={INPUT_SPECS.cyl.max}
-          step={INPUT_SPECS.cyl.step}
-          value={lens.cyl}
-          onChange={(v) => setLens({ ...lens, cyl: v })}
-          lang={lang}
-          icon={<GaugeIcon size={13} className="text-blue-500" />}
-          isRecalculating={false}
-        />
-        <Control
-          label={t.axis}
-          unit="°"
-          min={INPUT_SPECS.axis.min}
-          max={INPUT_SPECS.axis.max}
-          step={INPUT_SPECS.axis.step}
-          value={lens.axis}
-          onChange={(v) => setLens({ ...lens, axis: v })}
-          lang={lang}
-          icon={<ZapIcon size={13} className="text-blue-500" />}
-          isRecalculating={false}
-        />
-
-        {/* Refractive Index Dropdown */}
-        <Field orientation="vertical">
-          <FieldLabel className="w-auto flex-none m-0 items-center">
-            <LabelWithTooltip
-              label={t.refractiveIndex}
-              lang={lang}
-              className="select-none leading-tight dark:text-slate-300"
-              icon={<EyeIcon size={13} className="text-blue-500" />}
-            />
-          </FieldLabel>
-          <FieldContent>
-            <DropdownMenu>
-              <DropdownMenuTrigger
-                className={cn(
-                  buttonVariants({ variant: "outline" }),
-                  "w-full justify-between h-9 px-3 font-semibold text-xs",
-                )}
-                aria-label={t.refractiveIndex}
-              >
-                {lens.index.toFixed(2)}
-                <ChevronDownIcon size={14} className="opacity-50" />
-              </DropdownMenuTrigger>
-              <DropdownMenuContent
-                className="w-[var(--anchor-width)] min-w-0"
-                align="start"
-              >
-                <DropdownMenuRadioGroup
-                  value={lens.index.toString()}
-                  onValueChange={(val) =>
-                    setLens({ ...lens, index: parseFloat(val) as LensIndex })
-                  }
-                >
-                  {indices.map((idx) => (
-                    <DropdownMenuRadioItem
-                      key={idx}
-                      value={idx.toString()}
-                      className="font-medium text-xs"
-                    >
-                      {idx.toFixed(2)}
-                    </DropdownMenuRadioItem>
-                  ))}
-                </DropdownMenuRadioGroup>
-              </DropdownMenuContent>
-            </DropdownMenu>
-          </FieldContent>
-        </Field>
-
-        <Control
-          label={t.baseCurve}
-          unit=" D"
-          min={INPUT_SPECS.baseCurve.min}
-          max={INPUT_SPECS.baseCurve.max}
-          step={INPUT_SPECS.baseCurve.step}
-          value={lens.baseCurve}
-          onChange={(v) => setLens({ ...lens, baseCurve: v })}
-          lang={lang}
-          icon={<ApertureIcon size={13} className="text-blue-500" />}
-          isRecalculating={false}
-        />
-      </ParameterGroup>
+      />
 
       {/* Frame Geometry */}
       <ParameterGroup
@@ -807,45 +511,15 @@ export const Sidebar: React.FC<SidebarProps> = ({ lang, isMobile = false }) => {
       </ParameterGroup>
 
       {/* Fitting Specifications */}
-      <ParameterGroup
-        title={t.fittingSpecs}
-        icon={UserIcon}
-        iconColor="text-orange-500"
-        groupKey="fitting"
+      <FittingSpecsSection
+        patient={patient}
+        onPatientChange={setPatient}
+        bevelPercent={bevelPercent}
+        onBevelChange={setBevelPercent}
+        lang={lang}
         isOpen={openGroup.fitting}
         onToggle={toggleGroup}
-      >
-        <Control
-          label={t.pd}
-          unit="mm"
-          min={INPUT_SPECS.pd.min}
-          max={INPUT_SPECS.pd.max}
-          step={INPUT_SPECS.pd.step}
-          value={patient.pd}
-          onChange={(v) => setPatient({ ...patient, pd: v })}
-          lang={lang}
-          icon={<EyeIcon size={13} className="text-orange-500" />}
-          isRecalculating={false}
-        />
-        <Control
-          label={t.fittingHeight}
-          unit="mm"
-          min={INPUT_SPECS.fittingHeight.min}
-          max={INPUT_SPECS.fittingHeight.max}
-          step={INPUT_SPECS.fittingHeight.step}
-          value={patient.fittingHeight}
-          onChange={(v) => setPatient({ ...patient, fittingHeight: v })}
-          lang={lang}
-          icon={<RulerIcon size={13} className="text-orange-500" />}
-          isRecalculating={false}
-        />
-
-        <BevelControl
-          bevelPercent={bevelPercent}
-          onBevelChange={setBevelPercent}
-          lang={lang}
-        />
-      </ParameterGroup>
+      />
 
       {/* Comparison Mode */}
       <ComparisonModeToggle
@@ -880,71 +554,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ lang, isMobile = false }) => {
       )}
     >
       {/* Header */}
-      <div className="p-5 border-b border-slate-100 dark:border-slate-850">
-        <div className="flex items-center gap-3">
-          <div className="w-10 h-10 bg-white dark:bg-slate-900 p-1 rounded-lg border border-slate-100 dark:border-slate-800 flex items-center justify-center shrink-0">
-            <svg
-              viewBox="0 0 100 100"
-              className="w-full h-full"
-              aria-hidden="true"
-            >
-              <rect
-                x="42"
-                y="10"
-                width="16"
-                height="35"
-                fill="#1e73be"
-                rx="2"
-                transform="rotate(-45 50 50)"
-              />
-              <rect
-                x="42"
-                y="55"
-                width="16"
-                height="35"
-                fill="#2d9e4b"
-                rx="2"
-                transform="rotate(-45 50 50)"
-              />
-              <rect
-                x="42"
-                y="10"
-                width="16"
-                height="35"
-                fill="#31a8dd"
-                rx="2"
-                transform="rotate(45 50 50)"
-              />
-              <rect
-                x="42"
-                y="55"
-                width="16"
-                height="35"
-                fill="#84cc16"
-                rx="2"
-                transform="rotate(45 50 50)"
-              />
-              <circle cx="50" cy="50" r="4" fill="#1e73be" />
-            </svg>
-          </div>
-          <div>
-            <h1 className="text-slate-900 dark:text-slate-100 font-extrabold text-sm tracking-tight leading-none mb-1">
-              AKTRIYO
-            </h1>
-            <h2 className="text-[8px] text-slate-500 dark:text-slate-400 font-bold uppercase tracking-wider leading-none m-0">
-              {t.institute}
-            </h2>
-          </div>
-        </div>
-        <div className="mt-3 flex items-center justify-between gap-2">
-          <span className="text-[8px] font-black uppercase bg-blue-50 dark:bg-blue-950/20 text-blue-600 dark:text-blue-400 px-2 py-0.5 rounded tracking-wider">
-            Measuring Project
-          </span>
-          <span className="text-[8px] bg-slate-100 dark:bg-slate-900 text-slate-500 dark:text-slate-400 px-2 py-0.5 rounded-full font-mono border border-slate-200/60 dark:border-slate-800/80 uppercase tracking-tight">
-            {t.title}
-          </span>
-        </div>
-      </div>
+      <SidebarHeader lang={lang} />
 
       {/* Content */}
       <ScrollArea className="flex-1 min-h-0">

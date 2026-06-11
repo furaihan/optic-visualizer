@@ -13,6 +13,13 @@ export default defineConfig(({mode}) => {
     resolve: {
       alias: {
         '@': path.resolve(__dirname, '.'),
+        '@components': path.resolve(__dirname, './src/components'),
+        '@hooks': path.resolve(__dirname, './src/hooks'),
+        '@lib': path.resolve(__dirname, './src/lib'),
+        '@data': path.resolve(__dirname, './src/data'),
+        '@types': path.resolve(__dirname, './src/types'),
+        '@shadcn': path.resolve(__dirname, './src/components/ui'),
+        '@i18n': path.resolve(__dirname, './src/lib/translations'),
       },
     },
     server: {

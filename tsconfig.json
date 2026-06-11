@@ -23,7 +23,8 @@
       "@lib/*": ["./src/lib/*"],
       "@data/*": ["./src/data/*"],
       "@types/*": ["./src/types/*"],
-      "@shadcn/*": ["./src/components/ui/*"]
+      "@shadcn/*": ["./src/components/ui/*"],
+      "@i18n/*": ["./src/lib/translations/*"]
     },
     "allowImportingTsExtensions": true,
     "noEmit": true
