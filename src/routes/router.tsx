@@ -2,22 +2,16 @@ import { createRouter } from '@tanstack/react-router';
 import { rootRoute } from './root';
 import { indexRoute } from './index';
 import { contactRoute } from './contact';
-import { visualizerRoute, visualizerIndexRoute, visualizerSimpleRoute, visualizerAdvancedRoute } from './visualizer';
-import { asphericRoute, asphericIndexRoute, asphericSimpleRoute, asphericAdvancedRoute } from './aspheric';
+import { simulatorLayoutRoute } from './simulator-layout';
+import { visualizerRoute } from './visualizer';
+import { asphericRoute } from './aspheric';
 
-const visualizerWithChildren = visualizerRoute.addChildren([
-  visualizerIndexRoute,
-  visualizerSimpleRoute,
-  visualizerAdvancedRoute
+const simulatorWithChildren = simulatorLayoutRoute.addChildren([
+  visualizerRoute,
+  asphericRoute,
 ]);
 
-const asphericWithChildren = asphericRoute.addChildren([
-  asphericIndexRoute,
-  asphericSimpleRoute,
-  asphericAdvancedRoute
-]);
-
-const routeTree = rootRoute.addChildren([indexRoute, visualizerWithChildren, asphericWithChildren, contactRoute]);
+const routeTree = rootRoute.addChildren([indexRoute, simulatorWithChildren, contactRoute]);
 
 export const router = createRouter({ routeTree });
 

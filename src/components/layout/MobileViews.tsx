@@ -8,14 +8,13 @@ import { useOpticalContext } from "../../contexts/OpticalContext";
 import { ScrollArea } from "../ui/scroll-area";
 import ErrorBoundary from "../ErrorBoundary";
 import { useSearch } from '@tanstack/react-router';
-
-import type { SimulatorSearchParams } from '../../routes/index';
+import type { SimulatorSearchParams } from '../../types/search-params';
 
 export function MobileViews() {
-  const search = useSearch({ strict: false }) as SimulatorSearchParams;
-  const lang = search.lang || 'id';
-  const view = search.view || 'side';
-  const activeTab = search.activeTab || 'visualizer';
+  const search = useSearch({ strict: false }) as unknown as SimulatorSearchParams;
+  const lang = search.lang;
+  const view = search.view;
+  const activeTab = search.activeTab;
 
   const [isRecalculating, setIsRecalculating] = useState(false);
 

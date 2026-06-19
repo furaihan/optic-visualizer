@@ -21,10 +21,10 @@ export function RootLayout() {
 }
 
 function GlobalNav() {
-  const search = useSearch({ strict: false }) as Record<string, string>;
+  const search = useSearch({ from: '__root__' });
   const currentSearch = useRouterState({ select: (s) => s.location.search as Record<string, unknown> });
   const navigate = useNavigate();
-  const lang = search.lang === 'en' ? 'en' : 'id';
+  const lang = search.lang;
   const { theme, toggleTheme } = useTheme();
 
   const [isExpanded, setIsExpanded] = useState(() => {
@@ -124,8 +124,8 @@ function GlobalNav() {
 }
 
 function NavItem({ icon, label, to, exact, currentSearch }: { icon: React.ReactNode, label: string, to: string, exact?: boolean, currentSearch: Record<string, unknown> }) {
-  const search = useSearch({ strict: false }) as Record<string, string>;
-  const lang = search.lang === 'en' ? 'en' : 'id';
+  const search = useSearch({ from: '__root__' });
+  const lang = search.lang;
 
   return (
     <Link 

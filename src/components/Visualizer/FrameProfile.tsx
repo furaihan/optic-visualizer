@@ -23,7 +23,7 @@ export const FrameProfile: React.FC<FrameProfileProps> = ({
   lang,
 }) => {
   const t = translations[lang];
-  const yVal = frame.a / 2;
+  const yVal = frame.b / 2;
   const rimH = 5; 
 
   // Current lens positions for overhang labels

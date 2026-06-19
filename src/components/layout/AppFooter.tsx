@@ -1,12 +1,9 @@
 import { useOpticalContext } from '../../contexts/OpticalContext';
-import { useSearch } from '@tanstack/react-router';
 import { translations } from '../../lib/translations';
+import type { Language } from '../../types/search-params';
 import { OPTICAL_ENGINE_VERSION } from '../../lib/optic-engine/optical';
-import type { SimulatorSearchParams } from '../../routes/index';
 
-export function AppFooter() {
-  const search = useSearch({ strict: false }) as SimulatorSearchParams;
-  const lang = search.lang || 'id';
+export function AppFooter({ lang }: { lang: Language }) {
   const t = translations[lang];
 
   const { frame, result } = useOpticalContext();

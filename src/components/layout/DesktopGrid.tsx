@@ -7,27 +7,21 @@ import { RecommendationCard } from "../cards/RecommendationCard";
 import { useOpticalContext } from "../../contexts/OpticalContext";
 import { ScrollArea } from "../ui/scroll-area";
 import ErrorBoundary from "../ErrorBoundary";
-import { useSearch, useMatchRoute, useNavigate } from '@tanstack/react-router';
-import type { SimulatorSearchParams } from '../../routes/index';
+import { useSearch, useNavigate } from '@tanstack/react-router';
+import type { SimulatorSearchParams } from '../../types/search-params';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "../ui/tabs";
 import { translations } from "../../lib/translations";
+import { AppFooter } from "./AppFooter";
+import { ValidationAlerts } from "./ValidationAlerts";
+import { HeaderBar } from "./HeaderBar";
 
-export function DesktopGrid({ 
-  Header, 
-  Footer, 
-  Alerts 
-}: { 
-  Header: React.ReactNode; 
-  Footer: React.ReactNode; 
-  Alerts: React.ReactNode; 
-}) {
-  const search = useSearch({ strict: false }) as SimulatorSearchParams;
-  const lang = search.lang || 'id';
-  const view = search.view || 'side';
+export function DesktopGrid() {
+  const search = useSearch({ strict: false }) as unknown as SimulatorSearchParams;
+  const lang = search.lang;
+  const view = search.view;
 
-  const matchRoute = useMatchRoute();
   const navigate = useNavigate();
-  const currentMode = matchRoute({ to: '/visualizer/advanced' }) ? 'advanced' : 'simple';
+  const [currentMode, setCurrentMode] = useState<'simple' | 'advanced'>('simple');
   const t = translations[lang];
 
   const [isRecalculating, setIsRecalculating] = useState(false);
@@ -74,7 +68,7 @@ export function DesktopGrid({
   }, [lens, frame, patient, compareMode, compareIndex, bevelPercent, frameType]);
 
   const handleTabChange = (value: string) => {
-    navigate({ to: `/visualizer/${value}`, search: (prev: any) => prev });
+    setCurrentMode(value as 'simple' | 'advanced');
   };
 
   return (
@@ -85,8 +79,8 @@ export function DesktopGrid({
       </div>
 
       <div className="flex-1 flex flex-col h-full overflow-hidden relative">
-        {Header}
-        {Alerts}
+        <HeaderBar lang={lang} view={view} activeTab="visualizer" onViewChange={(v) => navigate({ search: { ...search, view: v } } as any)} />
+        <ValidationAlerts lang={lang} />
         <ScrollArea className="flex-1 min-h-0 pl-0.5">
           <div className="flex flex-col gap-4 md:pr-3 pb-6 p-3 md:p-4 lg:p-6">
             
@@ -159,7 +153,7 @@ export function DesktopGrid({
             </Tabs>
           </div>
         </ScrollArea>
-        {Footer}
+        <AppFooter lang={lang} />
       </div>
     </div>
   );

@@ -1,13 +1,10 @@
-import { useSearch } from '@tanstack/react-router';
 import { useOpticalContext } from '../../contexts/OpticalContext';
 import { translations } from '../../lib/translations';
+import type { Language } from '../../types/search-params';
 import { AlertTriangleIcon } from "lucide-react";
-import type { SimulatorSearchParams } from '../../routes/index';
 import { Alert, AlertTitle, AlertDescription } from '../ui/alert';
 
-export function ValidationAlerts() {
-  const search = useSearch({ strict: false }) as SimulatorSearchParams;
-  const lang = search.lang || 'id';
+export function ValidationAlerts({ lang }: { lang: Language }) {
   const t = translations[lang];
   const { validation } = useOpticalContext();
 

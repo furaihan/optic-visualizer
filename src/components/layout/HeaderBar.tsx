@@ -1,24 +1,21 @@
-import { useSearch, useNavigate } from '@tanstack/react-router';
 import { useOpticalContext } from '../../contexts/OpticalContext';
 import { translations } from '../../lib/translations';
+import type { Language, View, ActiveTab } from '../../types/search-params';
 import { RotateCcwIcon } from "lucide-react";
-import type { SimulatorSearchParams } from '../../routes/index';
 import { Button } from '../ui/button';
 import { Tabs, TabsList, TabsTrigger } from '../ui/tabs';
 import { cn } from '../../lib/utils';
 
-export function HeaderBar() {
-  const search = useSearch({ strict: false }) as SimulatorSearchParams;
-  const navigate = useNavigate({ from: '/visualizer' });
-  const lang = search.lang || 'id';
+type HeaderBarProps = {
+  lang: Language;
+  view: View;
+  activeTab: ActiveTab;
+  onViewChange: (view: View) => void;
+};
+
+export function HeaderBar({ lang, view, activeTab, onViewChange }: HeaderBarProps) {
   const t = translations[lang];
 
-  const view = search.view || 'side';
-  const setView = (newView: "side" | "top" | "front") => 
-    navigate({ search: (prev) => ({ ...prev, view: newView }) });
-  
-  const activeTab = search.activeTab || 'visualizer';
-  
   const {
     resetSession,
   } = useOpticalContext();
@@ -27,7 +24,7 @@ export function HeaderBar() {
     <header className="h-12 bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between px-4 md:px-6 shrink-0 z-20 shadow-sm transition-colors duration-200">
       <div className="flex items-center gap-3">
         <div className={cn(activeTab !== "visualizer" ? "hidden md:flex" : "flex")}>
-          <Tabs value={view} onValueChange={(v) => setView(v as any)} className="w-[220px] md:w-[320px]">
+          <Tabs value={view} onValueChange={(v) => onViewChange(v as View)} className="w-[220px] md:w-[320px]">
             <TabsList className="grid w-full grid-cols-3 h-10 p-1 bg-slate-50 dark:bg-slate-950 rounded-lg border border-slate-200/50 dark:border-slate-800/80">
               <TabsTrigger value="side" className="text-[11px] md:text-xs font-semibold tracking-wide">
                 {t.sideProfile}

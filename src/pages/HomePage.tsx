@@ -1,7 +1,6 @@
 import { useSearch, Link } from "@tanstack/react-router";
 import { GlassesIcon, ArrowRightIcon } from "lucide-react";
 
-import { type SimulatorSearchParams } from "@/src/routes/index";
 import { translations } from "@/src/lib/translations";
 
 import {
@@ -16,9 +15,8 @@ import { Badge } from "@components/ui/badge";
 import { buttonVariants } from "@components/ui/button";
 
 export function HomePage() {
-  const search = useSearch({ strict: false }) as SimulatorSearchParams;
-
-  const lang = search.lang || "id";
+  const search = useSearch({ from: '/' });
+  const lang = search.lang;
   const t = translations[lang];
 
   return (
@@ -75,7 +73,7 @@ export function HomePage() {
               <CardContent className="relative">
                 <Link
                   to="/visualizer"
-                  search={{ lang }}
+                  search={{ lang, activeTab: 'visualizer', view: 'side' }}
                   className={buttonVariants({
                     className:
                       "w-full group/btn relative overflow-hidden transition-all duration-300",

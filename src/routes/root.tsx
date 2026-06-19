@@ -1,21 +1,20 @@
 import { createRootRoute } from '@tanstack/react-router';
-import { OpticalProvider } from '../contexts/OpticalContext';
-import { AsphericProvider } from '../contexts/AsphericContext';
 import { RootLayout } from '../components/RootLayout';
+import { validateLang } from '../types/search-params';
 
-type GlobalSearchParams = { lang?: 'id' | 'en' };
+type GlobalSearchParams = { lang: 'id' | 'en' };
 
 export const rootRoute = createRootRoute({
   validateSearch: (search: Record<string, unknown>): GlobalSearchParams => ({
-    lang: ['id', 'en'].includes(search.lang as string)
-      ? (search.lang as GlobalSearchParams['lang'])
-      : 'id',
+    lang: validateLang(search.lang),
   }),
-  component: () => (
-    <OpticalProvider>
-      <AsphericProvider>
-        <RootLayout />
-      </AsphericProvider>
-    </OpticalProvider>
+  component: RootLayout,
+  notFoundComponent: () => (
+    <div className="flex h-full items-center justify-center p-8">
+      <div className="text-center space-y-2">
+        <h1 className="text-2xl font-bold text-slate-600 dark:text-slate-400">404</h1>
+        <p className="text-sm text-slate-400 dark:text-slate-500">Page not found</p>
+      </div>
+    </div>
   ),
 });

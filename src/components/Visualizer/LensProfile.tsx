@@ -13,7 +13,7 @@ interface LensProfileProps {
   scale: number;
   centerX: number;
   centerY: number;
-  frameA: number;
+  frameB: number;
   lang: Language;
   onHoverLabel: (hover: HoverLabel | null) => void;
   primaryPos: LensPosition;
@@ -30,12 +30,12 @@ export const LensProfile: React.FC<LensProfileProps> = ({
   scale,
   centerX,
   centerY,
-  frameA,
+  frameB,
   lang,
   onHoverLabel,
 }) => {
   const t = translations[lang];
-  const yVal = frameA / 2;
+  const yVal = frameB / 2;
   const { etX_start, etX_end, frontApexX } = pos;
 
   const getCurvePath = (x1: number, y1: number, x2: number, y2: number, rVal: number, sweep: number) => {
