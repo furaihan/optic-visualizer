@@ -9,7 +9,8 @@
     "preview": "vite preview",
     "clean": "rm -rf dist",
     "lint": "tsc --noEmit",
-    "test": "vitest run"
+    "test": "vitest run",
+    "postinstall": "node scripts/sync-intent-skills.mjs"
   },
   "dependencies": {
     "@base-ui/react": "^1.5.0",
