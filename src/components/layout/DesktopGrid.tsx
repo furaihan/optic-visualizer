@@ -1,30 +1,34 @@
-import { useState, useRef, useEffect } from "react";
-import { Sidebar } from "../Sidebar";
-import { Visualizer } from "../Visualizer";
-import { SummaryCard } from "../cards/SummaryCard";
-import { CurvatureCard } from "../cards/CurvatureCard";
-import { RecommendationCard } from "../cards/RecommendationCard";
-import { useOpticalContext } from "../../contexts/OpticalContext";
-import { ScrollArea } from "../ui/scroll-area";
-import ErrorBoundary from "../ErrorBoundary";
 import { useSearch, useNavigate } from '@tanstack/react-router';
+import { Sidebar } from '../Sidebar';
+import { Visualizer } from '../Visualizer';
+import { JobTicket } from '../sheet/JobTicket';
+import { MeasurementSheet } from '../sheet/MeasurementSheet';
+import { RecommendationRow } from '../sheet/RecommendationRow';
+import { useOpticalContext } from '../../contexts/OpticalContext';
+import { ScrollArea } from '../ui/scroll-area';
+import ErrorBoundary from '../ErrorBoundary';
 import type { SimulatorSearchParams } from '../../types/search-params';
-import { Tabs, TabsList, TabsTrigger, TabsContent } from "../ui/tabs";
-import { translations } from "../../lib/translations";
-import { AppFooter } from "./AppFooter";
-import { ValidationAlerts } from "./ValidationAlerts";
-import { HeaderBar } from "./HeaderBar";
+import { Tabs, TabsList, TabsTrigger, TabsContent } from '../ui/tabs';
+import { translations } from '../../lib/translations';
+import { AppFooter } from './AppFooter';
+import { ValidationAlerts } from './ValidationAlerts';
+import { HeaderBar } from './HeaderBar';
+import { useState } from 'react';
 
+/**
+ * The workbench, desktop.
+ *
+ * Inspector on the left, then the workspace read top to bottom as one lab
+ * sheet: the claim, the order, the drawing with its caliper schedule, then the
+ * measured values and the engine's recommendation.
+ */
 export function DesktopGrid() {
   const search = useSearch({ strict: false }) as unknown as SimulatorSearchParams;
   const lang = search.lang;
   const view = search.view;
-
   const navigate = useNavigate();
-  const [currentMode, setCurrentMode] = useState<'simple' | 'advanced'>('simple');
   const t = translations[lang];
-
-  const [isRecalculating, setIsRecalculating] = useState(false);
+  const [mode, setMode] = useState<'simple' | 'advanced'>('simple');
 
   const {
     lens,
@@ -34,125 +38,122 @@ export function DesktopGrid() {
     frameType,
     compareMode,
     compareIndex,
-    setLens,
-    setFrame,
-    setPatient,
-    setBevelPercent,
-    setFrameType,
-    setCompareMode,
-    setCompareIndex,
     result,
     compareResult,
-    highlightedLimit,
-    setHighlightedLimit
   } = useOpticalContext();
 
-  const prevDepsRef = useRef({ lens, frame, patient, compareMode, compareIndex, bevelPercent, frameType });
+  const compareLens = compareMode ? { ...lens, index: compareIndex } : undefined;
 
-  useEffect(() => {
-    const hasChanged = 
-      lens !== prevDepsRef.current.lens || 
-      frame !== prevDepsRef.current.frame || 
-      patient !== prevDepsRef.current.patient ||
-      compareMode !== prevDepsRef.current.compareMode ||
-      compareIndex !== prevDepsRef.current.compareIndex ||
-      bevelPercent !== prevDepsRef.current.bevelPercent ||
-      frameType !== prevDepsRef.current.frameType;
-      
-    if (hasChanged) {
-      setIsRecalculating(true);
-      prevDepsRef.current = { lens, frame, patient, compareMode, compareIndex, bevelPercent, frameType };
-      const timer = setTimeout(() => setIsRecalculating(false), 300);
-      return () => clearTimeout(timer);
-    }
-  }, [lens, frame, patient, compareMode, compareIndex, bevelPercent, frameType]);
-
-  const handleTabChange = (value: string) => {
-    setCurrentMode(value as 'simple' | 'advanced');
-  };
+  const board = (
+    <ErrorBoundary
+      fallback={
+        <div className="flex h-full items-center justify-center bg-sheet-panel p-6 text-[16px] text-sheet-ink">
+          {t.simError}
+        </div>
+      }
+    >
+      <Visualizer
+        lens={lens}
+        frame={frame}
+        patient={patient}
+        result={result}
+        compareResult={compareResult}
+        compareLens={compareLens}
+        lang={lang}
+        view={view}
+        frameType={frameType}
+        highlightedLimit={null}
+        bevelPercent={bevelPercent}
+      />
+    </ErrorBoundary>
+  );
 
   return (
-    <div className="flex flex-1 h-full overflow-hidden w-full">
-      {/* Sidebar - Desktop Only */}
-      <div className="shrink-0 bg-white dark:bg-slate-950 border-r border-slate-200 dark:border-slate-800">
+    <div className="flex h-full w-full flex-1 overflow-hidden bg-sheet-ground">
+      <div className="hidden shrink-0 bg-sheet-ground md:block">
         <Sidebar lang={lang} />
       </div>
 
-      <div className="flex-1 flex flex-col h-full overflow-hidden relative">
-        <HeaderBar lang={lang} view={view} activeTab="visualizer" onViewChange={(v) => navigate({ search: { ...search, view: v } } as any)} />
+      <div className="relative flex h-full min-w-0 flex-1 flex-col overflow-hidden">
+        <HeaderBar
+          lang={lang}
+          view={view}
+          activeTab="visualizer"
+          onViewChange={(v) => navigate({ search: { ...search, view: v } } as any)}
+        />
         <ValidationAlerts lang={lang} />
-        <ScrollArea className="flex-1 min-h-0 pl-0.5">
-          <div className="flex flex-col gap-4 md:pr-3 pb-6 p-3 md:p-4 lg:p-6">
-            
-            <Tabs value={currentMode} onValueChange={handleTabChange} className="w-full flex-col">
-              <div className="flex items-center justify-between mb-4">
-                <TabsList className="grid w-64 grid-cols-2 h-9 p-1 bg-slate-50 dark:bg-slate-950 rounded-lg border border-slate-200/50 dark:border-slate-800/80">
-                  <TabsTrigger value="simple" className="text-xs font-semibold">{t.tabImage}</TabsTrigger>
-                  <TabsTrigger value="advanced" className="text-xs font-semibold">{t.tabStatistics}</TabsTrigger>
-                </TabsList>
-              </div>
 
-              {/* Simple Mode: Visualizer and Summary */}
-              <TabsContent value="simple" className="flex flex-col gap-4 focus-visible:outline-none">
-                <div className="shrink-0">
-                  <ErrorBoundary fallback={<div className="p-4 border border-red-200 bg-red-50 text-red-600 rounded-xl text-xs">Summary Card Error</div>}>
-                    <SummaryCard
-                      result={result}
-                      compareResult={compareResult}
-                      lang={lang}
-                      frame={frame}
-                      lens={lens}
-                      isLoading={isRecalculating}
-                      isAdvanced={false}
-                    />
-                  </ErrorBoundary>
-                </div>
-                <div className="min-h-[400px] h-[50vh] xl:h-[500px]">
-                  <ErrorBoundary fallback={<div className="h-full w-full flex items-center justify-center border border-red-200 bg-red-50 text-red-600 rounded-xl text-xs">Visualizer Rendering Error</div>}>
-                    <Visualizer
-                      lens={lens}
-                      frame={frame}
-                      patient={patient}
-                      result={result}
-                      compareResult={compareResult}
-                      compareLens={compareMode ? { ...lens, index: compareIndex } : undefined}
-                      lang={lang}
-                      view={view}
-                      frameType={frameType}
-                      highlightedLimit={highlightedLimit}
-                    />
-                  </ErrorBoundary>
-                </div>
+        <ScrollArea className="min-h-0 flex-1">
+          <div className="flex flex-col gap-8 px-3 pb-12 pt-4 sm:px-4">
+            {/* The claim of the page, in two lines at most. */}
+            <div className="flex flex-col gap-2 lg:max-w-[64ch]">
+              <h1 className="sheet-rise text-[28px] font-medium leading-[1.15] tracking-[-0.025em] text-sheet-ink sm:text-[34px]">
+                {t.workbenchTitle}
+              </h1>
+              <p className="sheet-rise delay-1 max-w-[58ch] text-[16px] leading-relaxed text-sheet-ink">
+                {t.workbenchLead}
+              </p>
+            </div>
+
+            <JobTicket
+              lens={lens}
+              frame={frame}
+              patient={patient}
+              result={result}
+              frameType={frameType}
+              bevelPercent={bevelPercent}
+              lang={lang}
+              compareIndex={compareMode ? compareIndex : undefined}
+              compareResult={compareResult}
+            />
+
+            {/* The drawing gets the full width, so all three views and the
+                schedule fit without any one of them shrinking to a thumbnail. */}
+            <div className="sheet-rise delay-2 h-[50vh] min-h-[400px] xl:h-[430px]">{board}</div>
+
+            <Tabs value={mode} onValueChange={(v) => setMode(v as 'simple' | 'advanced')}>
+              <TabsList className="h-9 gap-0 rounded-none bg-sheet-panel p-1">
+                <TabsTrigger
+                  value="simple"
+                  className="h-full rounded-none px-3 text-[13px] font-medium text-sheet-muted data-active:bg-sheet-ground data-active:text-sheet-ink group-data-[variant=default]/tabs-list:data-active:shadow-none"
+                >
+                  {t.tabImage}
+                </TabsTrigger>
+                <TabsTrigger
+                  value="advanced"
+                  className="h-full rounded-none px-3 text-[13px] font-medium text-sheet-muted data-active:bg-sheet-ground data-active:text-sheet-ink group-data-[variant=default]/tabs-list:data-active:shadow-none"
+                >
+                  {t.tabStatistics}
+                </TabsTrigger>
+              </TabsList>
+
+              <TabsContent value="simple" className="mt-6 flex flex-col gap-8 focus-visible:outline-none">
+                <MeasurementSheet
+                  result={result}
+                  compareResult={compareResult}
+                  lang={lang}
+                  frame={frame}
+                  lens={lens}
+                  isAdvanced={false}
+                />
+                <RecommendationRow result={result} lensIndex={lens.index} lang={lang} />
               </TabsContent>
 
-              {/* Advanced Mode: All Stats, No Visualizer */}
-              <TabsContent value="advanced" className="flex flex-col gap-4 focus-visible:outline-none">
-                <div className="shrink-0">
-                  <ErrorBoundary fallback={<div className="p-4 border border-red-200 bg-red-50 text-red-600 rounded-xl text-xs">Summary Card Error</div>}>
-                    <SummaryCard
-                      result={result}
-                      compareResult={compareResult}
-                      lang={lang}
-                      frame={frame}
-                      lens={lens}
-                      isLoading={isRecalculating}
-                    />
-                  </ErrorBoundary>
-                </div>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <CurvatureCard result={result} lang={lang} />
-                  <RecommendationCard
-                    result={result}
-                    lensIndex={lens.index}
-                    lang={lang}
-                    isLoading={isRecalculating}
-                  />
-                </div>
+              <TabsContent value="advanced" className="mt-6 flex flex-col gap-8 focus-visible:outline-none">
+                <MeasurementSheet
+                  result={result}
+                  compareResult={compareResult}
+                  lang={lang}
+                  frame={frame}
+                  lens={lens}
+                  isAdvanced
+                />
+                <RecommendationRow result={result} lensIndex={lens.index} lang={lang} />
               </TabsContent>
-
             </Tabs>
           </div>
         </ScrollArea>
+
         <AppFooter lang={lang} />
       </div>
     </div>

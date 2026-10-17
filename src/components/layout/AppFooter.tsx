@@ -3,33 +3,37 @@ import { translations } from '../../lib/translations';
 import type { Language } from '../../types/search-params';
 import { OPTICAL_ENGINE_VERSION } from '../../lib/optic-engine/optical';
 
+/**
+ * The status band under the sheet: the three numbers that follow the optician
+ * from the order to the lab, and the engine that produced them. Read at 13px,
+ * not at 7px.
+ */
 export function AppFooter({ lang }: { lang: Language }) {
   const t = translations[lang];
-
   const { frame, result } = useOpticalContext();
 
   return (
-    <footer className="h-7 bg-white dark:bg-slate-950 border-t border-slate-200 dark:border-slate-900 text-slate-400 dark:text-slate-500 px-4 md:px-6 flex items-center justify-between text-[8px] font-mono shrink-0 z-20 overflow-hidden shadow-sm">
-      <div className="flex gap-4 md:gap-6 uppercase tracking-widest truncate mr-2">
-        <span className="flex gap-1 md:gap-1.5">
-          <span className="text-slate-300 dark:text-slate-600">{t.framePd}:</span>{" "}
-          {(frame.a + frame.dbl).toFixed(1)}mm
+    <footer className="flex h-9 shrink-0 items-center justify-between gap-4 bg-sheet-ground px-3 text-[13px] text-sheet-muted sm:px-4">
+      <dl className="flex min-w-0 items-center gap-4 overflow-hidden tnum">
+        <div className="flex shrink-0 items-baseline gap-1.5">
+          <dt className="whitespace-nowrap">{t.framePd}</dt>
+          <dd className="font-medium text-sheet-ink">{(frame.a + frame.dbl).toFixed(0)} mm</dd>
+        </div>
+        <div className="flex shrink-0 items-baseline gap-1.5">
+          <dt className="whitespace-nowrap">{t.decentration}</dt>
+          <dd className="font-medium text-sheet-ink">{result.decentration.toFixed(2)} mm</dd>
+        </div>
+        <div className="hidden shrink-0 items-baseline gap-1.5 sm:flex">
+          <dt className="whitespace-nowrap">{t.minBlank}</dt>
+          <dd className="font-medium text-sheet-ink">{(result.y * 2 + 2).toFixed(0)} mm</dd>
+        </div>
+      </dl>
+      <p className="flex shrink-0 items-center gap-3">
+        <span className="hidden tnum sm:inline">
+          {t.engine} {OPTICAL_ENGINE_VERSION}
         </span>
-        <span className="flex gap-1 md:gap-1.5">
-          <span className="text-slate-300 dark:text-slate-600">{t.decentration}:</span>{" "}
-          {result.decentration.toFixed(2)}mm
-        </span>
-        <span className="flex gap-1 md:gap-1.5">
-          <span className="text-slate-300 dark:text-slate-600">{t.minBlank}:</span>{" "}
-          {(result.y * 2 + 2).toFixed(0)}mm
-        </span>
-      </div>
-      <div className="flex items-center gap-2 md:gap-4 text-[7px] text-slate-300 dark:text-slate-600 shrink-0">
-        <span className="hidden sm:inline">
-          {t.engine}: {OPTICAL_ENGINE_VERSION}
-        </span>
-        <span className="uppercase">© 2026 {t.labs}</span>
-      </div>
+        <span className="whitespace-nowrap">© 2026 {t.labs}</span>
+      </p>
     </footer>
   );
 }

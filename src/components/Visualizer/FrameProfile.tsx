@@ -1,118 +1,191 @@
 import React from 'react';
 import { CalculationResult, FrameParameters } from '../../lib/optic-engine/types';
-import { Language, translations } from '../../lib/translations';
+import { translations, Language } from '../../lib/translations';
 import { LensPosition } from './types';
+import { ExtLine } from './SheetDefs';
 
 interface FrameProfileProps {
   frame: FrameParameters;
   result: CalculationResult;
   pos: LensPosition;
   scale: number;
-  centerX: number;
-  centerY: number;
+  /** Drawing origin: x = front face of the rim, y = the frame's vertical centre. */
+  originX: number;
+  originY: number;
   lang: Language;
+  activeTarget?: string | null;
+  onSelectTarget?: (target: string | null) => void;
 }
 
+/**
+ * The rim in cross-section: a solid band of frame depth above and below the
+ * lens, the bevel groove marked by a dashed position line, and the two
+ * protrusions dimensioned in their own band above the drawing so nothing
+ * collides with anything else.
+ */
 export const FrameProfile: React.FC<FrameProfileProps> = ({
   frame,
   result,
   pos,
   scale,
-  centerX,
-  centerY,
+  originX,
+  originY,
   lang,
+  activeTarget = null,
+  onSelectTarget,
 }) => {
   const t = translations[lang];
-  const yVal = frame.b / 2;
-  const rimH = 5; 
+  const halfB = (frame.b / 2) * scale;
+  const rim = 5 * scale;
+  const depth = frame.depth * scale;
+  const { grooveX } = pos;
 
-  // Current lens positions for overhang labels
-  const { etX_start, etX_end, grooveX: currentGrooveX } = pos;
+  const top = originY - halfB - rim;
+  const bottom = originY + halfB + rim;
+
+  const anterior = result.anteriorProtrusion;
+  const posterior = result.posteriorProtrusion;
+  // Two dimension bands above the rim: protrusion (measured off the rim faces)
+  // on the outer band, and CT above the lens inside it. Nothing overlaps.
+  const topBand = top - 54;
 
   return (
-    <g transform={`translate(${centerX}, ${centerY})`} className="text-slate-400">
-      <rect 
-        x={0} y={(-yVal - rimH) * scale} 
-        width={frame.depth * scale} height={rimH * scale} 
-        fill="currentColor" fillOpacity="0.2" 
-        stroke="url(#metallic-gradient)" strokeWidth="1.5"
-        rx={2}
+    <g transform={`translate(${originX}, 0)`}>
+      {/* Rim band, top and bottom: the slot the lens edge sits in. The rim is
+          drawn as a band that meets the lens edge, so the section reads as one
+          object rather than a lens floating between two slabs. */}
+      <rect
+        x={0}
+        y={top}
+        width={depth}
+        height={rim + 0.5}
+        className="text-sheet-ink"
+        fill="currentColor"
+        fillOpacity={0.3}
       />
-      <rect 
-        x={0} y={yVal * scale} 
-        width={frame.depth * scale} height={rimH * scale} 
-        fill="currentColor" fillOpacity="0.2" 
-        stroke="url(#metallic-gradient)" strokeWidth="1.5"
-        rx={2}
+      <rect
+        x={0}
+        y={bottom - rim - 0.5}
+        width={depth}
+        height={rim + 0.5}
+        className="text-sheet-ink"
+        fill="currentColor"
+        fillOpacity={0.3}
+      />
+      {/* The slot line: where the rim meets the lens, drawn once. */}
+      <line
+        x1={0}
+        y1={top + rim}
+        x2={depth}
+        y2={top + rim}
+        className="text-sheet-ink"
+        stroke="currentColor"
+        strokeWidth={1}
+        strokeOpacity={0.35}
+      />
+      <line
+        x1={0}
+        y1={bottom - rim}
+        x2={depth}
+        y2={bottom - rim}
+        className="text-sheet-ink"
+        stroke="currentColor"
+        strokeWidth={1}
+        strokeOpacity={0.35}
       />
 
-      <g transform={`translate(${frame.depth * scale}, ${(-yVal - rimH + 1) * scale})`}>
-        <rect 
-          x={-1 * scale} y={-0.5 * scale} 
-          width={3 * scale} height={3 * scale} 
-          fill="url(#metallic-gradient)" stroke="#1e293b" strokeWidth="0.5" 
-          rx={0.5} 
+      {/* Bevel groove. */}
+      <g
+        className={`cursor-help ${activeTarget === 'groove' ? 'text-sheet-warning' : 'text-sheet-muted'}`}
+        onMouseEnter={() => onSelectTarget?.('groove')}
+        onMouseLeave={() => onSelectTarget?.(null)}
+        onClick={() => onSelectTarget?.(activeTarget === 'groove' ? null : 'groove')}
+      >
+        <line
+          x1={grooveX}
+          y1={top}
+          x2={grooveX}
+          y2={bottom}
+          stroke="currentColor"
+          strokeWidth={activeTarget === 'groove' ? 1.75 : 1}
+          strokeOpacity={activeTarget === 'groove' ? 1 : 0.6}
+          strokeDasharray="6 5"
         />
-        <path 
-          d={`M 2 ${1 * scale} Q ${15 * scale} ${1 * scale}, ${40 * scale} ${5 * scale}`}
-          fill="none" stroke="currentColor" strokeWidth={2 * scale} strokeOpacity="0.15" strokeLinecap="round"
-        />
+        <text
+          x={grooveX}
+          y={bottom + 34}
+          textAnchor="middle"
+          fill="currentColor"
+          fontSize={12.5}
+          style={{ fontVariantNumeric: 'tabular-nums' }}
+        >
+          {Math.round(frame.depth ? (grooveX / scale / frame.depth) * 100 : 0)}%
+        </text>
       </g>
-      
-      {/* Groove Guide */}
-      <line 
-        x1={currentGrooveX * scale} y1={(-yVal - rimH) * scale}
-        x2={currentGrooveX * scale} y2={(yVal + rimH) * scale}
-        stroke="currentColor" strokeWidth="1" strokeDasharray="3 3" opacity="0.3"
-      />
-      <text x={currentGrooveX * scale} y={(-yVal - rimH - 10) * scale} textAnchor="middle" className="text-[7px] font-bold uppercase tracking-widest fill-slate-500">
-        {t.groove}
-      </text>
 
-      {/* Frame Depth Label */}
-      <text x={(frame.depth / 2) * scale} y={(yVal + rimH + 15) * scale} textAnchor="middle" className="text-[10px] uppercase font-bold fill-slate-500">
-        {t.frameDepth}: {frame.depth}mm
-      </text>
+      {/* Anterior protrusion, measured from the front face of the rim. */}
+      {anterior > 0 && (
+        <g className="text-sheet-warning">
+          <ExtLine x1={0} y1={top} x2={-anterior * scale} y2={top} />
+          <line
+            x1={-anterior * scale}
+            y1={topBand}
+            x2={0}
+            y2={topBand}
+            stroke="currentColor"
+            strokeWidth={activeTarget === 'anterior' ? 2 : 1.4}
+            markerStart="url(#sheet-arrow)"
+            markerEnd="url(#sheet-arrow)"
+            className="cursor-help"
+            onMouseEnter={() => onSelectTarget?.('anterior')}
+            onMouseLeave={() => onSelectTarget?.(null)}
+            onClick={() => onSelectTarget?.(activeTarget === 'anterior' ? null : 'anterior')}
+          />
+          <text
+            x={(-anterior * scale) / 2}
+            y={topBand - 8}
+            textAnchor="middle"
+            fill="currentColor"
+            fontSize={12.5}
+            fontWeight={600}
+            style={{ fontVariantNumeric: 'tabular-nums' }}
+          >
+            {anterior.toFixed(2)}
+          </text>
+        </g>
+      )}
 
-      {/* Overhang Indicators with Labels */}
-      <g>
-        {/* Anterior Overhang (Front) */}
-        {result.anteriorProtrusion > 0 && (
-          <g>
-            <line 
-              x1={-result.anteriorProtrusion * scale} y1={(-yVal - rimH - 5) * scale}
-              x2={0} y2={(-yVal - rimH - 5) * scale}
-              stroke="#ef4444" strokeWidth="1" strokeDasharray="2 2"
-            />
-            <text 
-              x={(-result.anteriorProtrusion / 2) * scale} 
-              y={(-yVal - rimH - 12) * scale} 
-              textAnchor="middle" 
-              className="text-[8px] font-bold fill-red-500 uppercase tracking-tighter"
-            >
-              ANT: {result.anteriorProtrusion.toFixed(1)}mm
-            </text>
-          </g>
-        )}
-        {/* Posterior Overhang (Back) */}
-        {result.posteriorProtrusion > 0 && (
-          <g>
-            <line 
-              x1={frame.depth * scale} y1={(-yVal - rimH - 5) * scale}
-              x2={(frame.depth + result.posteriorProtrusion) * scale} y2={(-yVal - rimH - 5) * scale}
-              stroke="#f59e0b" strokeWidth="1" strokeDasharray="2 2"
-            />
-            <text 
-              x={(frame.depth + result.posteriorProtrusion / 2) * scale} 
-              y={(-yVal - rimH - 12) * scale} 
-              textAnchor="middle" 
-              className="text-[8px] font-bold fill-orange-500 uppercase tracking-tighter"
-            >
-              POST: {result.posteriorProtrusion.toFixed(1)}mm
-            </text>
-          </g>
-        )}
-      </g>
+      {/* Posterior protrusion, measured from the back face of the rim. */}
+      {posterior > 0 && (
+        <g className="text-sheet-warning">
+          <ExtLine x1={depth} y1={top} x2={depth + posterior * scale} y2={top} />
+          <line
+            x1={depth}
+            y1={topBand}
+            x2={depth + posterior * scale}
+            y2={topBand}
+            stroke="currentColor"
+            strokeWidth={activeTarget === 'posterior' ? 2 : 1.4}
+            markerStart="url(#sheet-arrow)"
+            markerEnd="url(#sheet-arrow)"
+            className="cursor-help"
+            onMouseEnter={() => onSelectTarget?.('posterior')}
+            onMouseLeave={() => onSelectTarget?.(null)}
+            onClick={() => onSelectTarget?.(activeTarget === 'posterior' ? null : 'posterior')}
+          />
+          <text
+            x={depth + (posterior * scale) / 2}
+            y={topBand - 8}
+            textAnchor="middle"
+            fill="currentColor"
+            fontSize={12.5}
+            fontWeight={600}
+            style={{ fontVariantNumeric: 'tabular-nums' }}
+          >
+            {posterior.toFixed(2)}
+          </text>
+        </g>
+      )}
     </g>
   );
 };

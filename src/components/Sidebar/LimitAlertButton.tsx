@@ -1,9 +1,10 @@
 import { cn } from "@/src/lib/utils";
-import {Button} from "@shadcn/button";
 import { AlertCircleIcon } from "lucide-react";
 
 /**
- * LimitAlertButton - Single source of truth untuk frame param alerts
+ * The mark next to a frame dimension that is outside its ergonomic range.
+ * It highlights the matching dimension on the drawing while hovered or pressed.
+ * It does not pulse: a warning that blinks is a warning that gets ignored.
  */
 interface LimitAlertButtonProps {
   fieldName: "a" | "b" | "dbl" | "ed";
@@ -24,23 +25,23 @@ export const LimitAlertButton: React.FC<LimitAlertButtonProps> = ({
   isHighlighted,
   onClick,
 }) => (
-  <Button
-    variant="ghost"
-    size="icon"
+  <button
+    type="button"
     onMouseEnter={onMouseEnter}
     onMouseLeave={onMouseLeave}
     onClick={onClick}
     className={cn(
-      "w-5 h-5 rounded-full transition-all shrink-0 hover:bg-transparent",
-      "hover:scale-110 active:scale-95",
+      "flex h-5 w-5 shrink-0 items-center justify-center rounded-sm transition-colors duration-150",
+      "focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sheet-accent",
       isExceeding
-        ? "text-amber-500 hover:text-amber-600 animate-pulse-soft bg-amber-500/10"
-        : "text-slate-300 hover:text-slate-400 dark:text-slate-600 dark:hover:text-slate-500",
+        ? "text-sheet-warning hover:bg-sheet-warning/10"
+        : "text-sheet-muted hover:text-sheet-ink",
+      isHighlighted && "bg-sheet-warning/15",
     )}
     title={title}
-    aria-label={`Toggle ${fieldName} limit warning highlight`}
+    aria-label={`${fieldName}: ${title}`}
     aria-pressed={isHighlighted}
   >
-    <AlertCircleIcon size={11} />
-  </Button>
+    <AlertCircleIcon size={13} aria-hidden="true" />
+  </button>
 );

@@ -9,12 +9,16 @@ interface FrameInputProps {
   isExceeding: boolean;
 }
 
-export const FrameInput: React.FC<FrameInputProps> = ({ 
-  value, 
-  min, 
-  max, 
-  onChange, 
-  isExceeding 
+/**
+ * A frame dimension in millimetres. Out of range is said with the warning tone
+ * and a caption, not with a pulsing icon.
+ */
+export const FrameInput: React.FC<FrameInputProps> = ({
+  value,
+  min,
+  max,
+  onChange,
+  isExceeding,
 }) => {
   const [typed, setTyped] = useState(value.toString());
 
@@ -34,26 +38,34 @@ export const FrameInput: React.FC<FrameInputProps> = ({
   };
 
   return (
-    <InputGroup
-      className={`bg-white dark:bg-slate-950 h-8 ${
-        isExceeding 
-          ? 'border-amber-500 text-amber-600 dark:text-amber-400 focus-within:ring-amber-500 focus-within:border-amber-500' 
-          : 'border-slate-200 dark:border-slate-800 text-blue-600 dark:text-blue-400 focus-within:ring-blue-500 focus-within:border-blue-500'
-      }`}
-    >
-      <InputGroupInput
-        type="text"
-        value={typed}
-        onChange={(e) => setTyped(e.target.value)}
-        onBlur={commit}
-        onKeyDown={(e) => e.key === 'Enter' && commit()}
-        className={`w-full text-center text-xs font-mono font-bold h-8 px-0 ${
-          isExceeding ? 'text-amber-600 dark:text-amber-400' : 'text-blue-600 dark:text-blue-400'
+    <div className="flex flex-col gap-1">
+      <InputGroup
+        className={`h-9 rounded-sm bg-sheet-ground ${
+          isExceeding ? 'border-sheet-warning' : 'border-sheet-ground'
         }`}
-      />
-      <InputGroupAddon align="inline-end" className="pr-2 pointer-events-none text-[10px] opacity-70">
-        mm
-      </InputGroupAddon>
-    </InputGroup>
+      >
+        <InputGroupInput
+          type="text"
+          inputMode="decimal"
+          value={typed}
+          onChange={(e) => setTyped(e.target.value)}
+          onBlur={commit}
+          onKeyDown={(e) => e.key === 'Enter' && commit()}
+          aria-invalid={isExceeding}
+          className="h-9 w-full px-2 text-center text-[16px] font-medium text-sheet-ink tnum"
+        />
+        <InputGroupAddon
+          align="inline-end"
+          className="pointer-events-none pr-2 text-[13px] text-sheet-muted"
+        >
+          mm
+        </InputGroupAddon>
+      </InputGroup>
+      {isExceeding && (
+        <span className="text-[13px] text-sheet-warning">
+          {min}–{max} mm
+        </span>
+      )}
+    </div>
   );
 };

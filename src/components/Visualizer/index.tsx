@@ -1,329 +1,369 @@
 import React, { useMemo, useState } from 'react';
-import { AlertCircleIcon, XIcon, HelpCircleIcon } from "lucide-react";
 import { translations } from '../../lib/translations';
-import { VisualizerProps, HoverLabel, LensPosition } from './types';
+import { VisualizerProps, LensPosition, CaliperTarget } from './types';
 import { LensProfile } from './LensProfile';
 import { FrameProfile } from './FrameProfile';
 import { FrontView } from './FrontView';
 import { TopDownView } from './TopDownView';
-import { Popover, PopoverContent, PopoverTrigger } from '../ui/popover';
-import { Card } from '../ui/card';
-import { Button } from '../ui/button';
+import { EdgeDetail } from './EdgeDetail';
+import { SheetDefs } from './SheetDefs';
+import { useMediaQuery } from '../../hooks/useMediaQuery';
 
-export const Visualizer: React.FC<VisualizerProps> = React.memo(({
-  lens,
-  frame,
-  patient,
-  result,
-  compareResult,
-  compareLens,
-  lang,
-  view,
-  highlightedLimit = null,
-}) => {
-  const t = translations[lang];
-  const [hoveredLabel, setHoveredLabel] = useState<HoverLabel | null>(null);
-  const [isLegendOpen, setIsLegendOpen] = useState(true);
+type CaliperRow = {
+  id: Exclude<CaliperTarget, null>;
+  name: string;
+  value: string;
+  limit: string;
+  ok: boolean;
+  note: string;
+};
 
-  // Scaling factors
-  const PX_PER_MM = view === 'top' ? 4 : 6; 
-  const VIEWBOX_W = 550;
-  const VIEWBOX_H = 550;
-  
-  // Centers
-  const centerX = VIEWBOX_W / 2;
-  const centerY = view === 'top' ? VIEWBOX_H / 2 : 240; 
+/**
+ * The drawing board.
+ *
+ * A lab sheet, not a dashboard: one wide drawing strip — the section, the edge
+ * magnified as a detail callout, and the front elevation — and beneath it the
+ * schedule of what the drawing measures, with each dimension's tolerance. A
+ * dimension on the drawing and its row in the schedule light up together.
+ */
+export const Visualizer: React.FC<VisualizerProps> = React.memo(
+  ({
+    lens,
+    frame,
+    patient,
+    result,
+    compareResult,
+    compareLens,
+    lang,
+    view,
+    highlightedLimit = null,
+    bevelPercent = 0.33,
+  }) => {
+    const t = translations[lang];
+    const [target, setTarget] = useState<CaliperTarget>(null);
 
-  // Precalculate primary lens positions to avoid redundancy
-  const primaryPos = useMemo<LensPosition>(() => {
-    const etX_start = -result.anteriorProtrusion + result.s1;
-    const etX_end = etX_start + result.et;
-    const grooveX = etX_start + result.et / 2;
-    const frontApexX = -result.anteriorProtrusion;
-    const backApexX = frontApexX + result.ct;
-    return { etX_start, etX_end, grooveX, frontApexX, backApexX };
-  }, [result]);
+    const primaryPos = useMemo<LensPosition>(() => {
+      const etX_start = -result.anteriorProtrusion + result.s1;
+      const etX_end = etX_start + result.et;
+      const grooveX = etX_start + result.et / 2;
+      const frontApexX = -result.anteriorProtrusion;
+      const backApexX = frontApexX + result.ct;
+      return { etX_start, etX_end, grooveX, frontApexX, backApexX };
+    }, [result]);
 
-  // Precalculate compare lens positions if compareResult exists
-  const comparePos = useMemo<LensPosition | null>(() => {
-    if (!compareResult) return null;
-    const etX_start = -compareResult.anteriorProtrusion + compareResult.s1;
-    const etX_end = etX_start + compareResult.et;
-    const grooveX = etX_start + compareResult.et / 2;
-    const frontApexX = -compareResult.anteriorProtrusion;
-    const backApexX = frontApexX + compareResult.ct;
-    return { etX_start, etX_end, grooveX, frontApexX, backApexX };
-  }, [compareResult]);
+    const comparePos = useMemo<LensPosition | null>(() => {
+      if (!compareResult) return null;
+      const etX_start = -compareResult.anteriorProtrusion + compareResult.s1;
+      const etX_end = etX_start + compareResult.et;
+      const grooveX = etX_start + compareResult.et / 2;
+      const frontApexX = -compareResult.anteriorProtrusion;
+      const backApexX = frontApexX + compareResult.ct;
+      return { etX_start, etX_end, grooveX, frontApexX, backApexX };
+    }, [compareResult]);
 
-  return (
-    <div className="relative w-full h-full min-h-[300px] bg-slate-100 dark:bg-slate-900 rounded-3xl overflow-hidden flex items-center justify-center border border-slate-200 dark:border-slate-800 shadow-inner">
-      {/* Background Lab Grid */}
-      <div className="absolute inset-0 lab-grid" />
+    const mm = (v: number) => `${v.toFixed(2)} mm`;
 
-      <div className="absolute top-8 left-8 border-l-2 border-slate-300 dark:border-slate-700 pl-4 py-1 z-10 text-left">
-        <h3 className="text-slate-500 dark:text-slate-400 text-[10px] font-bold uppercase tracking-[0.2em]">
-          {view === 'side' ? t.crossSection : view === 'top' ? t.topDown : t.frontView}
-        </h3>
-        <p className="text-slate-400 dark:text-slate-500 text-[9px] italic">{t.visualSim}</p>
-      </div>
+    const calipers: CaliperRow[] = [
+      { id: 'ct', name: t.center, value: mm(result.ct), limit: '≥ 1.00', ok: result.ct >= 1, note: t.caliperCt },
+      { id: 'et', name: t.edgeThick, value: mm(result.et), limit: '≤ 6.00', ok: result.et <= 6, note: t.caliperEt },
+      {
+        id: 'anterior',
+        name: t.anteriorProt,
+        value: mm(result.anteriorProtrusion),
+        limit: '≤ 1.50',
+        ok: result.anteriorProtrusion <= 1.5,
+        note: t.caliperAnterior,
+      },
+      {
+        id: 'posterior',
+        name: t.posteriorProt,
+        value: mm(result.posteriorProtrusion),
+        limit: '≤ 2.00',
+        ok: result.posteriorProtrusion <= 2,
+        note: t.caliperPosterior,
+      },
+      {
+        id: 'groove',
+        name: t.groove,
+        value: `${Math.round(bevelPercent * 100)}%`,
+        limit: '0–100',
+        ok: true,
+        note: t.caliperGroove,
+      },
+    ];
 
-      {/* Floating Exceeded/Warning Alert Card */}
-      {highlightedLimit && (
-        <Card className="absolute top-8 right-8 max-w-[280px] p-4 bg-amber-500/10 dark:bg-amber-500/15 backdrop-blur-md border-amber-500/30 rounded-2xl flex items-start gap-2.5 shadow-lg animate-in fade-in slide-in-from-top-4 duration-300 text-left z-20">
-          <AlertCircleIcon className="text-amber-500 shrink-0 mt-0.5" size={16} />
-          <div>
-            <h4 className="text-[10px] font-bold text-amber-600 dark:text-amber-400 uppercase tracking-widest mb-1 leading-none">
-              {t.limitWarningTitle}
-            </h4>
-            <p className="text-[9.5px] text-slate-600 dark:text-slate-300 font-semibold leading-relaxed">
-              {highlightedLimit === 'a' && t.limitWarningA(frame.a, Number((result.y * 2 + 2).toFixed(0)))}
-              {highlightedLimit === 'b' && t.limitWarningB(frame.b)}
-              {highlightedLimit === 'dbl' && t.limitWarningDbl(frame.dbl)}
-              {highlightedLimit === 'ed' && t.limitWarningEd(frame.ed, frame.a)}
-            </p>
-          </div>
-        </Card>
-      )}
+    const active = calipers.find((c) => c.id === target) ?? null;
 
-      <svg width="100%" height="100%" viewBox={`0 0 ${VIEWBOX_W} ${VIEWBOX_H}`} preserveAspectRatio="xMidYMid meet" className="filter drop-shadow-xl cursor-crosshair">
-        <defs>
-          <linearGradient id="metallic-gradient" x1="0%" y1="0%" x2="100%" y2="100%">
-            <stop offset="0%" stopColor="#475569" />
-            <stop offset="20%" stopColor="#94a3b8" />
-            <stop offset="40%" stopColor="#cbd5e1" />
-            <stop offset="60%" stopColor="#94a3b8" />
-            <stop offset="80%" stopColor="#475569" />
-            <stop offset="100%" stopColor="#334155" />
-          </linearGradient>
-          <pattern id="diagonal-stripes" width="8" height="8" patternTransform="rotate(45 0 0)" patternUnits="userSpaceOnUse">
-            <line x1="0" y1="0" x2="0" y2="8" stroke="#10b981" strokeWidth="2.2" opacity="0.45" />
-          </pattern>
-        </defs>
-        {view === 'side' ? (
-          <>
-            <FrameProfile
-              frame={frame}
-              result={result}
-              pos={primaryPos}
-              scale={PX_PER_MM}
-              centerX={centerX}
-              centerY={centerY}
-              lang={lang}
-            />
-            
-            <FrontView
-              frame={frame}
-              patient={patient}
-              result={result}
-              lang={lang}
-              isMain={false}
-              highlightedLimit={highlightedLimit}
-            />
-            
-            {/* Comparison Result (Rendered first if exists to show behind) */}
-            {compareResult && compareLens && comparePos && (
-              <LensProfile
-                lens={compareLens}
-                result={compareResult}
-                pos={comparePos}
-                color="#10b981"
-                opacity={0.15}
-                label="secondary"
-                scale={PX_PER_MM}
-                centerX={centerX}
-                centerY={centerY}
-                frameB={frame.b}
+    // On a phone the three drawings cannot sit side by side legibly, so the
+    // board shows the section and the edge detail; the front elevation has its
+    // own view. The scale is the same, so the numbers still hold.
+    const compact = useMediaQuery('(max-width: 767px)');
+
+    // Three drawings at three scales, as a lab sheet sets them: the section for
+    // thickness, the edge magnified as a detail, the elevation for the frame.
+    const S = 6;
+    const detailZoom = 13;
+    const frontScale = 2.6;
+
+    const minX = -Math.max(result.anteriorProtrusion, compareResult?.anteriorProtrusion ?? 0);
+    const maxX = Math.max(
+      frame.depth + result.posteriorProtrusion,
+      frame.depth + (compareResult?.posteriorProtrusion ?? 0),
+      1,
+    );
+    const sectionW = (maxX - minX) * S;
+    const sectionH = (frame.b + 8) * S;
+
+    const detailW = (maxX - minX) * detailZoom;
+    const detailH = 7.5 * detailZoom;
+
+    const frontW = (frame.a * 2 + frame.dbl) * frontScale;
+    const frontH = (frame.b + 8) * frontScale;
+
+    const PAD = 34;
+    const GAP = 54;
+    const LABEL_BAND = 56;
+
+    const BOARD_W = compact
+      ? PAD + sectionW + 26 + detailW + PAD
+      : PAD + sectionW + GAP + detailW + GAP + frontW + PAD + 30;
+    // The sheet is one screen tall where it can be: the board takes what is
+    // left after the claim, the order and the schedule.
+    const BOARD_H = Math.max(sectionH, detailH, compact ? 0 : frontH) + PAD + LABEL_BAND + 18;    const originX = PAD + Math.abs(minX) * S;
+    const originY = PAD + Math.max(sectionH, detailH, frontH) / 2;
+    const detailOriginX = PAD + sectionW + (compact ? 26 : GAP) + Math.abs(minX) * detailZoom;
+    const frontOriginX = PAD + sectionW + GAP + detailW + GAP + (frame.a + frame.dbl) * frontScale;
+    const frontOriginY = originY;
+
+    const viewTitle =
+      view === 'side' ? t.crossSection : view === 'top' ? t.topDown : t.frontView;
+
+    const pick = (next: Exclude<CaliperTarget, null>) =>
+      setTarget((current) => (current === next ? null : next));
+
+    return (
+      <div
+        data-ui
+        className="flex h-full min-h-[340px] w-full flex-col overflow-hidden rounded-sm bg-sheet-stage"
+      >
+        <div className="flex shrink-0 flex-wrap items-baseline justify-between gap-x-4 gap-y-1 px-4 pt-3">
+          <h2 className="text-[13px] font-medium text-sheet-ink">{viewTitle}</h2>
+          <p className="text-[13px] text-sheet-muted">{t.scaleNote}</p>
+        </div>
+
+        {/* The drawing strip. */}
+        <div className="min-h-0 flex-1">
+          <svg
+            width="100%"
+            height="100%"
+            viewBox={
+              view === 'side'
+                ? `0 0 ${BOARD_W} ${BOARD_H}`
+                : view === 'front'
+                  ? `0 0 ${(frame.a * 2 + frame.dbl) * S + 160} ${(frame.b + 10) * S + 120}`
+                  : `0 0 ${(frame.a * 2 + frame.dbl) * S + 120} ${(frame.depth + 10) * S + 150}`
+            }
+            preserveAspectRatio="xMidYMid meet"
+            role="img"
+            aria-label={`${viewTitle}. ${t.visualSim}`}
+          >
+            <SheetDefs />
+
+            {view === 'side' ? (
+              <>
+                <FrameProfile
+                  frame={frame}
+                  result={result}
+                  pos={primaryPos}
+                  scale={S}
+                  originX={originX}
+                  originY={originY}
+                  lang={lang}
+                  activeTarget={target}
+                  onSelectTarget={(next) => setTarget(next as CaliperTarget)}
+                />
+
+                {compareResult && compareLens && comparePos && (
+                  <LensProfile
+                    result={compareResult}
+                    pos={comparePos}
+                    scale={S}
+                    originX={originX}
+                    originY={originY}
+                    frameB={frame.b}
+                    tone="compare"
+                  />
+                )}
+
+                <LensProfile
+                  result={result}
+                  pos={primaryPos}
+                  scale={S}
+                  originX={originX}
+                  originY={originY}
+                  frameB={frame.b}
+                  tone="primary"
+                  active={target === 'et' || target === 'ct'}
+                />
+
+                {/* CT across the lens. */}
+                <g
+                  className={`cursor-help ${target === 'ct' ? 'text-sheet-warning' : 'text-sheet-ink'}`}
+                  onMouseEnter={() => setTarget('ct')}
+                  onMouseLeave={() => setTarget(null)}
+                  onClick={() => pick('ct')}
+                >
+                  <line
+                    x1={originX + primaryPos.frontApexX * S}
+                    y1={originY - (frame.b / 2) * S * 0.55}
+                    x2={originX + primaryPos.backApexX * S}
+                    y2={originY - (frame.b / 2) * S * 0.55}
+                    stroke="currentColor"
+                    strokeWidth={target === 'ct' ? 2 : 1.4}
+                    markerStart="url(#sheet-arrow)"
+                    markerEnd="url(#sheet-arrow)"
+                  />
+                  <text
+                    x={originX + ((primaryPos.frontApexX + primaryPos.backApexX) / 2) * S}
+                    y={originY - (frame.b / 2) * S * 0.55 - 8}
+                    textAnchor="middle"
+                    fill="currentColor"
+                    fontSize={12}
+                    fontWeight={600}
+                    style={{ fontVariantNumeric: 'tabular-nums' }}
+                  >
+                    CT {result.ct.toFixed(2)}
+                  </text>
+                </g>
+
+                <EdgeDetail
+                  frame={frame}
+                  result={result}
+                  pos={primaryPos}
+                  lang={lang}
+                  zoom={detailZoom}
+                  originX={detailOriginX}
+                  originY={originY}
+                  activeTarget={target}
+                  onSelectTarget={(next) => setTarget(next as CaliperTarget)}
+                />
+                {!compact && (
+                  <FrontView
+                    frame={frame}
+                    patient={patient}
+                    result={result}
+                    lang={lang}
+                    scale={frontScale}
+                    originX={frontOriginX}
+                    originY={frontOriginY}
+                    highlightedLimit={highlightedLimit}
+                  />
+                )}
+
+                {/* Each drawing names itself, as a sheet's views do. */}
+                <g className="text-sheet-muted" fill="currentColor" fontSize={12}>
+                  <text x={originX} y={BOARD_H - 14} textAnchor="middle">
+                    {t.crossSection}
+                  </text>
+                  <text x={detailOriginX + detailW / 2} y={BOARD_H - 14} textAnchor="middle">
+                    {t.edgeDetail}
+                  </text>
+                  {!compact && (
+                    <text x={frontOriginX + frontW / 4} y={BOARD_H - 14} textAnchor="middle">
+                      {t.frontView}
+                    </text>
+                  )}
+                </g>
+              </>
+            ) : view === 'front' ? (
+              <FrontView
+                frame={frame}
+                patient={patient}
+                result={result}
                 lang={lang}
-                onHoverLabel={setHoveredLabel}
+                scale={S}
+                originX={PAD + (frame.a + frame.dbl) * S}
+                originY={PAD + (frame.b * S) / 2 + 20}
+                isMain
+                highlightedLimit={highlightedLimit}
+              />
+            ) : (
+              <TopDownView
+                lens={lens}
+                frame={frame}
+                patient={patient}
+                result={result}
+                compareResult={compareResult}
+                compareLens={compareLens}
+                lang={lang}
+                scale={S}
+                centerX={(frame.a + frame.dbl / 2) * S + 50}
+                centerY={(frame.depth + 6) * S}
                 primaryPos={primaryPos}
                 comparePos={comparePos}
+                highlightedLimit={highlightedLimit}
               />
             )}
-
-            {/* Normal Mode or Base Result */}
-            <LensProfile
-              lens={lens}
-              result={result}
-              pos={primaryPos}
-              color="#3b82f6"
-              opacity={0.25}
-              label="primary"
-              scale={PX_PER_MM}
-              centerX={centerX}
-              centerY={centerY}
-              frameB={frame.b}
-              lang={lang}
-              onHoverLabel={setHoveredLabel}
-              primaryPos={primaryPos}
-              comparePos={comparePos}
-            />
-          </>
-        ) : view === 'top' ? (
-          <TopDownView
-            lens={lens}
-            frame={frame}
-            patient={patient}
-            result={result}
-            compareResult={compareResult}
-            compareLens={compareLens}
-            lang={lang}
-            scale={PX_PER_MM}
-            centerX={centerX}
-            centerY={centerY}
-            primaryPos={primaryPos}
-            comparePos={comparePos}
-            highlightedLimit={highlightedLimit}
-          />
-        ) : (
-          <FrontView
-            frame={frame}
-            patient={patient}
-            result={result}
-            lang={lang}
-            isMain={true}
-            highlightedLimit={highlightedLimit}
-          />
-        )}
-
-        {/* SVG-based Interactivity Tooltip */}
-        {hoveredLabel && (
-          <g transform={`translate(${hoveredLabel.x + centerX}, ${hoveredLabel.y + centerY - 25})`} className="pointer-events-none z-50">
-            <rect
-              x={-80}
-              y={-32}
-              width={160}
-              height={26}
-              rx={6}
-              fill="#0f172a"
-              fillOpacity={0.96}
-              stroke="#334155"
-              strokeWidth={1}
-            />
-            {/* Tooltip arrow */}
-            <polygon points="-5,-5 0,0 5,-5" transform="translate(0, 0)" fill="#0f172a" stroke="#334155" strokeWidth={0.5} />
-            <rect x={-4} y={-6} width={8} height={2} fill="#0f172a" />
-            <text x={0} y={-19} textAnchor="middle" fill="#f1f5f9" className="text-[7.5px] font-sans font-bold">
-              {hoveredLabel.title}
-            </text>
-            <text x={0} y={-9} textAnchor="middle" fill="#cbd5e1" className="text-[7px] font-sans">
-              {hoveredLabel.desc}
-            </text>
-          </g>
-        )}
-      </svg>
-
-      {/* Dimension Labels Overlay / Collapsible Legend */}
-      {isLegendOpen ? (
-        <Card className="absolute bottom-6 right-6 p-3 bg-white/95 dark:bg-slate-950/95 border-slate-200/80 dark:border-slate-800/80 backdrop-blur-md rounded-xl space-y-2 shadow-md min-w-[145px] text-left transition-all duration-200 animate-in fade-in zoom-in-95 select-none md:bottom-8 md:right-8 z-20">
-          <div className="flex items-center justify-between gap-4 border-b border-slate-100 dark:border-slate-800 pb-1 mb-1">
-            <span className="text-[9px] font-extrabold text-slate-400 dark:text-slate-500 uppercase tracking-widest">
-              {t.legend}
-            </span>
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={() => setIsLegendOpen(false)}
-              className="h-6 w-6 text-slate-400 hover:text-slate-600 dark:hover:text-slate-300"
-              aria-label={t.collapseLegend}
-              title={t.collapseLegend}
-            >
-              <XIcon size={10} />
-            </Button>
-          </div>
-          <div className="space-y-1.5">
-            <div className="flex items-center gap-2">
-              <div className="w-2.5 h-2.5 rounded-full bg-blue-500 shadow-sm shadow-blue-500/40"></div>
-              <span className="text-[10px] font-semibold text-slate-600 dark:text-slate-350 uppercase tracking-wider">{t.primarySpec}</span>
-            </div>
-            {compareResult && compareLens && (
-              <div className="flex items-center gap-2">
-                <div className="w-2.5 h-2.5 rounded-full bg-emerald-500 shadow-sm shadow-emerald-500/40"></div>
-                <span className="text-[10px] font-semibold text-slate-600 dark:text-slate-350 uppercase tracking-wider">{t.comparison} ({compareLens.index.toFixed(2)})</span>
-              </div>
-            )}
-          </div>
-        </Card>
-      ) : (
-        /* Collapsed Panel utilizing Popover Shadcn */
-        <div className="absolute bottom-6 right-6 z-20 md:bottom-8 md:right-8 transition-all duration-200 animate-in fade-in zoom-in-95">
-          <Popover>
-            <PopoverTrigger
-              className="flex items-center gap-1.5 px-3 py-2 bg-white/95 dark:bg-slate-950/95 border border-slate-200/80 dark:border-slate-800/80 backdrop-blur-md rounded-full shadow-md hover:shadow-lg hover:border-slate-300 dark:hover:border-slate-700 transition-all cursor-pointer group active:scale-95"
-              title={t.showLegend}
-            >
-              {/* Display tiny colored indicator circle icons */}
-              <span className="flex items-center -space-x-1">
-                <span className="w-2.5 h-2.5 rounded-full bg-blue-500 border border-white dark:border-slate-900 shadow-sm" />
-                {compareResult && compareLens && (
-                  <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 border border-white dark:border-slate-900 shadow-sm" />
-                )}
-              </span>
-              
-              {/* Mini help icon */}
-              <HelpCircleIcon size={11} className="text-slate-400 group-hover:text-slate-600 dark:group-hover:text-slate-300 transition-colors" />
-            </PopoverTrigger>
-            <PopoverContent 
-              side="top" 
-              align="end" 
-              sideOffset={8} 
-              className="w-56 p-3 bg-white/95 dark:bg-slate-950/95 border border-slate-200/90 dark:border-slate-800 shadow-xl rounded-xl z-50 text-left backdrop-blur-sm"
-            >
-              <div className="space-y-2 select-none">
-                <div className="text-[9px] uppercase tracking-wider text-slate-400 dark:text-slate-500 font-extrabold pb-1 border-b border-slate-100 dark:border-slate-800">
-                  {t.visualLegend}
-                </div>
-                
-                <div className="space-y-2">
-                  <div className="flex items-start gap-2">
-                    <div className="w-2.5 h-2.5 rounded-full bg-blue-500 shadow-sm shrink-0 mt-0.5"></div>
-                    <div>
-                      <div className="text-[10px] font-bold text-slate-700 dark:text-slate-300 leading-tight">{t.primarySpec}</div>
-                      <div className="text-[8px] text-slate-400 dark:text-slate-500 font-medium">
-                        {t.primaryDesc}
-                      </div>
-                    </div>
-                  </div>
-                  
-                  {compareResult && compareLens && (
-                    <div className="flex items-start gap-2 pt-1">
-                      <div className="w-2.5 h-2.5 rounded-full bg-emerald-500 shadow-sm shrink-0 mt-0.5"></div>
-                      <div>
-                        <div className="text-[10px] font-bold text-slate-700 dark:text-slate-300 leading-tight">
-                          {t.comparison} ({compareLens.index.toFixed(2)})
-                        </div>
-                        <div className="text-[8px] text-slate-400 dark:text-slate-500 font-medium">
-                          {t.comparisonDesc}
-                        </div>
-                      </div>
-                    </div>
-                  )}
-                </div>
-                
-                <Button
-                  variant="secondary"
-                  onClick={() => setIsLegendOpen(true)}
-                  className="w-full mt-1.5 h-7 text-[9px] font-extrabold uppercase tracking-wider"
-                >
-                  {t.pinLegend}
-                </Button>
-              </div>
-            </PopoverContent>
-          </Popover>
+          </svg>
         </div>
-      )}
-    </div>
-  );
-}, (prevProps, nextProps) => {
-  return (
-    prevProps.lens === nextProps.lens &&
-    prevProps.frame === nextProps.frame &&
-    prevProps.patient === nextProps.patient &&
-    prevProps.result === nextProps.result &&
-    prevProps.compareResult === nextProps.compareResult &&
-    prevProps.compareLens === nextProps.compareLens &&
-    prevProps.lang === nextProps.lang &&
-    prevProps.view === nextProps.view &&
-    prevProps.highlightedLimit === nextProps.highlightedLimit &&
-    prevProps.frameType === nextProps.frameType
-  );
-});
+
+        {/* The schedule: what the drawing measures, and its tolerance. */}
+        <div className="shrink-0 px-2 pb-2">
+          <div className="grid grid-cols-2 gap-px bg-sheet-stage sm:grid-cols-3 lg:grid-cols-5">
+            {calipers.map((row, index) => {
+              const isActive = target === row.id;
+              return (
+                <button
+                  key={row.id}
+                  type="button"
+                  onMouseEnter={() => setTarget(row.id)}
+                  onMouseLeave={() => setTarget(null)}
+                  onFocus={() => setTarget(row.id)}
+                  onBlur={() => setTarget(null)}
+                  onClick={() => pick(row.id)}
+                  aria-pressed={isActive}
+                  className={`sheet-rise delay-${index + 1} flex flex-col gap-0.5 px-3 py-2 text-left transition-colors duration-150 ${
+                    isActive ? 'bg-sheet-ground' : 'bg-sheet-panel hover:bg-sheet-tint'
+                  }`}
+                >
+                  <span className="text-[13px] leading-tight text-sheet-muted">{row.name}</span>
+                  <span className="text-[18px] font-medium leading-tight text-sheet-ink tnum">
+                    {row.value}
+                  </span>
+                  <span className={`text-[13px] leading-tight tnum ${row.ok ? 'text-sheet-muted' : 'text-sheet-warning'}`}>
+                    {row.ok ? t.withinLimit : t.overLimit} · {row.limit} mm
+                  </span>
+                </button>
+              );
+            })}
+          </div>
+
+          {/* The definition of whichever caliper is being read. */}
+          <p
+            key={active ? active.id : 'hint'}
+            className={`caliper-snap mt-2 min-h-[20px] px-1 text-[13px] leading-snug ${
+              active ? 'text-sheet-ink' : 'text-sheet-muted'
+            }`}
+          >
+            {active ? active.note : t.caliperHint}
+          </p>
+        </div>
+      </div>
+    );
+  },
+  (prevProps, nextProps) => {
+    return (
+      prevProps.lens === nextProps.lens &&
+      prevProps.frame === nextProps.frame &&
+      prevProps.patient === nextProps.patient &&
+      prevProps.result === nextProps.result &&
+      prevProps.compareResult === nextProps.compareResult &&
+      prevProps.compareLens === nextProps.compareLens &&
+      prevProps.lang === nextProps.lang &&
+      prevProps.view === nextProps.view &&
+      prevProps.highlightedLimit === nextProps.highlightedLimit &&
+      prevProps.frameType === nextProps.frameType &&
+      prevProps.bevelPercent === nextProps.bevelPercent
+    );
+  },
+);

@@ -3,16 +3,17 @@ import { InputGroup, InputGroupAddon, InputGroupInput } from "@shadcn/input-grou
 import { Field, FieldLabel } from "@shadcn/field";
 import { LabelWithTooltip } from "./LabelWithTooltip";
 import { Slider } from "@shadcn/slider";
-import { ZapIcon } from "lucide-react";
+
 /**
- * BevelControl - Bevel positioning slider + percentage input
+ * Bevel position: where the rim grips the edge, from the front surface to the
+ * back, as a share of the frame depth. The slider and the percentage are the
+ * same value; the drawing walks the groove as it moves.
  */
 interface BevelControlProps {
   bevelPercent: number;
   onBevelChange: (percent: number) => void;
   lang: Language;
 }
-
 
 export const BevelControl: React.FC<BevelControlProps> = ({
   bevelPercent,
@@ -22,24 +23,14 @@ export const BevelControl: React.FC<BevelControlProps> = ({
   const t = translations[lang];
 
   return (
-    <Field orientation="vertical" className="pt-2">
-      <FieldLabel className="w-auto flex-none m-0 items-center">
-        <LabelWithTooltip
-          label={t.bevelPos}
-          lang={lang}
-          isUppercaseHeader
-          className="text-[10px] text-slate-400 font-bold uppercase tracking-wider"
-          icon={<ZapIcon size={11} className="text-orange-500" />}
-        />
+    <Field orientation="vertical" className="gap-2 pt-1">
+      <FieldLabel className="m-0 w-auto flex-none items-center">
+        <LabelWithTooltip label={t.bevelPos} lang={lang} />
       </FieldLabel>
-      <div className="flex flex-row items-center gap-2 sm:gap-3 mt-1 w-full">
-        {/* Label Front */}
-        <span className="text-[9px] font-bold text-slate-400 min-w-fit">
-          {t.bevelFront}
-        </span>
 
-        {/* Slider */}
-        <div className="flex-1 w-full min-w-0">
+      <div className="flex w-full items-center gap-3">
+        <span className="text-[13px] text-sheet-muted">{t.bevelFront}</span>
+        <div className="min-w-0 flex-1">
           <Slider
             min={0}
             max={1}
@@ -49,18 +40,13 @@ export const BevelControl: React.FC<BevelControlProps> = ({
               onBevelChange(Array.isArray(val) ? val[0] : (val as number))
             }
             className="w-full cursor-pointer"
-            aria-label="Bevel positioning slider"
+            aria-label={t.bevelPos}
           />
         </div>
+        <span className="text-[13px] text-sheet-muted">{t.bevelBack}</span>
 
-        {/* Label Back */}
-        <span className="text-[9px] font-bold text-slate-400 min-w-fit">
-          {t.bevelBack}
-        </span>
-
-        {/* Percentage Input */}
-        <div className="w-18 min-w-[72px] shrink-0">
-          <InputGroup className="h-7 w-full border-slate-200 dark:border-slate-800 focus-within:border-blue-500 focus-within:ring-1 focus-within:ring-blue-500">
+        <div className="w-[68px] shrink-0">
+          <InputGroup className="h-9 rounded-sm border-sheet-ground bg-sheet-ground">
             <InputGroupInput
               type="number"
               min={0}
@@ -69,18 +55,15 @@ export const BevelControl: React.FC<BevelControlProps> = ({
               value={Math.round(bevelPercent * 100)}
               onChange={(e) =>
                 onBevelChange(
-                  Math.min(
-                    100,
-                    Math.max(0, parseFloat(e.target.value || "0")),
-                  ) / 100,
+                  Math.min(100, Math.max(0, parseFloat(e.target.value || "0"))) / 100,
                 )
               }
-              className="w-full h-7 pl-2 pr-1 text-[11px] font-mono font-bold hover:bg-slate-50 dark:hover:bg-slate-900"
-              aria-label="Bevel percentage numeric input"
+              className="h-9 w-full pl-2 pr-1 text-[16px] font-medium text-sheet-ink tnum"
+              aria-label={t.bevelPos}
             />
             <InputGroupAddon
               align="inline-end"
-              className="pr-2 pl-0 text-[10px] text-slate-400 pointer-events-none"
+              className="pointer-events-none pl-0 pr-2 text-[13px] text-sheet-muted"
             >
               %
             </InputGroupAddon>

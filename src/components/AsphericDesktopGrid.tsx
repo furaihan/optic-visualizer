@@ -1,9 +1,9 @@
-import { useState, useRef, useEffect } from "react";
+import { useState } from "react";
 import { AsphericSidebar } from "./AsphericSidebar";
 import { AsphericVisualizer } from "./AsphericVisualizer";
-import { SummaryCard } from "./cards/SummaryCard";
-import { CurvatureCard } from "./cards/CurvatureCard";
-import { RecommendationCard } from "./cards/RecommendationCard";
+import { JobTicket } from "./sheet/JobTicket";
+import { MeasurementSheet } from "./sheet/MeasurementSheet";
+import { RecommendationRow } from "./sheet/RecommendationRow";
 import { useAsphericContext } from "../contexts/AsphericContext";
 import { ScrollArea } from "./ui/scroll-area";
 import ErrorBoundary from "./ErrorBoundary";
@@ -15,16 +15,17 @@ import { AppFooter } from "./layout/AppFooter";
 import { ValidationAlerts } from "./layout/ValidationAlerts";
 import { HeaderBar } from "./layout/HeaderBar";
 
+/**
+ * The aspheric workbench. Same sheet as the spherical one, with the aspheric
+ * surface parameters in the inspector and the same measurement table below.
+ */
 export function AsphericDesktopGrid() {
   const search = useSearch({ strict: false }) as unknown as SimulatorSearchParams;
   const lang = search.lang;
   const view = search.view;
-
   const navigate = useNavigate();
-  const [currentMode, setCurrentMode] = useState<'simple' | 'advanced'>('simple');
   const t = translations[lang];
-
-  const [isRecalculating, setIsRecalculating] = useState(false);
+  const [mode, setMode] = useState<'simple' | 'advanced'>('simple');
 
   const {
     lens,
@@ -32,72 +33,106 @@ export function AsphericDesktopGrid() {
     patient,
     bevelPercent,
     frameType,
-    setLens,
-    setFrame,
-    setPatient,
-    setBevelPercent,
-    setFrameType,
     result,
-    highlightedLimit,
-    setHighlightedLimit,
   } = useAsphericContext();
 
-  const prevDepsRef = useRef({ lens, frame, patient, bevelPercent, frameType });
-
-  useEffect(() => {
-    const hasChanged =
-      lens !== prevDepsRef.current.lens ||
-      frame !== prevDepsRef.current.frame ||
-      patient !== prevDepsRef.current.patient ||
-      bevelPercent !== prevDepsRef.current.bevelPercent ||
-      frameType !== prevDepsRef.current.frameType;
-
-    if (hasChanged) {
-      setIsRecalculating(true);
-      prevDepsRef.current = { lens, frame, patient, bevelPercent, frameType };
-      const timer = setTimeout(() => setIsRecalculating(false), 300);
-      return () => clearTimeout(timer);
-    }
-  }, [lens, frame, patient, bevelPercent, frameType]);
-
-  const handleTabChange = (value: string) => {
-    setCurrentMode(value as 'simple' | 'advanced');
+  const lensForSheet = {
+    sph: lens.sph,
+    cyl: lens.cyl,
+    axis: lens.axis,
+    index: lens.index,
+    baseCurve: lens.baseCurve,
   };
 
   return (
-    <div className="flex flex-1 h-full overflow-hidden w-full">
-      <div className="shrink-0 bg-white dark:bg-slate-950 border-r border-slate-200 dark:border-slate-800">
+    <div className="flex h-full w-full flex-1 overflow-hidden bg-sheet-ground">
+      <div className="hidden shrink-0 bg-sheet-ground md:block">
         <AsphericSidebar lang={lang} />
       </div>
 
-      <div className="flex-1 flex flex-col h-full overflow-hidden relative">
-        <HeaderBar lang={lang} view={view} activeTab="visualizer" onViewChange={(v) => navigate({ search: { ...search, view: v } } as any)} />
+      <div className="relative flex h-full min-w-0 flex-1 flex-col overflow-hidden">
+        <HeaderBar
+          lang={lang}
+          view={view}
+          activeTab="visualizer"
+          onViewChange={(v) => navigate({ search: { ...search, view: v } } as any)}
+        />
         <ValidationAlerts lang={lang} />
-        <ScrollArea className="flex-1 min-h-0 pl-0.5">
-          <div className="flex flex-col gap-4 md:pr-3 pb-6 p-3 md:p-4 lg:p-6">
-            <Tabs value={currentMode} onValueChange={handleTabChange} className="w-full flex-col">
-              <div className="flex items-center justify-between mb-4">
-                <TabsList className="grid w-64 grid-cols-2 h-9 p-1 bg-slate-50 dark:bg-slate-950 rounded-lg border border-slate-200/50 dark:border-slate-800/80">
-                  <TabsTrigger value="simple" className="text-xs font-semibold">{t.tabImage}</TabsTrigger>
-                  <TabsTrigger value="advanced" className="text-xs font-semibold">{t.tabStatistics}</TabsTrigger>
-                </TabsList>
-              </div>
 
-              <TabsContent value="simple" className="flex flex-col gap-4 focus-visible:outline-none">
-                <div className="shrink-0">
-                  <ErrorBoundary fallback={<div className="p-4 border border-red-200 bg-red-50 text-red-600 rounded-xl text-xs">Summary Card Error</div>}>
-                    <SummaryCard
-                      result={result}
-                      lang={lang}
-                      frame={frame}
-                      lens={{ sph: lens.sph, cyl: lens.cyl, axis: lens.axis, index: lens.index, baseCurve: lens.baseCurve }}
-                      isLoading={isRecalculating}
-                      isAdvanced={false}
-                    />
-                  </ErrorBoundary>
-                </div>
-                <div className="min-h-[400px] h-[50vh] xl:h-[500px]">
-                  <ErrorBoundary fallback={<div className="h-full w-full flex items-center justify-center border border-red-200 bg-red-50 text-red-600 rounded-xl text-xs">Visualizer Rendering Error</div>}>
+        <ScrollArea className="min-h-0 flex-1">
+          <div className="flex flex-col gap-8 px-3 pb-12 pt-4 sm:px-4">
+            <div className="flex flex-col gap-2 lg:max-w-[64ch]">
+              <h1 className="text-[28px] font-medium leading-[1.15] tracking-[-0.025em] text-sheet-ink sm:text-[34px]">
+                {t.asphericMode}
+              </h1>
+              <p className="max-w-[58ch] text-[16px] leading-relaxed text-sheet-ink">
+                {t.asphericParams}
+              </p>
+            </div>
+
+            <JobTicket
+              lens={lensForSheet}
+              frame={frame}
+              patient={patient}
+              result={result}
+              frameType={frameType}
+              bevelPercent={bevelPercent}
+              lang={lang}
+            />
+
+            <div className="grid grid-cols-1 gap-8 lg:grid-cols-[minmax(0,5fr)_minmax(0,7fr)] lg:items-start">
+              <Tabs
+                value={mode}
+                onValueChange={(v) => setMode(v as 'simple' | 'advanced')}
+                className="min-w-0"
+              >
+                <TabsList className="h-9 gap-0 rounded-none bg-sheet-panel p-1">
+                  <TabsTrigger
+                    value="simple"
+                    className="h-full rounded-none px-3 text-[13px] font-medium text-sheet-muted data-active:bg-sheet-ground data-active:text-sheet-ink group-data-[variant=default]/tabs-list:data-active:shadow-none"
+                  >
+                    {t.tabImage}
+                  </TabsTrigger>
+                  <TabsTrigger
+                    value="advanced"
+                    className="h-full rounded-none px-3 text-[13px] font-medium text-sheet-muted data-active:bg-sheet-ground data-active:text-sheet-ink group-data-[variant=default]/tabs-list:data-active:shadow-none"
+                  >
+                    {t.tabStatistics}
+                  </TabsTrigger>
+                </TabsList>
+
+                <TabsContent value="simple" className="mt-6 flex flex-col gap-8 focus-visible:outline-none">
+                  <MeasurementSheet
+                    result={result}
+                    lang={lang}
+                    frame={frame}
+                    lens={lensForSheet}
+                    isAdvanced={false}
+                  />
+                  <RecommendationRow result={result} lensIndex={lens.index} lang={lang} />
+                </TabsContent>
+
+                <TabsContent value="advanced" className="mt-6 flex flex-col gap-8 focus-visible:outline-none">
+                  <MeasurementSheet
+                    result={result}
+                    lang={lang}
+                    frame={frame}
+                    lens={lensForSheet}
+                    isAdvanced
+                  />
+                  <RecommendationRow result={result} lensIndex={lens.index} lang={lang} />
+                </TabsContent>
+              </Tabs>
+
+              <div className="order-first min-w-0 lg:order-none lg:sticky lg:top-0">
+                <div className="h-[52vh] min-h-[360px] lg:h-[calc(100dvh-8rem)]">
+                  <ErrorBoundary
+                    fallback={
+                      <div className="flex h-full items-center justify-center bg-sheet-panel p-6 text-[16px] text-sheet-ink">
+                        {t.simError}
+                      </div>
+                    }
+                  >
                     <AsphericVisualizer
                       lens={lens}
                       frame={frame}
@@ -106,37 +141,15 @@ export function AsphericDesktopGrid() {
                       lang={lang}
                       view={view}
                       frameType={frameType}
-                      highlightedLimit={highlightedLimit}
+                      highlightedLimit={null}
                     />
                   </ErrorBoundary>
                 </div>
-              </TabsContent>
-
-              <TabsContent value="advanced" className="flex flex-col gap-4 focus-visible:outline-none">
-                <div className="shrink-0">
-                  <ErrorBoundary fallback={<div className="p-4 border border-red-200 bg-red-50 text-red-600 rounded-xl text-xs">Summary Card Error</div>}>
-                    <SummaryCard
-                      result={result}
-                      lang={lang}
-                      frame={frame}
-                      lens={{ sph: lens.sph, cyl: lens.cyl, axis: lens.axis, index: lens.index, baseCurve: lens.baseCurve }}
-                      isLoading={isRecalculating}
-                    />
-                  </ErrorBoundary>
-                </div>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <CurvatureCard result={result} lang={lang} />
-                  <RecommendationCard
-                    result={result}
-                    lensIndex={lens.index}
-                    lang={lang}
-                    isLoading={isRecalculating}
-                  />
-                </div>
-              </TabsContent>
-            </Tabs>
+              </div>
+            </div>
           </div>
         </ScrollArea>
+
         <AppFooter lang={lang} />
       </div>
     </div>

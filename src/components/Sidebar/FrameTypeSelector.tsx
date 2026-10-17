@@ -1,13 +1,11 @@
 import { FrameType } from "@/src/lib/optic-engine/types";
 import { Language, translations } from "@/src/lib/translations";
 import { Field, FieldContent, FieldLabel } from "@shadcn/field";
-import { RadioGroup, RadioGroupItem } from "@shadcn/radio-group";
 import { LabelWithTooltip } from "./LabelWithTooltip";
-import { FrameIcon } from "lucide-react";
-import { Label } from "@shadcn/label";
 
 /**
- * FrameTypeSelector - Toggle buttons for frame type
+ * Frame type as three pressed states in a row, not three radio dots.
+ * The choice is structural: it changes which index the engine will allow.
  */
 interface FrameTypeSelectorProps {
   frameType: FrameType;
@@ -28,33 +26,36 @@ export const FrameTypeSelector: React.FC<FrameTypeSelectorProps> = ({
   ];
 
   return (
-    <Field orientation="vertical">
-      <FieldLabel className="w-auto flex-none m-0 items-center mb-2">
-        <LabelWithTooltip
-          label={t.frameType}
-          lang={lang}
-          className="select-none leading-tight dark:text-slate-300"
-          icon={<FrameIcon size={13} className="text-emerald-500" />}
-        />
+    <Field orientation="vertical" className="gap-1.5">
+      <FieldLabel className="m-0 w-auto flex-none items-center">
+        <LabelWithTooltip label={t.frameType} lang={lang} />
       </FieldLabel>
       <FieldContent>
-        <RadioGroup
-          value={frameType}
-          onValueChange={(val) => onFrameTypeChange(val as FrameType)}
-          className="flex flex-col gap-2.5 mt-1"
+        <div
+          role="radiogroup"
+          aria-label={t.frameType}
+          className="grid grid-cols-3 gap-1 bg-sheet-stage p-1"
         >
-          {types.map(({ value, label }) => (
-            <div className="flex items-center space-x-2" key={value}>
-              <RadioGroupItem value={value} id={`frame-type-${value}`} />
-              <Label
-                htmlFor={`frame-type-${value}`}
-                className="text-xs font-medium cursor-pointer"
+          {types.map(({ value, label }) => {
+            const active = frameType === value;
+            return (
+              <button
+                key={value}
+                type="button"
+                role="radio"
+                aria-checked={active}
+                onClick={() => onFrameTypeChange(value)}
+                className={`min-h-9 px-1.5 py-1 text-[13px] leading-tight transition-colors duration-150 ${
+                  active
+                    ? 'bg-sheet-ground font-medium text-sheet-ink'
+                    : 'text-sheet-muted hover:bg-sheet-stage hover:text-sheet-ink'
+                }`}
               >
                 {label}
-              </Label>
-            </div>
-          ))}
-        </RadioGroup>
+              </button>
+            );
+          })}
+        </div>
       </FieldContent>
     </Field>
   );

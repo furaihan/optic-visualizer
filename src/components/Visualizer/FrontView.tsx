@@ -1,199 +1,180 @@
 import React from 'react';
 import { FrameParameters, PatientParameters, CalculationResult } from '../../lib/optic-engine/types';
 import { Language, translations } from '../../lib/translations';
+import { DimH, DimV, ExtLine } from './SheetDefs';
 
 interface FrontViewProps {
   frame: FrameParameters;
   patient: PatientParameters;
   result: CalculationResult;
   lang: Language;
+  /** px per mm, shared with the section so the two views agree. */
+  scale: number;
+  /** Left edge of the right-hand opening (the one the order is for). */
+  originX: number;
+  /** Vertical centre of both openings. */
+  originY: number;
+  /** True when this is the only drawing on the board. */
   isMain?: boolean;
   highlightedLimit?: 'a' | 'b' | 'dbl' | 'ed' | null;
 }
 
+/**
+ * Front elevation of the lens pair: the rim, the lens, the effective diameter
+ * circle, the pupil crosshair, and the three dimensions a lab orders (A, B, DBL).
+ */
 export const FrontView: React.FC<FrontViewProps> = ({
   frame,
   patient,
   result,
   lang,
+  scale,
+  originX,
+  originY,
   isMain = false,
   highlightedLimit = null,
 }) => {
   const t = translations[lang];
-  const VIEWBOX_W = 550;
-  const VIEWBOX_H = 550;
 
-  // Bounded scales for thumbnail view to prevent overflow on large frames
-  const maxThumbnailW = 85;
-  const maxThumbnailH = 70;
-  const boundedScale = Math.min(maxThumbnailW / frame.a, maxThumbnailH / frame.b, 1.6);
-  const F_SCALE = isMain ? 5 : boundedScale; 
-  
-  // Position offsets
-  let fx, fy;
-  if (isMain) {
-    fx = (VIEWBOX_W - (frame.a + frame.dbl) * F_SCALE) / 2;
-    fy = (VIEWBOX_H - frame.b * F_SCALE) / 2;
-  } else {
-    fx = 40;
-    fy = VIEWBOX_H - (frame.b * F_SCALE) - 35;
-  }
+  const openingW = frame.a * scale;
+  const openingH = frame.b * scale;
+  const rimW = 2.5 * scale;
+  const bridge = frame.dbl * scale;
 
-  const rimThickness = 2.5 * F_SCALE;
+  // Right opening starts at originX; the left one ends at originX - bridge.
+  const rightX = originX;
+  const leftX = originX - bridge - openingW;
+
+  const top = originY - openingH / 2;
+  const bottom = originY + openingH / 2;
+
+  const warn = 'text-sheet-warning';
+  const ink = 'text-sheet-ink';
+  const muted = 'text-sheet-muted';
+  const tone = (field: 'a' | 'b' | 'dbl' | 'ed') =>
+    highlightedLimit === field ? warn : ink;
+
+  const opening = (x: number, primary: boolean) => (
+    <g key={x}>
+      {/* Lens opening: a flat tint, so the rim reads as a band around it. */}
+      <rect
+        x={x}
+        y={top}
+        width={openingW}
+        height={openingH}
+        className={primary ? 'text-sheet-accent' : 'text-sheet-muted'}
+        fill="currentColor"
+        fillOpacity={primary ? 0.1 : 0.06}
+      />
+      {/* Rim: a drawn band of real thickness. */}
+      <rect
+        x={x}
+        y={top}
+        width={openingW}
+        height={openingH}
+        fill="none"
+        className={primary ? 'text-sheet-ink' : 'text-sheet-muted'}
+        stroke="currentColor"
+        strokeWidth={rimW}
+        strokeOpacity={primary ? 0.4 : 0.28}
+      />
+      {/* Effective diameter: the circle the blank must cover. */}
+      <circle
+        cx={x + openingW / 2}
+        cy={originY}
+        r={(frame.ed * scale) / 2}
+        fill="none"
+        className={primary ? tone('ed') : 'text-sheet-muted'}
+        stroke="currentColor"
+        strokeWidth={primary && highlightedLimit === 'ed' ? 2.25 : 1.1}
+        strokeDasharray={primary && highlightedLimit === 'ed' ? '7 4' : '5 5'}
+        strokeOpacity={primary && highlightedLimit === 'ed' ? 1 : 0.45}
+      />
+      {/* Pupil and PD crosshair. */}
+      <g
+        transform={`translate(${x + (frame.a / 2 - result.decentration) * scale}, ${
+          originY + (frame.b / 2 - patient.fittingHeight) * scale
+        })`}
+        className="text-sheet-error"
+      >
+        <circle r={7} fill="none" stroke="currentColor" strokeWidth={1.6} />
+        <line x1={-13} y1={0} x2={13} y2={0} stroke="currentColor" strokeWidth={1} />
+        <line x1={0} y1={-13} x2={0} y2={13} stroke="currentColor" strokeWidth={1} />
+      </g>
+    </g>
+  );
 
   return (
-    <g transform={`translate(${fx}, ${fy})`} className="text-slate-400">
-       {/* Container background block for non-main thumbnail */}
-       {!isMain && (
-         <rect 
-           x={-15} 
-           y={-22} 
-           width={frame.a * F_SCALE + 30} 
-           height={frame.b * F_SCALE + 50} 
-           fill="#f8fafc" 
-           fillOpacity={0.75} 
-           stroke="#cbd5e1" 
-           strokeWidth="1" 
-           strokeDasharray="4 2"
-           rx={8} 
-         />
-       )}
-       {/* Dimensions Labels - A & B */}
-       {isMain && (
-         <g className="text-[10px] font-bold fill-slate-400 uppercase tracking-widest text-left">
-           {/* A Size Label */}
-           <g className={highlightedLimit === 'a' ? "text-amber-500 fill-amber-500 font-extrabold animate-pulse-soft" : "text-slate-400 fill-slate-400"}>
-             <line 
-               x1={0} y1={-20} x2={frame.a * F_SCALE} y2={-20} 
-               stroke="currentColor" 
-               strokeWidth={highlightedLimit === 'a' ? 3 : 1} 
-               strokeDasharray={highlightedLimit === 'a' ? "0" : "4 2"} 
-             />
-             <text x={frame.a * F_SCALE / 2} y={-30} textAnchor="middle">
-               A: {frame.a}mm {highlightedLimit === 'a' && '⚠️'}
-             </text>
-           </g>
-           
-           {/* B Size Label */}
-           <g className={highlightedLimit === 'b' ? "text-amber-500 fill-amber-500 font-extrabold animate-pulse-soft" : "text-slate-400 fill-slate-400"}>
-             <line 
-               x1={-20} y1={0} x2={-20} y2={frame.b * F_SCALE} 
-               stroke="currentColor" 
-               strokeWidth={highlightedLimit === 'b' ? 3 : 1} 
-               strokeDasharray={highlightedLimit === 'b' ? "0" : "4 2"} 
-             />
-             <text x={-30} y={frame.b * F_SCALE / 2} textAnchor="middle" transform={`rotate(-90, -30, ${frame.b * F_SCALE / 2})`}>
-               B: {frame.b}mm {highlightedLimit === 'b' && '⚠️'}
-             </text>
-           </g>
+    <g>
+      {opening(leftX, false)}
+      {opening(rightX, true)}
 
-           {/* DBL Label */}
-           <g className={highlightedLimit === 'dbl' ? "text-amber-500 fill-amber-500 font-extrabold animate-pulse-soft" : "text-blue-500 fill-blue-500"}>
-             <line 
-               x1={frame.a * F_SCALE} y1={frame.b * F_SCALE / 2} x2={(frame.a + frame.dbl) * F_SCALE} y2={frame.b * F_SCALE / 2} 
-               stroke="currentColor" 
-               strokeWidth={highlightedLimit === 'dbl' ? 3.5 : 1.5} 
-             />
-             <text x={(frame.a + frame.dbl/2) * F_SCALE} y={frame.b * F_SCALE / 2 - 10} textAnchor="middle" className="font-bold">
-               DBL: {frame.dbl}mm {highlightedLimit === 'dbl' && '⚠️'}
-             </text>
-           </g>
-         </g>
-       )}
+      {/* A: horizontal opening, above the right lens, above the ED circle. */}
+      <g className={tone('a')}>
+        <ExtLine x1={rightX} y1={top - rimW} x2={rightX} y2={top - 42} />
+        <ExtLine x1={rightX + openingW} y1={top - rimW} x2={rightX + openingW} y2={top - 42} />
+      </g>
+      <DimH
+        x1={rightX}
+        x2={rightX + openingW}
+        y={top - 34}
+        label={`A ${frame.a}`}
+        tone={highlightedLimit === 'a' ? 'warning' : 'ink'}
+        active={highlightedLimit === 'a'}
+      />
 
-       {/* Frame Rim */}
-       <rect 
-         x={-rimThickness/2} y={-rimThickness/2} 
-         width={frame.a * F_SCALE + rimThickness} height={frame.b * F_SCALE + rimThickness} 
-         fill="none" 
-         stroke="url(#metallic-gradient)" strokeWidth={rimThickness}
-         rx={isMain ? 8 : 4}
-       />
+      {/* B: vertical opening, in its own column right of the rim. */}
+      <g className={tone('b')}>
+        <ExtLine x1={rightX + openingW + rimW} y1={top} x2={rightX + openingW + 46} y2={top} />
+        <ExtLine x1={rightX + openingW + rimW} y1={bottom} x2={rightX + openingW + 46} y2={bottom} />
+      </g>
+      <DimV
+        y1={top}
+        y2={bottom}
+        x={rightX + openingW + 38}
+        label={`B ${frame.b}`}
+        side="right"
+        tone={highlightedLimit === 'b' ? 'warning' : 'ink'}
+        active={highlightedLimit === 'b'}
+      />
 
-       {/* Backdrop for lens */}
-       <rect 
-         x={0} y={0} 
-         width={frame.a * F_SCALE} height={frame.b * F_SCALE} 
-         fill="white" fillOpacity={isMain ? 0.3 : 0.5} 
-         rx={isMain ? 6 : 4}
-       />
-       
-       {/* ED Circle */}
-       <g className={highlightedLimit === 'ed' ? "text-amber-500 fill-amber-500 font-extrabold animate-pulse-soft" : "text-blue-400 fill-blue-400"}>
-         <circle 
-           cx={frame.a * F_SCALE / 2} cy={frame.b * F_SCALE / 2} 
-           r={frame.ed * F_SCALE / 2} 
-           fill="none" 
-           stroke={highlightedLimit === 'ed' ? "currentColor" : "#3b82f6"} 
-           strokeWidth={highlightedLimit === 'ed' ? 3.5 : (isMain ? 2 : 1)} 
-           strokeDasharray={highlightedLimit === 'ed' ? "8 4" : "6 3"} 
-           opacity={highlightedLimit === 'ed' ? 0.9 : 0.4}
-         />
-         {isMain && (
-           <text 
-             x={frame.a * F_SCALE / 2 + (frame.ed * F_SCALE / 2)} 
-             y={frame.b * F_SCALE / 2 - 10} 
-             className="text-[9px] font-bold fill-current"
-           >
-             ED: {frame.ed}mm {highlightedLimit === 'ed' && '⚠️'}
-           </text>
-         )}
-       </g>
+      {/* DBL: the bridge, between the two openings, in its own band below. */}
+      <g className={tone('dbl')}>
+        <ExtLine x1={leftX + openingW} y1={bottom + rimW} x2={leftX + openingW} y2={bottom + 40} />
+        <ExtLine x1={rightX} y1={bottom + rimW} x2={rightX} y2={bottom + 40} />
+      </g>
+      <DimH
+        x1={leftX + openingW}
+        x2={rightX}
+        y={bottom + 32}
+        label={`DBL ${frame.dbl}`}
+        tone={highlightedLimit === 'dbl' ? 'warning' : 'ink'}
+        active={highlightedLimit === 'dbl'}
+      />
+      {/* ED value, below the circle it measures, clear of the DBL dimension. */}
+      <text
+        x={rightX + openingW / 2}
+        y={bottom + 8}
+        textAnchor="middle"
+        className={tone('ed')}
+        fill="currentColor"
+        fontSize={12.5}
+        fontWeight={600}
+        style={{ fontVariantNumeric: 'tabular-nums' }}
+      >
+        ED {frame.ed}
+      </text>
 
-       {/* Pupil / PD Marker */}
-       <g transform={`translate(${(frame.a / 2 - result.decentration) * F_SCALE}, ${(frame.b - patient.fittingHeight) * F_SCALE})`}>
-          <circle r={2 * F_SCALE} fill="#ef4444" className="filter drop-shadow-sm" />
-          <line x1={-15} y1={0} x2={15} y2={0} stroke="#ef4444" strokeWidth="1.5" />
-          <line x1={0} y1={-15} x2={0} y2={15} stroke="#ef4444" strokeWidth="1.5" />
-          {isMain && (
-            <text y={-22} textAnchor="middle" className="text-[10px] font-black fill-red-500 uppercase tracking-widest text-left">{t.pupil} (PD)</text>
-          )}
-       </g>
-
-       {/* Lens Overhang (Heatmap Style) */}
-       {isMain && (
-         <g>
-           {/* Visual indicator of overhang areas */}
-           <rect 
-             x={-4} y={-4} 
-             width={frame.a * F_SCALE + 8} height={frame.b * F_SCALE + 8} 
-             fill="none" stroke="#f59e0b" strokeWidth={result.et > 5 ? 6 : 2} 
-             strokeOpacity={Math.min(0.3, result.et / 30)}
-             strokeDasharray="10 5"
-             rx={12}
-           />
-           <text x={frame.a * F_SCALE + 15} y={frame.b * F_SCALE + 15} className="text-[8px] fill-orange-500 font-bold uppercase italic text-left">
-             Max Protrusion: {Math.max(result.anteriorProtrusion, result.posteriorProtrusion).toFixed(1)}mm
-           </text>
-         </g>
-       )}
-
-       {/* Left Eye Hint if Main */}
-       {isMain && (
-         <g opacity="0.3">
-           <rect 
-             x={(frame.a + frame.dbl) * F_SCALE} y={0}
-             width={frame.a * F_SCALE} height={frame.b * F_SCALE}
-             fill="none" stroke="currentColor" strokeWidth="1" rx="8"
-           />
-           <text 
-             x={(frame.a + frame.dbl + frame.a/2) * F_SCALE} 
-             y={frame.b * F_SCALE + 20} 
-             textAnchor="middle" 
-             className="text-[8px] fill-slate-300 uppercase text-left"
-           >
-             Left Eye
-           </text>
-         </g>
-       )}
-
-       {!isMain && (
-         <>
-           {/* Labels */}
-           <text x={frame.a * F_SCALE / 2} y={-10} textAnchor="middle" className="text-[9px] font-bold fill-slate-500 uppercase tracking-widest text-left">{t.frontView}</text>
-           <text x={frame.a * F_SCALE / 2} y={(frame.b * F_SCALE) + 15} textAnchor="middle" className="text-[8px] fill-slate-400 text-left">Size: {frame.a} x {frame.b}mm</text>
-         </>
-       )}
+      <text
+        x={rightX + openingW / 2}
+        y={bottom + 54}
+        textAnchor="middle"
+        className={muted}
+        fill="currentColor"
+        fontSize={12.5}
+      >
+        {isMain ? t.frontView : ''}
+      </text>
     </g>
   );
 };

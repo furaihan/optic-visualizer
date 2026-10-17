@@ -3,7 +3,6 @@ import type { Language, View, ActiveTab } from '../../types/search-params';
 import { HeaderBar } from './HeaderBar';
 import { ValidationAlerts } from './ValidationAlerts';
 import { MobileTabManager } from './MobileTabManager';
-import { MobileViews } from './MobileViews';
 import { AppFooter } from './AppFooter';
 
 type SimulatorShellProps = {
@@ -16,13 +15,17 @@ type SimulatorShellProps = {
   onTabChange: (tab: ActiveTab) => void;
 };
 
+/**
+ * The frame the simulator lives in. Desktop gets the workbench; the phone gets
+ * the drawing, the tab bar, and the panel the tab names.
+ */
 export function SimulatorShell({ grid, mobileExtra, lang, view, activeTab, onViewChange, onTabChange }: SimulatorShellProps) {
   return (
-    <div className="flex flex-1 h-full overflow-hidden">
-      <div className="hidden md:flex flex-1 h-full overflow-hidden">
+    <div className="flex h-full flex-1 overflow-hidden bg-sheet-ground">
+      <div className="hidden h-full flex-1 overflow-hidden md:flex">
         {grid}
       </div>
-      <div className="flex-1 flex flex-col h-full overflow-hidden relative md:hidden">
+      <div className="relative flex h-full flex-1 flex-col overflow-hidden md:hidden">
         <HeaderBar
           lang={lang}
           view={view}
@@ -30,7 +33,7 @@ export function SimulatorShell({ grid, mobileExtra, lang, view, activeTab, onVie
           onViewChange={onViewChange}
         />
         <ValidationAlerts lang={lang} />
-        <div className="flex-1 overflow-hidden p-3 flex flex-col gap-3">
+        <div className="flex flex-1 flex-col gap-3 overflow-hidden p-3">
           <MobileTabManager
             lang={lang}
             activeTab={activeTab}

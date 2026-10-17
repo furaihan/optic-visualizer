@@ -1,12 +1,11 @@
 import { Language } from "@/src/lib/translations";
 import { Field, FieldContent, FieldLabel } from "@shadcn/field";
 import { LabelWithTooltip } from "./LabelWithTooltip";
-import { RulerIcon } from "lucide-react";
 import { FrameInput } from "./FrameInput";
 import { LimitAlertButton } from "./LimitAlertButton";
 
 /**
- * FrameParamField - Encapsulate frame parameter input + label + alert
+ * A frame dimension: its name, the range check, and the value.
  */
 interface FrameParamFieldProps {
   label: string;
@@ -38,26 +37,21 @@ export const FrameParamField: React.FC<FrameParamFieldProps> = ({
   lang,
 }) => (
   <Field orientation="vertical" className="gap-1.5">
-    <div className="flex items-center justify-between w-full">
-      <FieldLabel className="w-auto flex-none m-0 items-center">
-        <LabelWithTooltip
-          label={label}
-          lang={lang}
-          isUppercaseHeader
-          icon={<RulerIcon size={11} className="text-emerald-500" />}
-        />
+    <div className="flex w-full items-center justify-between gap-2">
+      <FieldLabel className="m-0 w-auto flex-none items-center">
+        <LabelWithTooltip label={label} lang={lang} />
       </FieldLabel>
-      <LimitAlertButton
-        fieldName={fieldName}
-        isExceeding={isExceeding}
-        title={alertTitle}
-        onMouseEnter={() => onMouseEnter(fieldName)}
-        onMouseLeave={onMouseLeave}
-        isHighlighted={highlightedLimit === fieldName}
-        onClick={() =>
-          onMouseEnter(highlightedLimit === fieldName ? null : fieldName)
-        }
-      />
+      {isExceeding && (
+        <LimitAlertButton
+          fieldName={fieldName}
+          isExceeding={isExceeding}
+          title={alertTitle}
+          onMouseEnter={() => onMouseEnter(fieldName)}
+          onMouseLeave={onMouseLeave}
+          isHighlighted={highlightedLimit === fieldName}
+          onClick={() => onMouseEnter(highlightedLimit === fieldName ? null : fieldName)}
+        />
+      )}
     </div>
     <FieldContent>
       <FrameInput

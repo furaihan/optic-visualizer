@@ -1,5 +1,4 @@
 import React, { useMemo, useState } from 'react';
-import { AlertCircleIcon, XIcon, HelpCircleIcon } from "lucide-react";
 import { translations, Language } from '../lib/translations';
 import { getAsphericSag } from '../lib/optic-engine/aspheric';
 import {
@@ -12,9 +11,8 @@ import {
 import { FrameProfile } from './Visualizer/FrameProfile';
 import { FrontView } from './Visualizer/FrontView';
 import { TopDownView } from './Visualizer/TopDownView';
-import { Popover, PopoverContent, PopoverTrigger } from './ui/popover';
-import { Card } from './ui/card';
-import { Button } from './ui/button';
+import { SheetDefs } from './Visualizer/SheetDefs';
+import { useMediaQuery } from '../hooks/useMediaQuery';
 
 interface LensPosition {
   etX_start: number;
@@ -22,13 +20,6 @@ interface LensPosition {
   grooveX: number;
   frontApexX: number;
   backApexX: number;
-}
-
-interface HoverLabel {
-  title: string;
-  desc: string;
-  x: number;
-  y: number;
 }
 
 interface AsphericVisualizerProps {
@@ -42,353 +33,342 @@ interface AsphericVisualizerProps {
   highlightedLimit?: 'a' | 'b' | 'dbl' | 'ed' | null;
 }
 
-function generateAsphericCurvePath(
+/**
+ * The aspheric surface, sampled into a real path.
+ *
+ * z(y) = y²/R / (1 + √(1 − (1+K)y²/R²)) + A₂y² + A₄y⁴ + A₆y⁶ + A₈y⁸
+ * The sphere is the fallback when a surface is switched off, so the drawing
+ * always shows what the engine actually computed.
+ */
+function asphericPath(
   etX: number,
-  yVal: number,
+  halfHeight: number,
   R: number,
   conic: number,
   coeffs: { A2: number; A4: number; A6: number; A8: number },
   scale: number,
   fromTop: boolean,
-  direction: number, // -1 = bows left (front), +1 = bows right (back diverging)
+  direction: number,
 ): string {
   if (!Number.isFinite(R)) return '';
-
-  const steps = 40;
-  const startY = fromTop ? -yVal : yVal;
-  const endY = fromTop ? yVal : -yVal;
+  const steps = 48;
+  const startY = fromTop ? -halfHeight : halfHeight;
+  const endY = fromTop ? halfHeight : -halfHeight;
   const step = (endY - startY) / steps;
-
   const points: string[] = [];
   for (let i = 0; i <= steps; i++) {
     const y = startY + step * i;
     const sag = getAsphericSag(R, Math.abs(y), conic, coeffs);
-    const x = etX - direction * sag;
-    points.push(`${x * scale} ${y * scale}`);
+    points.push(`${(etX - direction * sag) * scale} ${y * scale}`);
   }
   return points.join(' L ');
 }
 
-function generateSphericalCurvePath(
-  etX: number,
-  yVal: number,
-  R: number,
-  scale: number,
-  sweep: number,
-): string {
+function sphericalArc(etX: number, y: number, R: number, scale: number, sweep: number): string {
   if (!Number.isFinite(R)) return '';
-  return `A ${Math.abs(R) * scale} ${Math.abs(R) * scale} 0 0 ${sweep} ${etX * scale} ${yVal * scale}`;
+  return `A ${Math.abs(R) * scale} ${Math.abs(R) * scale} 0 0 ${sweep} ${etX * scale} ${y * scale}`;
 }
 
-export const AsphericVisualizer: React.FC<AsphericVisualizerProps> = React.memo(({
-  lens,
-  frame,
-  patient,
-  result,
-  lang,
-  view,
-  highlightedLimit = null,
-}) => {
-  const t = translations[lang];
-  const [hoveredLabel, setHoveredLabel] = useState<HoverLabel | null>(null);
-  const [isLegendOpen, setIsLegendOpen] = useState(true);
+/**
+ * The aspheric workbench's drawing: the same sheet language as the spherical
+ * one, with the aspheric surface drawn from its conic and coefficients and the
+ * two aberration figures the engine reports.
+ */
+export const AsphericVisualizer: React.FC<AsphericVisualizerProps> = React.memo(
+  ({ lens, frame, patient, result, lang, view, highlightedLimit = null }) => {
+    const t = translations[lang];
+    const compact = useMediaQuery('(max-width: 767px)');
 
-  const PX_PER_MM = view === 'top' ? 4 : 6;
-  const VIEWBOX_W = 550;
-  const VIEWBOX_H = 550;
-  const centerX = VIEWBOX_W / 2;
-  const centerY = view === 'top' ? VIEWBOX_H / 2 : 240;
+    const primaryPos = useMemo<LensPosition>(() => {
+      const etX_start = -result.anteriorProtrusion + result.s1;
+      const etX_end = etX_start + result.et;
+      const grooveX = etX_start + result.et / 2;
+      const frontApexX = -result.anteriorProtrusion;
+      const backApexX = frontApexX + result.ct;
+      return { etX_start, etX_end, grooveX, frontApexX, backApexX };
+    }, [result]);
 
-  const primaryPos = useMemo<LensPosition>(() => {
-    const etX_start = -result.anteriorProtrusion + result.s1;
-    const etX_end = etX_start + result.et;
-    const grooveX = etX_start + result.et / 2;
-    const frontApexX = -result.anteriorProtrusion;
-    const backApexX = frontApexX + result.ct;
-    return { etX_start, etX_end, grooveX, frontApexX, backApexX };
-  }, [result]);
+    const S = 6;
+    const frontScale = 2.6;
 
-  const yVal = frame.a / 2;
-  const { etX_start, etX_end } = primaryPos;
+    const halfHeight = (frame.b / 2) * S;
+    const rim = 5 * S;
+    const minX = -result.anteriorProtrusion;
+    const maxX = frame.depth + result.posteriorProtrusion;
+    const sectionW = (maxX - minX) * S;
 
-  const frontSweep = 0;
-  const sweepBack = result.backPower >= 0 ? 0 : 1;
-  const scale = PX_PER_MM;
+    const PAD = 34;
+    const GAP = 54;
+    const LABEL_BAND = 56;
 
-  // Front surface direction: always bows left (-1)
-  const frontDir = -1;
-  // Back surface direction: +1 = bows right (diverging), -1 = bows left (converging)
-  const backDir = result.backPower < 0 ? 1 : -1;
+    const frontW = (frame.a * 2 + frame.dbl) * frontScale;
+    const frontH = (frame.b + 8) * frontScale;
 
-  // Generate front surface path (aspheric or spherical fallback)
-  const frontSurfacePath = lens.asphericFront.isActive
-    ? `M ${etX_start * scale} ${-yVal * scale} L ${generateAsphericCurvePath(etX_start, yVal, result.r1, lens.asphericFront.conic, lens.asphericFront, scale, true, frontDir)}`
-    : `M ${etX_start * scale} ${-yVal * scale} ${generateSphericalCurvePath(etX_start, yVal, result.r1, scale, frontSweep)}`;
+    const BOARD_W = compact
+      ? PAD + sectionW + PAD
+      : PAD + sectionW + GAP + frontW + PAD + 60;
+    const BOARD_H = Math.max((frame.b + 8) * S, frontH) + PAD + LABEL_BAND;
 
-  // Generate back surface path (aspheric or spherical fallback)
-  const backSurfacePath = lens.asphericBack.isActive
-    ? `L ${generateAsphericCurvePath(etX_end, yVal, result.r2, lens.asphericBack.conic, lens.asphericBack, scale, false, backDir)}`
-    : `L ${generateSphericalCurvePath(etX_end, -yVal, result.r2, scale, sweepBack)}`;
+    const originX = PAD + Math.abs(minX) * S;
+    const originY = PAD + BOARD_H / 2 - LABEL_BAND / 2;
+    const frontOriginX = PAD + sectionW + GAP + (frame.a + frame.dbl) * frontScale;
+    const frontOriginY = originY;
 
-  const lensPath = `${frontSurfacePath} L ${etX_end * scale} ${yVal * scale} ${backSurfacePath} Z`;
+    const { etX_start, etX_end } = primaryPos;
+    const frontDir = -1;
+    const backDir = result.backPower < 0 ? 1 : -1;
+    const sweepBack = result.backPower >= 0 ? 0 : 1;
 
-  const clampedLabelX = Math.max(-centerX + 15, Math.min((etX_end + 10) * scale, VIEWBOX_W - 65 - centerX));
+    const frontPath = lens.asphericFront.isActive
+      ? `M ${etX_start * S} ${-halfHeight} L ${asphericPath(
+          etX_start,
+          frame.b / 2,
+          result.r1,
+          lens.asphericFront.conic,
+          lens.asphericFront,
+          S,
+          true,
+          frontDir,
+        )}`
+      : `M ${etX_start * S} ${-halfHeight} ${sphericalArc(etX_start, frame.b / 2, result.r1, S, 0)}`;
 
-  return (
-    <div className="relative w-full h-full min-h-[300px] bg-slate-100 dark:bg-slate-900 rounded-3xl overflow-hidden flex items-center justify-center border border-slate-200 dark:border-slate-800 shadow-inner">
-      <div className="absolute inset-0 lab-grid" />
+    const backPath = lens.asphericBack.isActive
+      ? `L ${asphericPath(
+          etX_end,
+          frame.b / 2,
+          result.r2,
+          lens.asphericBack.conic,
+          lens.asphericBack,
+          S,
+          false,
+          backDir,
+        )}`
+      : `L ${sphericalArc(etX_end, -frame.b / 2, result.r2, S, sweepBack)}`;
 
-      <div className="absolute top-8 left-8 border-l-2 border-slate-300 dark:border-slate-700 pl-4 py-1 z-10 text-left">
-        <h3 className="text-slate-500 dark:text-slate-400 text-[10px] font-bold uppercase tracking-[0.2em]">
-          {view === 'side' ? t.crossSection : view === 'top' ? t.topDown : t.frontView}
-        </h3>
-        <p className="text-slate-400 dark:text-slate-500 text-[9px] italic">{t.visualSim}</p>
-      </div>
+    const lensPath = `${frontPath} L ${etX_end * S} ${halfHeight} ${backPath} Z`;
 
-      {highlightedLimit && (
-        <Card className="absolute top-8 right-8 max-w-[280px] p-4 bg-amber-500/10 dark:bg-amber-500/15 backdrop-blur-md border-amber-500/30 rounded-2xl flex items-start gap-2.5 shadow-lg animate-in fade-in slide-in-from-top-4 duration-300 text-left z-20">
-          <AlertCircleIcon className="text-amber-500 shrink-0 mt-0.5" size={16} />
-          <div>
-            <h4 className="text-[10px] font-bold text-amber-600 dark:text-amber-400 uppercase tracking-widest mb-1 leading-none">
-              {t.limitWarningTitle}
-            </h4>
-            <p className="text-[9.5px] text-slate-600 dark:text-slate-300 font-semibold leading-relaxed">
-              {highlightedLimit === 'a' && t.limitWarningA(frame.a, Number((result.y * 2 + 2).toFixed(0)))}
-              {highlightedLimit === 'b' && t.limitWarningB(frame.b)}
-              {highlightedLimit === 'dbl' && t.limitWarningDbl(frame.dbl)}
-              {highlightedLimit === 'ed' && t.limitWarningEd(frame.ed, frame.a)}
-            </p>
-          </div>
-        </Card>
-      )}
+    const viewTitle =
+      view === 'side' ? t.crossSection : view === 'top' ? t.topDown : t.frontView;
 
-      <svg width="100%" height="100%" viewBox={`0 0 ${VIEWBOX_W} ${VIEWBOX_H}`} preserveAspectRatio="xMidYMid meet" className="filter drop-shadow-xl cursor-crosshair">
-        <defs>
-          <linearGradient id="aspheric-metallic" x1="0%" y1="0%" x2="100%" y2="100%">
-            <stop offset="0%" stopColor="#475569" />
-            <stop offset="20%" stopColor="#94a3b8" />
-            <stop offset="40%" stopColor="#cbd5e1" />
-            <stop offset="60%" stopColor="#94a3b8" />
-            <stop offset="80%" stopColor="#475569" />
-            <stop offset="100%" stopColor="#334155" />
-          </linearGradient>
-        </defs>
-        {view === 'side' ? (
-          <>
-            <FrameProfile
-              frame={frame}
-              result={result}
-              pos={primaryPos}
-              scale={PX_PER_MM}
-              centerX={centerX}
-              centerY={centerY}
-              lang={lang}
-            />
-
-            <FrontView
-              frame={frame}
-              patient={patient}
-              result={result}
-              lang={lang}
-              isMain={false}
-              highlightedLimit={highlightedLimit}
-            />
-
-            {/* Lens cross-section */}
-            <g transform={`translate(${centerX}, ${centerY})`}>
-              <path
-                d={lensPath}
-                fill="#8b5cf6"
-                fillOpacity={0.2}
-                stroke="#8b5cf6"
-                strokeWidth="1.5"
-                strokeOpacity={0.5}
-              />
-
-              {/* Aspheric surface annotations */}
-              {lens.asphericFront.isActive && (
-                <text
-                  x={(etX_start - result.s1 / 2) * scale}
-                  y={(-yVal - 12) * scale}
-                  textAnchor="middle"
-                  className="text-[7px] font-bold fill-violet-500 uppercase tracking-wider"
-                >
-                  ASPH
-                </text>
-              )}
-              {lens.asphericBack.isActive && (
-                <text
-                  x={(etX_end + result.s2 / 2) * scale}
-                  y={(-yVal - 12) * scale}
-                  textAnchor="middle"
-                  className="text-[7px] font-bold fill-violet-500 uppercase tracking-wider"
-                >
-                  ASPH
-                </text>
-              )}
-
-              {/* CT Label */}
-              <g className="text-[10px] font-mono select-none">
-                <rect
-                  x={(primaryPos.frontApexX + (result.ct / 2)) * scale - 24}
-                  y={-23}
-                  width={48}
-                  height={12}
-                  fill="#0f172a"
-                  fillOpacity={0.08}
-                  rx={3}
-                />
-                <text
-                  x={(primaryPos.frontApexX + (result.ct / 2)) * scale}
-                  y={-14}
-                  textAnchor="middle"
-                  fill="currentColor"
-                  className="text-[9px] font-bold"
-                >
-                  CT: {result.ct.toFixed(1)}mm
-                </text>
-              </g>
-
-              {/* ET Label */}
-              <g className="text-[10px] font-mono select-none">
-                <rect
-                  x={clampedLabelX - 4}
-                  y={(yVal + 3) * scale - 9}
-                  width={48}
-                  height={12}
-                  fill="#0f172a"
-                  fillOpacity={0.08}
-                  rx={3}
-                />
-                <text
-                  x={clampedLabelX}
-                  y={(yVal + 3) * scale}
-                  fill="currentColor"
-                  className="text-[9px] font-bold"
-                >
-                  ET: {result.et.toFixed(1)}mm
-                </text>
-              </g>
-
-              {/* Aberration display */}
-              {(lens.asphericFront.isActive || lens.asphericBack.isActive) && (
-                <text
-                  x={(etX_start - 5) * scale}
-                  y={(yVal + 20) * scale}
-                  className="text-[7px] fill-slate-500 font-mono"
-                >
-                  SA₀: {result.sa0.toFixed(3)} | Coma: {result.comaX.toFixed(3)}
-                </text>
-              )}
-            </g>
-          </>
-        ) : view === 'top' ? (
-          <TopDownView
-            lens={lens as any}
-            frame={frame}
-            patient={patient}
-            result={result as any}
-            compareResult={undefined}
-            lang={lang}
-            scale={PX_PER_MM}
-            centerX={centerX}
-            centerY={centerY}
-            primaryPos={primaryPos}
-            comparePos={null}
-            highlightedLimit={highlightedLimit}
-          />
-        ) : (
-          <FrontView
-            frame={frame}
-            patient={patient}
-            result={result}
-            lang={lang}
-            isMain={true}
-            highlightedLimit={highlightedLimit}
-          />
-        )}
-
-        {hoveredLabel && (
-          <g transform={`translate(${hoveredLabel.x + centerX}, ${hoveredLabel.y + centerY - 25})`} className="pointer-events-none z-50">
-            <rect x={-80} y={-32} width={160} height={26} rx={6} fill="#0f172a" fillOpacity={0.96} stroke="#334155" strokeWidth={1} />
-            <polygon points="-5,-5 0,0 5,-5" transform="translate(0, 0)" fill="#0f172a" stroke="#334155" strokeWidth={0.5} />
-            <rect x={-4} y={-6} width={8} height={2} fill="#0f172a" />
-            <text x={0} y={-19} textAnchor="middle" fill="#f1f5f9" className="text-[7.5px] font-sans font-bold">
-              {hoveredLabel.title}
-            </text>
-            <text x={0} y={-9} textAnchor="middle" fill="#cbd5e1" className="text-[7px] font-sans">
-              {hoveredLabel.desc}
-            </text>
-          </g>
-        )}
-      </svg>
-
-      {/* Legend */}
-      {isLegendOpen ? (
-        <Card className="absolute bottom-6 right-6 p-3 bg-white/95 dark:bg-slate-950/95 border-slate-200/80 dark:border-slate-800/80 backdrop-blur-md rounded-xl space-y-2 shadow-md min-w-[145px] text-left transition-all duration-200 animate-in fade-in zoom-in-95 select-none md:bottom-8 md:right-8 z-20">
-          <div className="flex items-center justify-between gap-4 border-b border-slate-100 dark:border-slate-800 pb-1 mb-1">
-            <span className="text-[9px] font-extrabold text-slate-400 dark:text-slate-500 uppercase tracking-widest">
-              {t.legend}
-            </span>
-            <Button variant="ghost" size="icon" onClick={() => setIsLegendOpen(false)} className="h-6 w-6 text-slate-400 hover:text-slate-600 dark:hover:text-slate-300" aria-label={t.collapseLegend} title={t.collapseLegend}>
-              <XIcon size={10} />
-            </Button>
-          </div>
-          <div className="space-y-1.5">
-            <div className="flex items-center gap-2">
-              <div className="w-2.5 h-2.5 rounded-full bg-violet-500 shadow-sm shadow-violet-500/40"></div>
-              <span className="text-[10px] font-semibold text-slate-600 dark:text-slate-350 uppercase tracking-wider">{t.primarySpec}</span>
-            </div>
-            {lens.asphericFront.isActive && (
-              <div className="flex items-center gap-2">
-                <span className="text-[9px] font-bold text-violet-500 uppercase tracking-wider">ASPH</span>
-                <span className="text-[10px] font-semibold text-slate-600 dark:text-slate-350">Front</span>
-              </div>
-            )}
-            {lens.asphericBack.isActive && (
-              <div className="flex items-center gap-2">
-                <span className="text-[9px] font-bold text-violet-500 uppercase tracking-wider">ASPH</span>
-                <span className="text-[10px] font-semibold text-slate-600 dark:text-slate-350">Back</span>
-              </div>
-            )}
-          </div>
-        </Card>
-      ) : (
-        <div className="absolute bottom-6 right-6 z-20 md:bottom-8 md:right-8 transition-all duration-200 animate-in fade-in zoom-in-95">
-          <Popover>
-            <PopoverTrigger
-              className="flex items-center gap-1.5 px-3 py-2 bg-white/95 dark:bg-slate-950/95 border border-slate-200/80 dark:border-slate-800/80 backdrop-blur-md rounded-full shadow-md hover:shadow-lg hover:border-slate-300 dark:hover:border-slate-700 transition-all cursor-pointer group active:scale-95"
-              title={t.showLegend}
-            >
-              <span className="flex items-center -space-x-1">
-                <span className="w-2.5 h-2.5 rounded-full bg-violet-500 border border-white dark:border-slate-900 shadow-sm" />
-              </span>
-              <HelpCircleIcon size={11} className="text-slate-400 group-hover:text-slate-600 dark:group-hover:text-slate-300 transition-colors" />
-            </PopoverTrigger>
-            <PopoverContent side="top" align="end" sideOffset={8} className="w-56 p-3 bg-white/95 dark:bg-slate-950/95 border border-slate-200/90 dark:border-slate-800 shadow-xl rounded-xl z-50 text-left backdrop-blur-sm">
-              <div className="space-y-2 select-none">
-                <div className="text-[9px] uppercase tracking-wider text-slate-400 dark:text-slate-500 font-extrabold pb-1 border-b border-slate-100 dark:border-slate-800">
-                  {t.visualLegend}
-                </div>
-                <div className="space-y-2">
-                  <div className="flex items-start gap-2">
-                    <div className="w-2.5 h-2.5 rounded-full bg-violet-500 shadow-sm shrink-0 mt-0.5"></div>
-                    <div>
-                      <div className="text-[10px] font-bold text-slate-700 dark:text-slate-300 leading-tight">{t.primarySpec}</div>
-                      <div className="text-[8px] text-slate-400 dark:text-slate-500 font-medium">
-                        {t.primaryDesc}
-                      </div>
-                    </div>
-                  </div>
-                </div>
-                <Button variant="secondary" onClick={() => setIsLegendOpen(true)} className="w-full mt-1.5 h-7 text-[9px] font-extrabold uppercase tracking-wider">
-                  {t.pinLegend}
-                </Button>
-              </div>
-            </PopoverContent>
-          </Popover>
+    return (
+      <div
+        data-ui
+        className="flex h-full min-h-[320px] w-full flex-col overflow-hidden rounded-sm bg-sheet-stage"
+      >
+        <div className="flex shrink-0 flex-wrap items-baseline justify-between gap-x-4 gap-y-1 px-4 pt-3">
+          <h2 className="text-[13px] font-medium text-sheet-ink">{viewTitle}</h2>
+          <p className="text-[13px] text-sheet-muted">{t.scaleNote}</p>
         </div>
-      )}
-    </div>
-  );
-});
+
+        <div className="min-h-0 flex-1">
+          <svg
+            width="100%"
+            height="100%"
+            viewBox={
+              view === 'side'
+                ? `0 0 ${BOARD_W} ${BOARD_H}`
+                : view === 'front'
+                  ? `0 0 ${(frame.a * 2 + frame.dbl) * S + 160} ${(frame.b + 10) * S + 120}`
+                  : `0 0 ${(frame.a * 2 + frame.dbl) * S + 120} ${(frame.depth + 10) * S + 150}`
+            }
+            preserveAspectRatio="xMidYMid meet"
+            role="img"
+            aria-label={`${viewTitle}. ${t.visualSim}`}
+          >
+            <SheetDefs />
+
+            {view === 'side' ? (
+              <>
+                <FrameProfile
+                  frame={frame}
+                  result={result}
+                  pos={primaryPos}
+                  scale={S}
+                  originX={originX}
+                  originY={originY}
+                  lang={lang}
+                />
+
+                {/* The aspheric section itself. */}
+                <g transform={`translate(${originX}, ${originY})`}>
+                  <path
+                    key={`${result.ct}-${result.et}-${result.s1}-${result.s2}`}
+                    d={lensPath}
+                    className="text-sheet-accent section-redraw"
+                    fill="currentColor"
+                    fillOpacity={0.16}
+                    stroke="currentColor"
+                    strokeWidth={2}
+                  />
+
+                  {/* Which surfaces are aspheric, and their conic constant. */}
+                  {lens.asphericFront.isActive && (
+                    <text
+                      x={etX_start * S}
+                      y={-halfHeight - 10}
+                      textAnchor="middle"
+                      className="text-sheet-accent"
+                      fill="currentColor"
+                      fontSize={12}
+                      fontWeight={600}
+                    >
+                      ASPH K {lens.asphericFront.conic.toFixed(2)}
+                    </text>
+                  )}
+                  {lens.asphericBack.isActive && (
+                    <text
+                      x={etX_end * S}
+                      y={-halfHeight - 10}
+                      textAnchor="middle"
+                      className="text-sheet-accent"
+                      fill="currentColor"
+                      fontSize={12}
+                      fontWeight={600}
+                    >
+                      ASPH K {lens.asphericBack.conic.toFixed(2)}
+                    </text>
+                  )}
+
+                  {/* CT across the lens. */}
+                  <line
+                    x1={primaryPos.frontApexX * S}
+                    y1={-halfHeight * 0.55}
+                    x2={primaryPos.backApexX * S}
+                    y2={-halfHeight * 0.55}
+                    className="text-sheet-ink"
+                    stroke="currentColor"
+                    strokeWidth={1.4}
+                    markerStart="url(#sheet-arrow)"
+                    markerEnd="url(#sheet-arrow)"
+                  />
+                  <text
+                    x={((primaryPos.frontApexX + primaryPos.backApexX) / 2) * S}
+                    y={-halfHeight * 0.55 - 8}
+                    textAnchor="middle"
+                    className="text-sheet-ink"
+                    fill="currentColor"
+                    fontSize={12}
+                    fontWeight={600}
+                    style={{ fontVariantNumeric: 'tabular-nums' }}
+                  >
+                    CT {result.ct.toFixed(2)}
+                  </text>
+
+                  {/* ET across the edge. */}
+                  <line
+                    x1={primaryPos.etX_start * S}
+                    y1={halfHeight * 0.55}
+                    x2={primaryPos.etX_end * S}
+                    y2={halfHeight * 0.55}
+                    className="text-sheet-ink"
+                    stroke="currentColor"
+                    strokeWidth={1.4}
+                    markerStart="url(#sheet-arrow)"
+                    markerEnd="url(#sheet-arrow)"
+                  />
+                  <text
+                    x={primaryPos.grooveX * S + 14}
+                    y={halfHeight * 0.55 + 4}
+                    textAnchor="start"
+                    className="text-sheet-ink"
+                    fill="currentColor"
+                    fontSize={12}
+                    fontWeight={600}
+                    style={{ fontVariantNumeric: 'tabular-nums' }}
+                  >
+                    ET {result.et.toFixed(2)}
+                  </text>
+                </g>
+
+                {!compact && (
+                  <FrontView
+                    frame={frame}
+                    patient={patient}
+                    result={result}
+                    lang={lang}
+                    scale={frontScale}
+                    originX={frontOriginX}
+                    originY={frontOriginY}
+                    highlightedLimit={highlightedLimit}
+                  />
+                )}
+
+                <g className="text-sheet-muted" fill="currentColor" fontSize={12}>
+                  <text x={originX} y={BOARD_H - 14} textAnchor="middle">
+                    {t.crossSection}
+                  </text>
+                  {!compact && (
+                    <text x={frontOriginX + frontW / 4} y={BOARD_H - 14} textAnchor="middle">
+                      {t.frontView}
+                    </text>
+                  )}
+                </g>
+              </>
+            ) : view === 'front' ? (
+              <FrontView
+                frame={frame}
+                patient={patient}
+                result={result}
+                lang={lang}
+                scale={S}
+                originX={PAD + (frame.a + frame.dbl) * S}
+                originY={PAD + (frame.b * S) / 2 + 20}
+                isMain
+                highlightedLimit={highlightedLimit}
+              />
+            ) : (
+              <TopDownView
+                lens={lens as any}
+                frame={frame}
+                patient={patient}
+                result={result as any}
+                lang={lang}
+                scale={S}
+                centerX={(frame.a + frame.dbl / 2) * S + 50}
+                centerY={(frame.depth + 6) * S}
+                primaryPos={primaryPos}
+                comparePos={null}
+                highlightedLimit={highlightedLimit}
+              />
+            )}
+          </svg>
+        </div>
+
+        {/* The aspheric figures, as a schedule row under the drawing. */}
+        <div className="shrink-0 px-2 pb-2">
+          <div className="grid grid-cols-2 gap-px bg-sheet-stage sm:grid-cols-4">
+            <div className="flex flex-col gap-0.5 bg-sheet-panel px-3 py-2">
+              <span className="text-[13px] leading-tight text-sheet-muted">{t.conicConstant}</span>
+              <span className="text-[18px] font-medium leading-tight text-sheet-ink tnum">
+                {(lens.asphericFront.isActive ? lens.asphericFront.conic : lens.asphericBack.conic).toFixed(2)}
+              </span>
+            </div>
+            <div className="flex flex-col gap-0.5 bg-sheet-panel px-3 py-2">
+              <span className="text-[13px] leading-tight text-sheet-muted">{t.surfaceActive}</span>
+              <span className="text-[16px] leading-tight text-sheet-ink">
+                {[
+                  lens.asphericFront.isActive ? t.asphericSurfaceFront : null,
+                  lens.asphericBack.isActive ? t.asphericSurfaceBack : null,
+                ]
+                  .filter(Boolean)
+                  .join(' · ') || 'None'}
+              </span>
+            </div>
+            <div className="flex flex-col gap-0.5 bg-sheet-panel px-3 py-2">
+              <span className="text-[13px] leading-tight text-sheet-muted">{t.sphAberration}</span>
+              <span className="text-[18px] font-medium leading-tight text-sheet-ink tnum">
+                {result.sa0.toFixed(3)}
+              </span>
+            </div>
+            <div className="flex flex-col gap-0.5 bg-sheet-panel px-3 py-2">
+              <span className="text-[13px] leading-tight text-sheet-muted">{t.coma}</span>
+              <span className="text-[18px] font-medium leading-tight text-sheet-ink tnum">
+                {result.comaX.toFixed(3)}
+              </span>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  },
+);

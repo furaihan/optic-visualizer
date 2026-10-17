@@ -169,4 +169,41 @@ export interface AppTranslations {
   coma: string;
   asphericNav: string;
   asphericParams: string;
+
+  // Sheet (redesigned /visualizer)
+  workbenchTitle: string;
+  workbenchLead: string;
+  copyOrder: string;
+  copiedOrder: string;
+  copyFailed: string;
+  sheetMeasurements: string;
+  sheetColMeasure: string;
+  sheetColValue: string;
+  sheetColLimit: string;
+  sheetColStatus: string;
+  withinLimit: string;
+  overLimit: string;
+  threshold: string;
+  definition: string;
+  rxLine: string;
+  frameLine: string;
+  fittingLine: string;
+  inducedPrism: string;
+  sagittaFront: string;
+  sagittaBack: string;
+  rulerMm: string;
+  caliperHint: string;
+  caliperCt: string;
+  caliperEt: string;
+  caliperGroove: string;
+  caliperAnterior: string;
+  caliperPosterior: string;
+  rowOpenHint: string;
+  orderCopiedNote: string;
+  weightComfort: string;
+  compareAgainst: string;
+  viewLabel: string;
+  edgeDetail: string;
+  scaleNote: string;
+  invalidInput: string;
 }

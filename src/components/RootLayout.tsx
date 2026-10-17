@@ -56,14 +56,14 @@ function GlobalNav() {
           size="icon"
           onClick={() => setIsExpanded(true)}
           aria-expanded={isExpanded}
-          className="hidden md:flex flex-col fixed top-4 left-4 z-50 w-10 h-10 items-center justify-center rounded-xl bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-300 hover:text-blue-600 dark:hover:text-blue-400 shadow-sm transition-colors"
+          className="hidden md:flex flex-col fixed top-4 left-4 z-50 w-10 h-10 items-center justify-center rounded-xl bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-300 hover:text-blue-600 dark:hover:text-blue-400 transition-colors"
           title={lang === 'id' ? 'Buka MenuIcon' : 'Open MenuIcon'}
         >
           <MenuIcon size={20} />
         </Button>
       )}
 
-      <nav className={`w-full bg-white dark:bg-slate-950 border-t md:border-t-0 md:border-r border-slate-200 dark:border-slate-800 shrink-0 flex md:flex-col items-center justify-between px-4 md:px-0 md:py-4 gap-2 md:gap-4 z-40 relative transition-all duration-300 h-16 ${isExpanded ? 'md:h-dvh md:w-16 md:flex' : 'md:hidden'}`}>
+      <nav className={`w-full bg-white dark:bg-slate-950 md:bg-slate-50 dark:md:bg-slate-900/40 shrink-0 flex md:flex-col items-center justify-between px-4 md:px-0 md:py-4 gap-2 md:gap-4 z-40 relative transition-[width,background-color] duration-300 h-16 ${isExpanded ? 'md:h-dvh md:w-16 md:flex' : 'md:hidden'}`}>
         <div className="flex md:flex-col gap-2 md:gap-4 w-full h-full md:h-auto items-center justify-between md:justify-center">
           <div className="flex md:flex-col gap-2 md:gap-4 justify-center md:items-center">
             {navItems.map((item) => (
@@ -138,13 +138,13 @@ function NavItem({ icon, label, to, exact, currentSearch }: { icon: React.ReactN
       inactiveProps={{
         className: 'text-slate-400 dark:text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-900 hover:text-slate-600 dark:hover:text-slate-300'
       }}
-      className="flex flex-col items-center justify-center w-12 h-12 md:w-12 md:h-12 rounded-xl transition-all duration-200 group relative"
+      className="flex flex-col items-center justify-center w-12 h-12 md:w-12 md:h-12 rounded-xl transition-colors duration-200 group relative"
       aria-label={label}
       title={label}
     >
       {icon}
       {/* Tooltip emulation for desktop only, visible on hover */}
-      <span className="absolute left-14 hidden group-hover:md:block px-2 py-1 bg-slate-800 text-white text-[10px] font-bold rounded shadow-xl whitespace-nowrap z-50 capitalize">
+      <span className="absolute left-14 hidden group-hover:md:block px-2 py-1 bg-slate-800 text-white text-[10px] font-bold rounded whitespace-nowrap z-50 capitalize">
         {label}
       </span>
     </Link>

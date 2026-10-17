@@ -19,17 +19,20 @@ interface ControlProps {
   isRecalculating?: boolean;
 }
 
-export const Control: React.FC<ControlProps> = ({ 
-  label, 
-  value, 
-  min, 
-  max, 
-  step, 
-  onChange, 
-  unit, 
-  lang, 
+/**
+ * One numeric input: a stepper on each side and the value in the middle.
+ * Figures are tabular so a column of them lines up.
+ */
+export const Control: React.FC<ControlProps> = ({
+  label,
+  value,
+  min,
+  max,
+  step,
+  onChange,
+  unit,
+  lang,
   icon,
-  isRecalculating
 }) => {
   const [typedVal, setTypedVal] = useState(value.toString());
 
@@ -37,19 +40,12 @@ export const Control: React.FC<ControlProps> = ({
     setTypedVal(value.toString());
   }, [value]);
 
-  const isAxis = unit === '°';
-  const inputWidthClass = isAxis ? 'min-w-12 max-w-14' : 'min-w-16 max-w-20';
-
   const commitVal = (v: number) => {
     const snapped = Math.round(v / step) * step;
     const clamped = Math.min(max, Math.max(min, snapped));
     const fixed = parseFloat(clamped.toFixed(10));
     onChange(fixed);
     setTypedVal(fixed.toString());
-  };
-
-  const handleTypedChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setTypedVal(e.target.value);
   };
 
   const handleBlur = () => {
@@ -72,55 +68,63 @@ export const Control: React.FC<ControlProps> = ({
   };
 
   return (
-    <Field orientation="vertical" className="py-1.5 gap-1.5">
-      <FieldLabel className="w-auto flex-none m-0 items-center">
-        <LabelWithTooltip 
-          label={label} 
-          lang={lang} 
-          className="select-none leading-tight dark:text-slate-300" 
-          icon={icon} 
+    <Field orientation="vertical" className="gap-1.5 py-1">
+      <FieldLabel className="m-0 w-auto flex-none items-center">
+        <LabelWithTooltip
+          label={label}
+          lang={lang}
+          className="select-none leading-tight text-sheet-ink"
+          icon={icon}
         />
       </FieldLabel>
       <FieldContent>
-        <InputGroup className={cn("h-8 transition-colors duration-300 w-full", isRecalculating ? "ring-2 ring-blue-400/50 border-blue-400 bg-blue-50/50 dark:bg-blue-900/30" : "")}>
-           <InputGroupAddon align="inline-start" className="pl-0 border-r border-slate-100 dark:border-slate-800">
+        <InputGroup className="h-9 w-full rounded-sm border-sheet-ground bg-sheet-ground">
+          <InputGroupAddon align="inline-start" className="pl-0">
             <InputGroupButton
               size="icon-xs"
               onClick={() => commitVal(value - step)}
               title="Decrease"
-              className="w-8 h-full rounded-none"
+              aria-label={`${label} decrease`}
+              className="h-full w-8 rounded-none text-sheet-muted hover:bg-sheet-stage hover:text-sheet-ink"
             >
-              <MinusIcon size={11} strokeWidth={3} className="text-slate-500 dark:text-slate-400" />
+              <MinusIcon size={12} strokeWidth={2.5} aria-hidden="true" />
             </InputGroupButton>
           </InputGroupAddon>
-          <InputGroupInput 
+          <InputGroupInput
             type="text"
+            inputMode="decimal"
             value={typedVal}
-            onChange={handleTypedChange}
+            onChange={(e) => setTypedVal(e.target.value)}
             onBlur={handleBlur}
             onKeyDown={handleKeyDown}
-            className="text-center font-mono text-xs font-bold text-slate-800 dark:text-slate-100 px-0 h-8 w-full"
+            aria-label={label}
+            className="h-9 w-full px-0 text-center text-[16px] font-medium text-sheet-ink tnum"
           />
-           <InputGroupAddon align="inline-end" className="pr-0 border-l border-slate-100 dark:border-slate-800">
+          <InputGroupAddon align="inline-end" className="pr-0">
             <InputGroupButton
               size="icon-xs"
               onClick={() => commitVal(value + step)}
               title="Increase"
-              className="w-8 h-full rounded-none"
+              aria-label={`${label} increase`}
+              className="h-full w-8 rounded-none text-sheet-muted hover:bg-sheet-stage hover:text-sheet-ink"
             >
-              <PlusIcon size={11} strokeWidth={3} className="text-slate-500 dark:text-slate-400" />
+              <PlusIcon size={12} strokeWidth={2.5} aria-hidden="true" />
             </InputGroupButton>
           </InputGroupAddon>
-          <InputGroupAddon align="inline-end" className="pr-2 pl-1 pointer-events-none text-[10px] text-slate-400 font-mono font-bold w-6 text-right">
+          <InputGroupAddon
+            align="inline-end"
+            className="pointer-events-none w-7 pl-1 pr-2 text-right text-[13px] text-sheet-muted tnum"
+          >
             {unit}
           </InputGroupAddon>
         </InputGroup>
       </FieldContent>
       {label.includes("(BC)") && (
-        <FieldDescription className="mt-0 bg-blue-50/50 dark:bg-blue-950/20 p-2 rounded-lg border border-blue-100/30 dark:border-blue-900/30 flex gap-2 w-full flex-none">
-          <LightbulbIcon size={14} className="text-blue-500 shrink-0 mt-0.5" />
+        <FieldDescription className="mt-1 flex w-full flex-none gap-2 bg-sheet-tint p-2.5 text-[13px] leading-snug text-sheet-ink">
+          <LightbulbIcon size={14} className="mt-0.5 shrink-0 text-sheet-accent" aria-hidden="true" />
           <span>
-            <span><strong>{translations[lang].bcRecLabel}</strong> {translations[lang].bcRecText}</span>
+            <strong className="font-medium">{translations[lang].bcRecLabel}</strong>{' '}
+            {translations[lang].bcRecText}
           </span>
         </FieldDescription>
       )}

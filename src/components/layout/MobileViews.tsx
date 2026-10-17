@@ -1,22 +1,29 @@
-import { useState, useRef, useEffect } from "react";
+import { useState } from "react";
 import { Sidebar } from "../Sidebar";
 import { Visualizer } from "../Visualizer";
-import { SummaryCard } from "../cards/SummaryCard";
-import { CurvatureCard } from "../cards/CurvatureCard";
-import { RecommendationCard } from "../cards/RecommendationCard";
+import { JobTicket } from "../sheet/JobTicket";
+import { MeasurementSheet } from "../sheet/MeasurementSheet";
+import { RecommendationRow } from "../sheet/RecommendationRow";
 import { useOpticalContext } from "../../contexts/OpticalContext";
 import { ScrollArea } from "../ui/scroll-area";
 import ErrorBoundary from "../ErrorBoundary";
 import { useSearch } from '@tanstack/react-router';
 import type { SimulatorSearchParams } from '../../types/search-params';
+import { translations } from "../../lib/translations";
 
+/**
+ * The phone composition, which is its own layout rather than the desktop
+ * squeezed: the drawing first and full-bleed, the order under it, then the
+ * measurements.
+ */
 export function MobileViews() {
   const search = useSearch({ strict: false }) as unknown as SimulatorSearchParams;
   const lang = search.lang;
   const view = search.view;
   const activeTab = search.activeTab;
+  const t = translations[lang];
 
-  const [isRecalculating, setIsRecalculating] = useState(false);
+  const [mode, setMode] = useState<'simple' | 'advanced'>('simple');
 
   const {
     lens,
@@ -26,91 +33,118 @@ export function MobileViews() {
     frameType,
     compareMode,
     compareIndex,
-    setLens,
-    setFrame,
-    setPatient,
-    setBevelPercent,
-    setFrameType,
-    setCompareMode,
-    setCompareIndex,
     result,
     compareResult,
-    highlightedLimit,
-    setHighlightedLimit
+    validation,
   } = useOpticalContext();
 
-  const prevDepsRef = useRef({ lens, frame, patient, compareMode, compareIndex, bevelPercent, frameType });
+  const compareLens = compareMode ? { ...lens, index: compareIndex } : undefined;
 
-  useEffect(() => {
-    const hasChanged = 
-      lens !== prevDepsRef.current.lens || 
-      frame !== prevDepsRef.current.frame || 
-      patient !== prevDepsRef.current.patient ||
-      compareMode !== prevDepsRef.current.compareMode ||
-      compareIndex !== prevDepsRef.current.compareIndex ||
-      bevelPercent !== prevDepsRef.current.bevelPercent ||
-      frameType !== prevDepsRef.current.frameType;
-      
-    if (hasChanged) {
-      setIsRecalculating(true);
-      prevDepsRef.current = { lens, frame, patient, compareMode, compareIndex, bevelPercent, frameType };
-      const timer = setTimeout(() => setIsRecalculating(false), 300);
-      return () => clearTimeout(timer);
-    }
-  }, [lens, frame, patient, compareMode, compareIndex, bevelPercent, frameType]);
+  const board = (
+    <ErrorBoundary
+      fallback={
+        <div className="flex h-full items-center justify-center bg-sheet-panel p-6 text-[16px] text-sheet-ink">
+          {t.simError}
+        </div>
+      }
+    >
+      <Visualizer
+        lens={lens}
+        frame={frame}
+        patient={patient}
+        result={result}
+        compareResult={compareResult}
+        compareLens={compareLens}
+        lang={lang}
+        view={view}
+        frameType={frameType}
+        highlightedLimit={null}
+        bevelPercent={bevelPercent}
+      />
+    </ErrorBoundary>
+  );
 
   return (
-    <div className="md:hidden flex flex-col flex-1 min-h-0 overflow-hidden mt-3">
+    <div className="mt-3 flex min-h-0 flex-1 flex-col overflow-hidden md:hidden">
       {activeTab === "visualizer" && (
-        <div className="flex-1 flex flex-col min-h-0 animate-tab-enter">
-          <ErrorBoundary fallback={<div className="h-full w-full flex items-center justify-center border border-red-200 bg-red-50 text-red-600 rounded-xl text-xs">Visualizer Error</div>}>
-            <Visualizer
-              lens={lens}
-              frame={frame}
-              patient={patient}
-              result={result}
-              compareResult={compareResult}
-              compareLens={compareMode ? { ...lens, index: compareIndex } : undefined}
-              lang={lang}
-              view={view}
-              frameType={frameType}
-              highlightedLimit={highlightedLimit}
-            />
-          </ErrorBoundary>
-        </div>
-      )}
+        <div className="sheet-fade flex min-h-0 flex-1 flex-col">
+          <ScrollArea className="min-h-0 flex-1">
+            <div className="flex flex-col gap-6 pb-8">
+              <div className="flex flex-col gap-1.5">
+                <h1 className="text-[24px] font-medium leading-[1.15] tracking-[-0.02em] text-sheet-ink">
+                  {t.workbenchTitle}
+                </h1>
+                <p className="text-[16px] leading-relaxed text-sheet-ink">{t.workbenchLead}</p>
+              </div>
 
-      {activeTab === "summary" && (
-        <div className="flex-1 flex flex-col min-h-0 animate-tab-enter-up">
-          <ScrollArea className="flex-1 min-h-0">
-            <div className="space-y-4 pb-6 pr-1.5">
-              <ErrorBoundary fallback={<div className="p-4 border border-red-200 bg-red-50 text-red-600 rounded-xl text-xs">Summary Card Error</div>}>
-                <SummaryCard
-                  result={result}
-                  compareResult={compareResult}
-                  lang={lang}
-                  frame={frame}
-                  lens={lens}
-                  isLoading={isRecalculating}
-                />
-              </ErrorBoundary>
-              <CurvatureCard result={result} lang={lang} />
-              <RecommendationCard
+              <div className="h-[52vh] min-h-[300px]">{board}</div>
+
+              <JobTicket
+                lens={lens}
+                frame={frame}
+                patient={patient}
                 result={result}
-                lensIndex={lens.index}
+                frameType={frameType}
+                bevelPercent={bevelPercent}
                 lang={lang}
-                isLoading={isRecalculating}
+                compareIndex={compareMode ? compareIndex : undefined}
+                compareResult={compareResult}
               />
             </div>
           </ScrollArea>
         </div>
       )}
 
+      {activeTab === "summary" && (
+        <div className="sheet-fade flex min-h-0 flex-1 flex-col">
+          <ScrollArea className="min-h-0 flex-1">
+            <div className="flex flex-col gap-6 pb-8">
+              <div className="flex items-baseline gap-1 bg-sheet-panel p-1">
+                <button
+                  type="button"
+                  onClick={() => setMode('simple')}
+                  className={`min-h-9 flex-1 px-3 text-[13px] font-medium transition-colors duration-150 ${
+                    mode === 'simple'
+                      ? 'bg-sheet-ground text-sheet-ink'
+                      : 'text-sheet-muted hover:text-sheet-ink'
+                  }`}
+                  aria-pressed={mode === 'simple'}
+                >
+                  {t.tabImage}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setMode('advanced')}
+                  className={`min-h-9 flex-1 px-3 text-[13px] font-medium transition-colors duration-150 ${
+                    mode === 'advanced'
+                      ? 'bg-sheet-ground text-sheet-ink'
+                      : 'text-sheet-muted hover:text-sheet-ink'
+                  }`}
+                  aria-pressed={mode === 'advanced'}
+                >
+                  {t.tabStatistics}
+                </button>
+              </div>
+
+              <MeasurementSheet
+                result={result}
+                compareResult={compareResult}
+                lang={lang}
+                frame={frame}
+                lens={lens}
+                isAdvanced={mode === 'advanced'}
+              />
+              <RecommendationRow result={result} lensIndex={lens.index} lang={lang} />
+            </div>
+          </ScrollArea>
+        </div>
+      )}
+
       {activeTab === "parameters" && (
-        <div className="flex-1 flex flex-col min-h-0 animate-tab-enter-up">
-          <ScrollArea className="flex-1 min-h-0">
-            <div className="pb-6 pr-1.5">
-              <Sidebar lang={lang} isMobile={true} />
+        <div className="sheet-fade flex min-h-0 flex-1 flex-col">
+          <ScrollArea className="min-h-0 flex-1">
+            <div className="pb-8">
+              <Sidebar lang={lang} isMobile />
             </div>
           </ScrollArea>
         </div>

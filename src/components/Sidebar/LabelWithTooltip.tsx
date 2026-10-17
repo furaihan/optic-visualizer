@@ -2,7 +2,6 @@ import React from 'react';
 import { HelpCircleIcon } from "lucide-react";
 import { Language, getTooltipByLabel } from '../../lib/translations';
 import { Tooltip, TooltipTrigger, TooltipContent } from '../ui/tooltip';
-import { Label } from '../ui/label';
 
 interface LabelWithTooltipProps {
   label: string;
@@ -12,40 +11,43 @@ interface LabelWithTooltipProps {
   icon?: React.ReactNode;
 }
 
-export const LabelWithTooltip: React.FC<LabelWithTooltipProps> = ({ 
-  label, 
-  lang, 
-  className, 
-  isUppercaseHeader = false, 
-  icon 
+/**
+ * A field label that carries its definition. Sentence case, body size, with a
+ * quiet help mark: the definition is available, not shouted.
+ */
+export const LabelWithTooltip: React.FC<LabelWithTooltipProps> = ({
+  label,
+  lang,
+  className,
+  icon,
 }) => {
   const tooltipText = getTooltipByLabel(label, lang);
-  const baseLabelClass = isUppercaseHeader 
-    ? `font-bold uppercase tracking-wider text-[10px] text-slate-500 cursor-help ${className || ''}` 
-    : `font-semibold text-[11px] text-slate-700 cursor-help ${className || ''}`;
 
   if (!tooltipText) {
     return (
-      <span className={`text-[11px] font-semibold text-slate-700 dark:text-slate-300 ${className || ''}`}>
-        {icon && <span className="mr-1.5 align-middle">{icon}</span>}
+      <span className={`flex items-center gap-1.5 text-[13px] font-medium leading-tight text-sheet-ink ${className || ''}`}>
+        {icon && <span className="shrink-0" aria-hidden="true">{icon}</span>}
         {label}
       </span>
     );
   }
+
   return (
     <Tooltip>
-      <TooltipTrigger render={
-        <button type="button" className={`inline-flex items-center gap-1 cursor-help hover:text-blue-600 dark:hover:text-blue-400 transition-colors ${className || ''}`} aria-label={tooltipText} />
-      }>
-        <div className="flex items-center gap-1">
-          {icon && <span className="shrink-0 flex items-center" aria-hidden="true">{icon}</span>}
-          <span className={baseLabelClass}>
-            {label}
-          </span>
-        </div>
-        <HelpCircleIcon size={10} className="text-slate-400 shrink-0" aria-hidden="true" />
+      <TooltipTrigger
+        render={
+          <button
+            type="button"
+            className={`inline-flex items-center gap-1.5 text-[13px] font-medium leading-tight text-sheet-ink transition-colors hover:text-sheet-accent focus-visible:underline ${className || ''}`}
+            aria-label={tooltipText}
+          />
+        }
+      >
+        {icon && <span className="shrink-0" aria-hidden="true">{icon}</span>}
+        <span>{label}</span>
+        <HelpCircleIcon size={12} className="shrink-0 text-sheet-muted" aria-hidden="true" />
       </TooltipTrigger>
-      <TooltipContent className="p-2.5 max-w-[220px] text-[10.5px] font-sans font-medium leading-normal bg-slate-900 border border-slate-800 text-slate-100 rounded-lg shadow-xl shrink-0 z-50">
+      <TooltipContent className="max-w-[240px] rounded-sm bg-sheet-ink p-2.5 text-[13px] leading-snug text-sheet-ground">
         {tooltipText}
       </TooltipContent>
     </Tooltip>

@@ -1,9 +1,12 @@
 import { useOpticalContext } from '../../contexts/OpticalContext';
 import { translations } from '../../lib/translations';
 import type { Language } from '../../types/search-params';
-import { AlertTriangleIcon } from "lucide-react";
-import { Alert, AlertTitle, AlertDescription } from '../ui/alert';
 
+/**
+ * Validation, stated in one band above the work: what is wrong, in sentences.
+ * No alert card, no icon, no amber wash. The band only exists when there is
+ * something to say.
+ */
 export function ValidationAlerts({ lang }: { lang: Language }) {
   const t = translations[lang];
   const { validation } = useOpticalContext();
@@ -11,24 +14,27 @@ export function ValidationAlerts({ lang }: { lang: Language }) {
   if (validation.errors.length === 0) return null;
 
   return (
-    <div className="px-4 md:px-6 py-2 shrink-0 animate-fade-in bg-amber-50/50 dark:bg-amber-950/10 border-b border-amber-200/60 dark:border-amber-900/40">
-      <Alert variant="destructive" className="max-w-7xl mx-auto bg-amber-50 dark:bg-amber-950/20 text-amber-700 dark:text-amber-400 border-amber-200/60 dark:border-amber-900/40 gap-x-3 py-1.5 [&>svg]:text-amber-500">
-        <AlertTriangleIcon size={14} className="mt-0.5" />
-        <div className="flex flex-col min-w-0">
-          <AlertTitle className="text-[10px] uppercase tracking-wider font-extrabold mb-0.5 text-amber-600 dark:text-amber-400">
-            {t.clinicalVerification}
-          </AlertTitle>
-          <AlertDescription>
-            <ul className="list-disc list-outside ml-3 text-xs font-medium leading-tight text-amber-800/80 dark:text-amber-200/80">
-              {validation.errors.map((err, i) => (
-                <li key={i} className="whitespace-normal break-words py-0.5">
-                  {lang === 'id' ? err.messageId : err.messageEn}
-                </li>
-              ))}
-            </ul>
-          </AlertDescription>
-        </div>
-      </Alert>
-    </div>
+    <section
+      aria-live="polite"
+      className="sheet-fade shrink-0 bg-sheet-tint px-3 py-2 sm:px-4"
+    >
+      <div className="flex flex-col gap-1">
+        <p className="text-[13px] font-medium text-sheet-ink">{t.clinicalVerification}</p>
+        <ul className="flex flex-col gap-1">
+          {validation.errors.map((err, i) => (
+            <li
+              key={i}
+              className="flex gap-2 text-[13px] leading-snug text-sheet-ink sm:text-[16px]"
+            >
+              <span
+                aria-hidden="true"
+                className="mt-[7px] block h-1.5 w-1.5 shrink-0 rounded-full bg-sheet-warning"
+              />
+              {lang === 'id' ? err.messageId : err.messageEn}
+            </li>
+          ))}
+        </ul>
+      </div>
+    </section>
   );
 }

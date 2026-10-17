@@ -18,6 +18,8 @@ export interface VisualizerProps {
   view: "side" | "top" | "front";
   frameType?: FrameType;
   highlightedLimit?: "a" | "b" | "dbl" | "ed" | null;
+  /** Bevel position as a share of frame depth, for the groove caliper. */
+  bevelPercent?: number;
 }
 
 export interface LensPosition {
@@ -28,10 +30,18 @@ export interface LensPosition {
   backApexX: number;
 }
 
+/** The measurements a caliper can read off the board. */
+export type CaliperTarget =
+  | "ct"
+  | "et"
+  | "groove"
+  | "anterior"
+  | "posterior"
+  | null;
+
 export interface HoverLabel {
   title: string;
   desc: string;
   x: number;
   y: number;
 }
-
