@@ -8,4 +8,3 @@ coverage/
 !.env.example
 deploy-guide.md
 deploy-guide-docker.md
-.agents/skills/
