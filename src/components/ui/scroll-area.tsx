@@ -1,9 +1,6 @@
-"use client"
-
 import * as React from "react"
 import { ScrollArea as ScrollAreaPrimitive } from "@base-ui/react/scroll-area"
-
-import { cn } from "../../lib/utils"
+import { cn } from "cn"
 
 function ScrollArea({
   className,
@@ -23,7 +20,6 @@ function ScrollArea({
         {children}
       </ScrollAreaPrimitive.Viewport>
       <ScrollBar />
-      <ScrollBar orientation="horizontal" />
       <ScrollAreaPrimitive.Corner />
     </ScrollAreaPrimitive.Root>
   )
