@@ -137,29 +137,59 @@ src/
 
 ### Prasyarat
 
-Node.js **v18** atau **v20+**.
+[Bun](https://bun.com) **v1.2** atau lebih baru (`bun --version`).
 
 ### Langkah-langkah
 
 ```bash
 # Instal dependensi
-npm install
+bun install
 
-# Jalankan server development (port 3000 dengan HMR)
-npm run dev
+# Jalankan server development (port dan host diambil dari .env.development)
+bun run dev
 
 # Type-check dengan TypeScript
-npm run lint
+bun run lint
 
 # Jalankan unit test (Vitest)
-npm run test
+bun run test
 
 # Build produksi
-npm run build
+bun run build
 
-# Pratinjau build produksi
-npm run preview
+# Pratinjau build produksi (port dan host diambil dari .env.production)
+bun run preview
+
+# Hapus hasil build
+bun run clean
 ```
+
+---
+
+## Lingkungan (Environment)
+
+Port, host, dan nama environment disimpan di berkas env, bukan di dalam script. Vite
+memilih berkas yang sesuai dengan mode-nya secara otomatis — tanpa flag tambahan.
+
+| Berkas | Dipakai oleh | Nilai |
+| --- | --- | --- |
+| `.env.development` | `bun run dev` | `PORT=3000`, `HOST=0.0.0.0`, `APP_ENV=development` |
+| `.env.production` | `bun run build` dan `bun run preview` | `PORT=8080`, `HOST=0.0.0.0`, `APP_ENV=production` |
+| `.env.local` | Secret lokal Anda (diabaikan git) | `GEMINI_API_KEY`, `APP_URL` |
+| `.env.example` | Referensi semua variabel | — |
+
+```bash
+# Pratinjau pada port berbeda (env var asli menimpa berkas env)
+PORT=4120 bun run preview
+```
+
+Set `DISABLE_HMR=true` untuk mematikan Hot Module Replacement, atau `STRICT_PORT=true`
+untuk gagal alih-alih menaikkan port secara otomatis saat port sedang dipakai.
+
+> Pemuatan `.env` otomatis Bun dinonaktifkan di `bunfig.toml` agar Vite tetap menjadi
+> satu-satunya sumber berkas environment. Tanpa itu, Bun memasukkan
+> `.env.development` ke dalam `process.env` apa pun mode Vite, sehingga build
+> produksi diam-diam mengambil port development.
 
 ---
 

@@ -1,10 +1,23 @@
 import tailwindcss from '@tailwindcss/vite';
 import react from '@vitejs/plugin-react';
 import path from 'path';
+import {fileURLToPath} from 'url';
 import {defineConfig, loadEnv} from 'vite';
 
+const root = path.dirname(fileURLToPath(import.meta.url));
+const resolvePath = (...segments: string[]) => path.resolve(root, ...segments);
+
 export default defineConfig(({mode}) => {
-  const env = loadEnv(mode, '.', '');
+  // Read from the mode-specific files (.env.development / .env.production / .env.local).
+  // Deliberately NOT process.env: Bun auto-loads .env.development into process.env
+  // regardless of Vite's mode, which would leak dev settings into a production build.
+  const env = loadEnv(mode, root, '');
+  const isProd = mode === 'production';
+
+  const port = Number(env.PORT ?? (isProd ? 8080 : 3000));
+  const host = env.HOST ?? '0.0.0.0';
+  const strictPort = env.STRICT_PORT === 'true';
+
   return {
     plugins: [react(), tailwindcss()],
     define: {
@@ -12,20 +25,28 @@ export default defineConfig(({mode}) => {
     },
     resolve: {
       alias: {
-        '@': path.resolve(__dirname, '.'),
-        '@components': path.resolve(__dirname, './src/components'),
-        '@hooks': path.resolve(__dirname, './src/hooks'),
-        '@lib': path.resolve(__dirname, './src/lib'),
-        '@data': path.resolve(__dirname, './src/data'),
-        '@types': path.resolve(__dirname, './src/types'),
-        '@shadcn': path.resolve(__dirname, './src/components/ui'),
-        '@i18n': path.resolve(__dirname, './src/lib/translations'),
+        '@': resolvePath('.'),
+        '@components': resolvePath('src/components'),
+        '@hooks': resolvePath('src/hooks'),
+        '@lib': resolvePath('src/lib'),
+        '@data': resolvePath('src/data'),
+        '@types': resolvePath('src/types'),
+        '@shadcn': resolvePath('src/components/ui'),
+        '@i18n': resolvePath('src/lib/translations'),
       },
     },
     server: {
+      host,
+      port,
+      strictPort,
       // HMR is disabled in AI Studio via DISABLE_HMR env var.
-      // Do not modifyâfile watching is disabled to prevent flickering during agent edits.
-      hmr: process.env.DISABLE_HMR !== 'true',
+      // Do not modify—file watching is disabled to prevent flickering during agent edits.
+      hmr: env.DISABLE_HMR !== 'true',
+    },
+    preview: {
+      host,
+      port,
+      strictPort,
     },
     build: {
       rollupOptions: {

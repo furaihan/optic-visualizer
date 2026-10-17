@@ -1,0 +1,14 @@
+# Bun configuration for optic-tools.
+
+# Disable Bun's automatic .env loading.
+#
+# Bun loads .env.development into process.env regardless of Vite's mode, and
+# Vite's loadEnv() gives process.env precedence over file values. Without this,
+# `bun run preview` (Vite mode "production") would pick up PORT from
+# .env.development instead of .env.production.
+#
+# Vite still loads .env, .env.local and .env.[mode] itself, with correct
+# per-mode precedence. Real environment variables (e.g. PORT=4120 bun run dev)
+# continue to work as overrides.
+[env]
+file = false

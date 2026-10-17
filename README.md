@@ -172,29 +172,59 @@ src/
 
 ### Prerequisites
 
-Node.js **v18** or **v20+**.
+[Bun](https://bun.com) **v1.2** or **later** (`bun --version`).
 
 ### Setup
 
 ```bash
 # Install dependencies
-npm install
+bun install
 
-# Start development server (port 3000 with HMR)
-npm run dev
+# Start development server (port and host come from .env.development)
+bun run dev
 
 # Type-check with TypeScript
-npm run lint
+bun run lint
 
 # Run unit tests (Vitest)
-npm run test
+bun run test
 
 # Production build
-npm run build
+bun run build
 
-# Preview production build
-npm run preview
+# Preview production build (port and host come from .env.production)
+bun run preview
+
+# Remove the build output
+bun run clean
 ```
+
+---
+
+## Environment
+
+Port, host, and environment name live in env files rather than in the scripts. Vite
+picks the file that matches its mode automatically — no flags required.
+
+| File | Purpose | Values |
+| --- | --- | --- |
+| `.env.development` | Used by `bun run dev` | `PORT=3000`, `HOST=0.0.0.0`, `APP_ENV=development` |
+| `.env.production` | Used by `bun run build` and `bun run preview` | `PORT=8080`, `HOST=0.0.0.0`, `APP_ENV=production` |
+| `.env.local` | Your local secrets (gitignored) | `GEMINI_API_KEY`, `APP_URL` |
+| `.env.example` | Reference for every variable | — |
+
+```bash
+# Preview on a different port (real env vars override the env files)
+PORT=4120 bun run preview
+```
+
+Set `DISABLE_HMR=true` to turn off Hot Module Replacement, or `STRICT_PORT=true` to
+fail instead of auto-incrementing when the port is busy.
+
+> Bun's automatic `.env` loading is disabled in `bunfig.toml` so that Vite stays the
+> single source of truth for environment files. Without it, Bun injects
+> `.env.development` into `process.env` regardless of Vite's mode, and a production
+> build would silently pick up the development port.
 
 ---
 
