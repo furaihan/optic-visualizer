@@ -7,6 +7,7 @@ import {
   PatientParameters,
 } from '../../lib/optic-engine/types';
 import { Language, translations } from '../../lib/translations';
+import { GroupMarker, type SheetGroup } from '../Sidebar/GroupMarker';
 
 interface JobTicketProps {
   lens: LensParameters;
@@ -44,9 +45,10 @@ export const JobTicket: React.FC<JobTicketProps> = ({
   const frameTypeLabel =
     frameType === 'full' ? t.fullRim : frameType === 'half' ? t.halfRim : t.rimless;
 
-  const blocks: { title: string; cells: Cell[] }[] = [
+  const blocks: { title: string; group: SheetGroup; cells: Cell[] }[] = [
     {
       title: t.rxLine,
+      group: 'rx',
       cells: [
         { key: 'SPH', value: signed(lens.sph) },
         { key: 'CYL', value: signed(lens.cyl) },
@@ -57,6 +59,7 @@ export const JobTicket: React.FC<JobTicketProps> = ({
     },
     {
       title: t.frameLine,
+      group: 'frame',
       cells: [
         { key: 'A', value: `${frame.a}` },
         { key: 'B', value: `${frame.b}` },
@@ -68,6 +71,7 @@ export const JobTicket: React.FC<JobTicketProps> = ({
     },
     {
       title: t.fittingLine,
+      group: 'fit',
       cells: [
         { key: 'PD', value: `${patient.pd}` },
         { key: t.fittingHeight, value: `${patient.fittingHeight}` },
@@ -85,7 +89,10 @@ export const JobTicket: React.FC<JobTicketProps> = ({
     >
       {blocks.map((block) => (
         <div key={block.title} className="flex min-w-0 flex-col gap-3">
-          <p className="text-[13px] font-medium text-sheet-ink">{block.title}</p>
+          <p className="flex items-center gap-2 text-[13px] font-medium text-sheet-ink">
+            <GroupMarker group={block.group} />
+            <span className="truncate">{block.title}</span>
+          </p>
           <dl className="grid grid-cols-3 gap-x-4 gap-y-3">
             {block.cells.map((cell) => (
               <div key={cell.key} className="flex min-w-0 flex-col gap-0.5">

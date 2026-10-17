@@ -16,7 +16,7 @@ export function ValidationAlerts({ lang }: { lang: Language }) {
   return (
     <section
       aria-live="polite"
-      className="sheet-fade shrink-0 bg-sheet-tint px-3 py-2 sm:px-4"
+      className="sheet-fade shrink-0 bg-sheet-alert px-3 py-2 sm:px-4"
     >
       <div className="flex flex-col gap-1">
         <p className="text-[13px] font-medium text-sheet-ink">{t.clinicalVerification}</p>

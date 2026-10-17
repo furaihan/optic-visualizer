@@ -161,12 +161,12 @@ export const MeasurementSheet: React.FC<MeasurementSheetProps> = ({
   const flagged = rows.filter((r) => !r.ok);
 
   return (
-    <section data-ui className="flex flex-col gap-4" aria-labelledby="measurements-title">
+    <section data-ui className="@container flex flex-col gap-4" aria-labelledby="measurements-title">
       <div className="flex flex-wrap items-baseline justify-between gap-x-6 gap-y-2">
         <h2 id="measurements-title" className="text-[26px] font-medium leading-tight tracking-[-0.02em] text-sheet-ink">
           {t.sheetMeasurements}
         </h2>
-        <p className={`text-[13px] ${flagged.length ? 'text-sheet-warning' : 'text-sheet-muted'}`}>
+        <p className={`whitespace-nowrap text-[13px] ${flagged.length ? 'text-sheet-warning' : 'text-sheet-muted'}`}>
           {flagged.length > 0 ? `${flagged.length} × ${t.overLimit}` : t.withinLimit}
         </p>
       </div>
@@ -174,7 +174,7 @@ export const MeasurementSheet: React.FC<MeasurementSheetProps> = ({
       {/* When the inputs are invalid the engine falls back to placeholders.
           Say so, rather than letting a placeholder pass for a measurement. */}
       {result.error && (
-        <p className="bg-sheet-tint p-3 text-[16px] leading-snug text-sheet-ink">
+        <p className="bg-sheet-alert p-3 text-[16px] leading-snug text-sheet-ink">
           {result.errorMessage ? `${result.errorMessage} ` : ''}
           {t.invalidInput}
         </p>
@@ -185,7 +185,7 @@ export const MeasurementSheet: React.FC<MeasurementSheetProps> = ({
           <tr className="text-[13px] text-sheet-muted">
             <th scope="col" className="pb-2 font-normal">{t.sheetColMeasure}</th>
             <th scope="col" className="pb-2 text-right font-normal">{t.sheetColValue}</th>
-            <th scope="col" className="hidden pb-2 text-right font-normal sm:table-cell">{t.sheetColLimit}</th>
+            <th scope="col" className="hidden pb-2 text-right font-normal @2xl:table-cell">{t.sheetColLimit}</th>
             <th scope="col" className="pb-2 pl-4 text-right font-normal">{t.sheetColStatus}</th>
           </tr>
         </thead>
@@ -196,11 +196,11 @@ export const MeasurementSheet: React.FC<MeasurementSheetProps> = ({
               <React.Fragment key={row.id}>
                 <tr
                   className={`sheet-rise delay-${Math.min(i + 1, 9)} cursor-pointer transition-colors duration-150 ${
-                    row.ok ? 'bg-sheet-panel hover:bg-sheet-tint' : 'bg-sheet-tint hover:bg-sheet-stage'
+                    row.ok ? 'bg-sheet-panel hover:bg-sheet-info' : 'bg-sheet-alert hover:bg-sheet-stage'
                   }`}
                   onClick={() => setOpen(isOpen ? null : row.id)}
                 >
-                  <th scope="row" className="py-3 pl-3 pr-2 text-left text-[16px] font-normal text-sheet-ink">
+                  <th scope="row" className="whitespace-nowrap py-3 pl-3 pr-2 text-left text-[16px] font-normal text-sheet-ink">
                     <button
                       type="button"
                       className="text-left underline-offset-4 hover:underline focus-visible:underline"
@@ -213,7 +213,7 @@ export const MeasurementSheet: React.FC<MeasurementSheetProps> = ({
                       {row.label}
                     </button>
                   </th>
-                  <td className="py-3 pr-2 text-right text-[22px] font-medium leading-none text-sheet-ink tnum">
+                  <td className="whitespace-nowrap py-3 pr-2 text-right text-[22px] font-medium leading-none text-sheet-ink tnum">
                     <span key={row.value} className="value-step inline-block">{row.value}</span>
                     {row.compareValue && (
                       <span className="mt-1 block text-[13px] font-normal text-sheet-muted tnum">
@@ -221,15 +221,15 @@ export const MeasurementSheet: React.FC<MeasurementSheetProps> = ({
                       </span>
                     )}
                   </td>
-                  <td className="hidden py-3 pr-2 text-right text-[13px] text-sheet-muted tnum sm:table-cell">
+                  <td className="hidden py-3 pr-2 text-right text-[13px] text-sheet-muted tnum @2xl:table-cell">
                     {row.limit}
                   </td>
                   <td className="py-3 pl-4 pr-3 text-right">
                     <span
-                      className={`inline-block px-2 py-1 text-[13px] leading-none ${
+                      className={`inline-block whitespace-nowrap px-2 py-1 text-[13px] leading-none ${
                         row.ok
                           ? 'bg-sheet-stage text-sheet-ink'
-                          : 'bg-sheet-warning text-white'
+                          : 'bg-sheet-warning text-sheet-warning-ink'
                       }`}
                     >
                       {row.ok ? t.withinLimit : t.overLimit}
@@ -237,7 +237,7 @@ export const MeasurementSheet: React.FC<MeasurementSheetProps> = ({
                   </td>
                 </tr>
                 {isOpen && (
-                  <tr className={row.ok ? 'bg-sheet-panel' : 'bg-sheet-tint'}>
+                  <tr className={row.ok ? 'bg-sheet-panel' : 'bg-sheet-alert'}>
                     <td colSpan={4} className="sheet-fade px-3 pb-4 pt-1">
                       <p className="max-w-[68ch] text-[16px] leading-relaxed text-sheet-ink">
                         {row.detail}

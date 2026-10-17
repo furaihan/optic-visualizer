@@ -6,11 +6,12 @@ import { Button } from './ui/button';
 import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem } from './ui/dropdown-menu';
 import { Toggle } from './ui/toggle';
 import { useTheme } from '../hooks/useTheme';
+import { BrandRule } from './BrandRule';
 
 export function RootLayout() {
   return (
     <TooltipProvider delay={50}>
-      <div className="flex flex-col-reverse md:flex-row h-dvh w-full font-sans overflow-hidden transition-colors duration-200 bg-slate-50 dark:bg-slate-950 text-slate-800 dark:text-slate-100">
+      <div className="flex flex-col-reverse md:flex-row h-dvh w-full font-sans overflow-hidden transition-colors duration-200 bg-sheet-ground text-sheet-ink">
         <GlobalNav />
         <main className="flex-1 flex flex-col min-h-0 overflow-hidden relative">
           <Outlet />
@@ -42,7 +43,7 @@ function GlobalNav() {
   }, [isExpanded]);
 
   const navItems = [
-    { to: '/', icon: <HomeIcon size={20} />, label: lang === 'id' ? 'Beranda' : 'HomeIcon', exact: true },
+    { to: '/', icon: <HomeIcon size={20} />, label: lang === 'id' ? 'Beranda' : 'Home', exact: true },
     { to: '/visualizer', icon: <GlassesIcon size={20} />, label: lang === 'id' ? 'Lensa' : 'Lenses' },
     { to: '/aspheric', icon: <SparklesIcon size={20} />, label: lang === 'id' ? 'Aspheric' : 'Aspheric' },
     { to: '/contact', icon: <DropletIcon size={20} />, label: lang === 'id' ? 'Kontak' : 'Contact' },
@@ -56,14 +57,14 @@ function GlobalNav() {
           size="icon"
           onClick={() => setIsExpanded(true)}
           aria-expanded={isExpanded}
-          className="hidden md:flex flex-col fixed top-4 left-4 z-50 w-10 h-10 items-center justify-center rounded-xl bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-300 hover:text-blue-600 dark:hover:text-blue-400 transition-colors"
-          title={lang === 'id' ? 'Buka MenuIcon' : 'Open MenuIcon'}
+          className="hidden md:flex flex-col fixed top-4 left-4 z-50 w-10 h-10 items-center justify-center rounded-xl bg-sheet-ground border-sheet-stage text-sheet-muted hover:text-sheet-accent transition-colors"
+          title={lang === 'id' ? 'Buka menu' : 'Open menu'}
         >
           <MenuIcon size={20} />
         </Button>
       )}
 
-      <nav className={`w-full bg-white dark:bg-slate-950 md:bg-slate-50 dark:md:bg-slate-900/40 shrink-0 flex md:flex-col items-center justify-between px-4 md:px-0 md:py-4 gap-2 md:gap-4 z-40 relative transition-[width,background-color] duration-300 h-16 ${isExpanded ? 'md:h-dvh md:w-16 md:flex' : 'md:hidden'}`}>
+      <nav className={`w-full bg-sheet-panel md:bg-sheet-panel shrink-0 flex md:flex-col items-center justify-between px-4 md:px-0 md:py-4 gap-2 md:gap-4 z-40 relative transition-[width,background-color] duration-300 h-16 ${isExpanded ? 'md:h-dvh md:w-16 md:flex' : 'md:hidden'}`}>
         <div className="flex md:flex-col gap-2 md:gap-4 w-full h-full md:h-auto items-center justify-between md:justify-center">
           <div className="flex md:flex-col gap-2 md:gap-4 justify-center md:items-center">
             {navItems.map((item) => (
@@ -81,7 +82,7 @@ function GlobalNav() {
           <div className="flex flex-row md:flex-col items-center gap-2">
             <DropdownMenu>
               <DropdownMenuTrigger
-                className="w-10 h-10 md:w-12 md:h-12 outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 flex items-center justify-center font-bold text-xs rounded-xl bg-slate-100 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-300 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-slate-200 dark:hover:bg-slate-800 transition-colors"
+                className="w-10 h-10 md:w-12 md:h-12 outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 flex items-center justify-center font-bold text-xs rounded-xl bg-sheet-ground border border-sheet-stage text-sheet-muted hover:text-sheet-accent transition-colors"
                 title={lang === 'id' ? 'Switch to English' : 'Ganti ke Bahasa Indonesia'}
               >
                 <span className="text-lg leading-none">{lang === 'id' ? '🇮🇩' : '🇬🇧'}</span>
@@ -99,7 +100,7 @@ function GlobalNav() {
             <Toggle 
               pressed={theme === 'dark'}
               onPressedChange={toggleTheme}
-              className="w-10 h-10 md:w-12 md:h-12 rounded-xl bg-slate-100 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-300 hover:text-amber-500 dark:hover:text-amber-400 data-[state=on]:bg-slate-200 dark:data-[state=on]:bg-slate-800 transition-colors"
+              className="w-10 h-10 md:w-12 md:h-12 rounded-xl bg-sheet-ground border border-sheet-stage text-sheet-muted hover:text-sheet-accent data-[state=on]:bg-sheet-stage transition-colors"
               title={lang === 'id' ? 'Ganti Tema Terang/Gelap' : 'Toggle Dark/Light Theme'}
               aria-label="Toggle Theme"
             >
@@ -111,8 +112,8 @@ function GlobalNav() {
               size="icon"
               onClick={() => setIsExpanded(false)}
               aria-expanded={isExpanded}
-              className="hidden md:flex w-10 h-10 items-center justify-center rounded-xl bg-slate-100 dark:bg-slate-900 border-slate-200 dark:border-slate-800 text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 transition-colors md:mt-2"
-              title={lang === 'id' ? 'Tutup MenuIcon' : 'Close MenuIcon'}
+              className="hidden md:flex w-10 h-10 items-center justify-center rounded-xl bg-sheet-ground border-sheet-stage text-sheet-muted hover:text-sheet-ink transition-colors md:mt-2"
+              title={lang === 'id' ? 'Tutup menu' : 'Close menu'}
             >
               <ChevronLeftIcon size={16} />
             </Button>
@@ -133,18 +134,26 @@ function NavItem({ icon, label, to, exact, currentSearch }: { icon: React.ReactN
       search={{ ...currentSearch, lang }}
       activeOptions={{ exact }}
       activeProps={{
-        className: 'bg-blue-50 dark:bg-blue-900/40 text-blue-600 dark:text-blue-400 font-bold'
+        className: 'text-sheet-accent font-bold'
       }}
       inactiveProps={{
-        className: 'text-slate-400 dark:text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-900 hover:text-slate-600 dark:hover:text-slate-300'
+        className: 'text-sheet-muted hover:bg-sheet-ground hover:text-sheet-ink'
       }}
-      className="flex flex-col items-center justify-center w-12 h-12 md:w-12 md:h-12 rounded-xl transition-colors duration-200 group relative"
+      className="group relative flex flex-col items-center justify-center w-12 h-12 md:w-12 md:h-12 rounded-xl transition-colors duration-200"
       aria-label={label}
       title={label}
     >
+      {/* The active item is marked by the brand rule, not by a coloured wash:
+          along the top edge on the phone, down the left edge on the desk rail. */}
+      <span className="pointer-events-none absolute inset-x-2 top-0 hidden group-data-[status=active]:block md:group-data-[status=active]:hidden">
+        <BrandRule />
+      </span>
+      <span className="pointer-events-none absolute inset-y-2 left-0 hidden md:group-data-[status=active]:flex">
+        <BrandRule orientation="vertical" />
+      </span>
       {icon}
       {/* Tooltip emulation for desktop only, visible on hover */}
-      <span className="absolute left-14 hidden group-hover:md:block px-2 py-1 bg-slate-800 text-white text-[10px] font-bold rounded whitespace-nowrap z-50 capitalize">
+      <span className="absolute left-14 hidden group-hover:md:block px-2 py-1 bg-sheet-ink text-sheet-ground text-[10px] font-bold rounded whitespace-nowrap z-50 capitalize">
         {label}
       </span>
     </Link>

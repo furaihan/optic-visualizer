@@ -89,7 +89,7 @@ export const FrameGeometrySection: React.FC<FrameGeometrySectionProps> = ({
       />
 
       {isAnyExceeding && (
-        <p className="sheet-fade bg-sheet-tint p-2.5 text-[13px] leading-snug text-sheet-ink">
+        <p className="sheet-fade bg-sheet-alert p-2.5 text-[13px] leading-snug text-sheet-ink">
           {t.ergonomicWarning}
         </p>
       )}

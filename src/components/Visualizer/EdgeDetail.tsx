@@ -55,14 +55,15 @@ export const EdgeDetail: React.FC<EdgeDetailProps> = ({
 
   const ink = 'text-sheet-ink';
   const muted = 'text-sheet-muted';
-  const accent = 'text-sheet-accent';
+  const accent = 'text-sheet-rx';
+  const rimInk = 'text-sheet-frame';
   const warn = 'text-sheet-warning';
 
   return (
     <g transform={`translate(${originX}, 0)`}>
       {/* Rim bands, top and bottom. */}
-      <rect x={0} y={top} width={depth} height={rimH} className={ink} fill="currentColor" fillOpacity={0.26} />
-      <rect x={0} y={bottom - rimH} width={depth} height={rimH} className={ink} fill="currentColor" fillOpacity={0.26} />
+      <rect x={0} y={top} width={depth} height={rimH} className={rimInk} fill="currentColor" fillOpacity={0.3} />
+      <rect x={0} y={bottom - rimH} width={depth} height={rimH} className={rimInk} fill="currentColor" fillOpacity={0.3} />
 
       {/* The lens edge, in section: a straight slab at this magnification. */}
       <rect

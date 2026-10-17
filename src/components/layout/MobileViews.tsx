@@ -65,7 +65,7 @@ export function MobileViews() {
   );
 
   return (
-    <div className="mt-3 flex min-h-0 flex-1 flex-col overflow-hidden md:hidden">
+    <div className="mt-3 flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden md:hidden">
       {activeTab === "visualizer" && (
         <div className="sheet-fade flex min-h-0 flex-1 flex-col">
           <ScrollArea className="min-h-0 flex-1">
@@ -77,7 +77,7 @@ export function MobileViews() {
                 <p className="text-[16px] leading-relaxed text-sheet-ink">{t.workbenchLead}</p>
               </div>
 
-              <div className="h-[52vh] min-h-[300px]">{board}</div>
+              <div className="h-[70vh] min-h-[440px] min-w-0">{board}</div>
 
               <JobTicket
                 lens={lens}

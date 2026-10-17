@@ -60,30 +60,30 @@ export class ErrorBoundary extends Component<Props, State> {
       }
 
       return (
-        <div className="min-h-screen bg-slate-50 dark:bg-slate-950 flex items-center justify-center p-6 font-sans antialiased text-left transition-colors duration-200">
-          <Card className="w-full max-w-md bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-6 md:p-8 shadow-xl space-y-6">
+        <div className="flex min-h-dvh items-center justify-center bg-sheet-ground p-6 font-sans antialiased text-left transition-colors duration-200">
+          <Card className="w-full max-w-md space-y-6 rounded-sm bg-sheet-panel p-6 md:p-8">
             <div className="flex items-start gap-4">
-              <div className="p-3 bg-red-50 dark:bg-red-950/20 rounded-2xl text-red-500 shrink-0">
+              <div className="shrink-0 rounded-sm bg-sheet-alert p-3 text-sheet-warning">
                 <AlertTriangleIcon size={24} />
               </div>
               <div className="space-y-1">
-                <h2 className="text-base font-extrabold text-slate-900 dark:text-slate-100 uppercase tracking-tight">
-                  Aplikasi Mengalami Kendala
+                <h2 className="text-[18px] font-medium leading-tight text-sheet-ink">
+                  Aplikasi mengalami kendala
                 </h2>
-                <p className="text-xs font-semibold text-slate-500 dark:text-slate-400">
-                  Application Runtime Intercepted
+                <p className="text-[13px] text-sheet-muted">
+                  Application runtime intercepted
                 </p>
               </div>
             </div>
 
             <div className="space-y-2.5">
-              <p className="text-xs text-slate-600 dark:text-slate-350 leading-relaxed font-medium">
+              <p className="text-[16px] font-normal leading-relaxed text-sheet-ink">
                 Terjadi kesalahan teknis saat memproses parameter geometri lensa atau memuat data sesi. Anda dapat menyetel ulang data sesi untuk mengatasi kendala ini.
               </p>
 
               {this.state.error && (
-                <div className="bg-slate-50 dark:bg-slate-950 border border-slate-150 dark:border-slate-850 p-3 rounded-xl max-h-36 overflow-auto font-mono text-[10px] text-slate-600 dark:text-slate-400 leading-normal select-text">
-                  <strong>Message:</strong> {this.state.error.message}
+                <div className="max-h-36 select-text overflow-auto rounded-sm bg-sheet-ground p-3 text-[13px] leading-normal text-sheet-muted">
+                  <strong className="font-medium text-sheet-ink">Message:</strong> {this.state.error.message}
                   {this.state.error.stack && (
                     <div className="mt-1 opacity-70 whitespace-pre-wrap">
                       {this.state.error.stack}
@@ -97,10 +97,10 @@ export class ErrorBoundary extends Component<Props, State> {
               <Button
                 onClick={this.handleReset}
                 variant="default"
-                className="flex-1 rounded-xl shadow-md cursor-pointer active:scale-[0.98]"
+                className="flex-1 rounded-sm bg-sheet-accent text-sheet-accent-ink hover:bg-sheet-accent/90 cursor-pointer active:translate-y-px"
               >
                 <RotateCcwIcon size={14} className="mr-2" />
-                Setel Ulang Sesi
+                Setel ulang sesi
               </Button>
 
               <Button
@@ -108,9 +108,9 @@ export class ErrorBoundary extends Component<Props, State> {
                 size="icon"
                 onClick={this.handleCopyToClipboard}
                 title="Salin log kesalahan"
-                className="w-10 rounded-xl cursor-pointer active:scale-[0.98]"
+                className="w-10 rounded-sm border-sheet-stage bg-sheet-ground text-sheet-muted hover:text-sheet-ink cursor-pointer active:translate-y-px"
               >
-                {this.state.copied ? <CheckIcon size={14} className="text-emerald-500" /> : <CopyIcon size={14} />}
+                {this.state.copied ? <CheckIcon size={14} className="text-sheet-fit" /> : <CopyIcon size={14} />}
               </Button>
             </div>
           </Card>

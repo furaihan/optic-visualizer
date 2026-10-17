@@ -51,8 +51,8 @@ export const TopDownView: React.FC<TopDownViewProps> = ({
   const depth = frame.depth;
 
   const warn = 'text-sheet-warning';
-  const ink = 'text-sheet-ink';
-  const accent = 'text-sheet-accent';
+  const accent = 'text-sheet-rx';
+  const rimInk = 'text-sheet-frame';
   const muted = 'text-sheet-muted';
 
   const halfGap = (dbl / 2) * scale;
@@ -88,10 +88,10 @@ export const TopDownView: React.FC<TopDownViewProps> = ({
             Q ${centerX} ${centerY - depthPx * 0.6}
               ${centerX + halfGap} ${centerY + depthPx / 2}`}
         fill="none"
-        className={highlightedLimit === 'dbl' ? warn : ink}
+        className={highlightedLimit === 'dbl' ? warn : rimInk}
         stroke="currentColor"
         strokeWidth={highlightedLimit === 'dbl' ? 3 : 2}
-        strokeOpacity={highlightedLimit === 'dbl' ? 1 : 0.7}
+        strokeOpacity={highlightedLimit === 'dbl' ? 1 : 0.8}
         strokeLinecap="round"
       />
 
@@ -105,9 +105,9 @@ export const TopDownView: React.FC<TopDownViewProps> = ({
               y={centerY}
               width={openingW}
               height={depthPx}
-              className={highlightedLimit === 'a' ? warn : ink}
+              className={highlightedLimit === 'a' ? warn : rimInk}
               fill="currentColor"
-              fillOpacity={highlightedLimit === 'a' ? 0.22 : 0.14}
+              fillOpacity={highlightedLimit === 'a' ? 0.24 : 0.16}
               rx={1.5}
             />
 

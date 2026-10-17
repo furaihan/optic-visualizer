@@ -120,7 +120,7 @@ export const Control: React.FC<ControlProps> = ({
         </InputGroup>
       </FieldContent>
       {label.includes("(BC)") && (
-        <FieldDescription className="mt-1 flex w-full flex-none gap-2 bg-sheet-tint p-2.5 text-[13px] leading-snug text-sheet-ink">
+        <FieldDescription className="mt-1 flex w-full flex-none gap-2 bg-sheet-info p-2.5 text-[13px] leading-snug text-sheet-ink">
           <LightbulbIcon size={14} className="mt-0.5 shrink-0 text-sheet-accent" aria-hidden="true" />
           <span>
             <strong className="font-medium">{translations[lang].bcRecLabel}</strong>{' '}

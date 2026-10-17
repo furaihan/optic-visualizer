@@ -16,8 +16,8 @@ interface LensProfileProps {
 
 /**
  * The lens in cross-section: front radius R1 on the left, back radius R2 on the
- * right, closed at the frame height. Filled with the accent tint, or hatched
- * when it is the comparison material.
+ * right, closed at the frame height. Filled with the prescription ink, or
+ * hatched when it is the comparison material.
  */
 export const LensProfile: React.FC<LensProfileProps> = ({
   result,
@@ -56,7 +56,7 @@ export const LensProfile: React.FC<LensProfileProps> = ({
         d={lensPath}
         fill={isCompare ? 'url(#section-hatch)' : 'currentColor'}
         fillOpacity={isCompare ? 1 : active ? 0.26 : 0.16}
-        className={`${isCompare ? 'text-sheet-muted' : 'text-sheet-accent'} ${
+        className={`${isCompare ? 'text-sheet-muted' : 'text-sheet-rx'} ${
           isCompare ? '' : 'section-redraw'
         }`}
         stroke="currentColor"

@@ -21,11 +21,11 @@ type SimulatorShellProps = {
  */
 export function SimulatorShell({ grid, mobileExtra, lang, view, activeTab, onViewChange, onTabChange }: SimulatorShellProps) {
   return (
-    <div className="flex h-full flex-1 overflow-hidden bg-sheet-ground">
+    <div className="flex h-full min-w-0 flex-1 overflow-hidden bg-sheet-ground">
       <div className="hidden h-full flex-1 overflow-hidden md:flex">
         {grid}
       </div>
-      <div className="relative flex h-full flex-1 flex-col overflow-hidden md:hidden">
+      <div className="relative flex h-full min-w-0 flex-1 flex-col overflow-hidden md:hidden">
         <HeaderBar
           lang={lang}
           view={view}
@@ -33,7 +33,7 @@ export function SimulatorShell({ grid, mobileExtra, lang, view, activeTab, onVie
           onViewChange={onViewChange}
         />
         <ValidationAlerts lang={lang} />
-        <div className="flex flex-1 flex-col gap-3 overflow-hidden p-3">
+        <div className="flex min-w-0 flex-1 flex-col gap-3 overflow-hidden p-3">
           <MobileTabManager
             lang={lang}
             activeTab={activeTab}

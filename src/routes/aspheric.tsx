@@ -8,9 +8,9 @@ export const asphericRoute = createRoute({
   component: AsphericPage,
   errorComponent: ({ error }) => (
     <div className="flex h-full items-center justify-center p-8">
-      <div className="text-center space-y-2">
-        <h1 className="text-lg font-bold text-red-500">Something went wrong</h1>
-        <p className="text-sm text-slate-400">{error instanceof Error ? error.message : String(error)}</p>
+      <div className="space-y-2 text-center">
+        <h1 className="text-[18px] font-medium text-sheet-error">Something went wrong</h1>
+        <p className="text-[16px] text-sheet-muted">{error instanceof Error ? error.message : String(error)}</p>
       </div>
     </div>
   ),

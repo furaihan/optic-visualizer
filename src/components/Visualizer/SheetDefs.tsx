@@ -9,6 +9,10 @@ import React from 'react';
  *
  * The ids are fixed (`sheet-arrow`, `section-hatch`) because the marker and
  * pattern paints are referenced by url() from sibling components.
+ *
+ * Paint servers do not inherit currentColor, so the two fills below read the
+ * sheet tokens directly: a marker filled with the ink has to stay legible when
+ * the ground flips from paper to dark board.
  */
 export const SheetDefs: React.FC = () => (
   <defs>
@@ -23,12 +27,11 @@ export const SheetDefs: React.FC = () => (
       orient="auto-start-reverse"
       markerUnits="userSpaceOnUse"
     >
-      <path d="M 0 1 L 9 5 L 0 9 Z" fill="#3d4a53" />
+      <path d="M 0 1 L 9 5 L 0 9 Z" fill="var(--sheet-ink)" />
     </marker>
 
     {/* The comparison lens is hatched, so it reads as a second material
-        without introducing a second hue. The line is a fixed mid grey:
-        paint servers do not inherit currentColor reliably across browsers. */}
+        without introducing a second hue. */}
     <pattern
       id="section-hatch"
       width="7"
@@ -37,7 +40,15 @@ export const SheetDefs: React.FC = () => (
       patternUnits="userSpaceOnUse"
     >
       <rect width="7" height="7" fill="transparent" />
-      <line x1="0" y1="0" x2="0" y2="7" stroke="#7d8b94" strokeWidth="1.6" strokeOpacity="0.6" />
+      <line
+        x1="0"
+        y1="0"
+        x2="0"
+        y2="7"
+        stroke="var(--sheet-muted)"
+        strokeWidth="1.6"
+        strokeOpacity="0.6"
+      />
     </pattern>
   </defs>
 );

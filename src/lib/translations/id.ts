@@ -160,6 +160,7 @@ export const translations_id: AppTranslations = {
   homeSubtitle: 'Pilih modul di bawah ini untuk memulai pengujian dan simulasi optik secara interaktif.',
   homeLensVisualizer: 'Simulator Lensa Kacamata',
   homeLensVisualizerDesc: 'Simulasikan ketebalan profil tepi, rekomendasi base curve, kurva asferis, dan audit geometri untuk lensa',
+  homeAsphericDesc: 'Kendali konik dan polinomial per permukaan, dengan metrik sagital dan koma pada lembar yang sama.',
   homeContactLenses: 'Simulator Lensa Kontak',
   homeContactLensesDesc: 'Pemodelan fitting kornea parameter lensa kontak',
 

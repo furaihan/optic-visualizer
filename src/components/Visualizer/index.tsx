@@ -151,8 +151,9 @@ export const Visualizer: React.FC<VisualizerProps> = React.memo(
           <p className="text-[13px] text-sheet-muted">{t.scaleNote}</p>
         </div>
 
-        {/* The drawing strip. */}
-        <div className="min-h-0 flex-1">
+        {/* The drawing strip. It keeps a floor of its own so the schedule
+            below can never squeeze it to a sliver on a short screen. */}
+        <div className="min-h-[200px] flex-1">
           <svg
             width="100%"
             height="100%"
@@ -309,8 +310,7 @@ export const Visualizer: React.FC<VisualizerProps> = React.memo(
 
         {/* The schedule: what the drawing measures, and its tolerance. */}
         <div className="shrink-0 px-2 pb-2">
-          <div className="grid grid-cols-2 gap-px bg-sheet-stage sm:grid-cols-3 lg:grid-cols-5">
-            {calipers.map((row, index) => {
+          <div className="grid grid-cols-2 gap-px bg-sheet-stage sm:grid-cols-3 lg:grid-cols-5">            {calipers.map((row, index) => {
               const isActive = target === row.id;
               return (
                 <button
@@ -323,7 +323,7 @@ export const Visualizer: React.FC<VisualizerProps> = React.memo(
                   onClick={() => pick(row.id)}
                   aria-pressed={isActive}
                   className={`sheet-rise delay-${index + 1} flex flex-col gap-0.5 px-3 py-2 text-left transition-colors duration-150 ${
-                    isActive ? 'bg-sheet-ground' : 'bg-sheet-panel hover:bg-sheet-tint'
+                    isActive ? 'bg-sheet-ground' : 'bg-sheet-panel hover:bg-sheet-info'
                   }`}
                 >
                   <span className="text-[13px] leading-tight text-sheet-muted">{row.name}</span>

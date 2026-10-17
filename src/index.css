@@ -20,10 +20,7 @@
 @layer utilities {
   .custom-scrollbar {
     scrollbar-width: thin;
-    scrollbar-color: rgb(203, 213, 225) transparent;
-  }
-  .dark .custom-scrollbar {
-    scrollbar-color: rgb(71, 85, 105) transparent;
+    scrollbar-color: var(--sheet-muted) transparent;
   }
   .custom-scrollbar::-webkit-scrollbar {
     width: 5px;
@@ -32,7 +29,12 @@
     @apply bg-transparent;
   }
   .custom-scrollbar::-webkit-scrollbar-thumb {
-    @apply bg-slate-300 dark:bg-slate-600 rounded-full hover:bg-slate-400 dark:hover:bg-slate-500 transition-colors;
+    background-color: color-mix(in srgb, var(--sheet-muted) 45%, transparent);
+    border-radius: 9999px;
+    transition: background-color 150ms;
+  }
+  .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+    background-color: color-mix(in srgb, var(--sheet-muted) 70%, transparent);
   }
 
   /* Figures that are read down a column. */
@@ -133,39 +135,30 @@ input[type="range"] {
 }
 
 input[type="range"]::-webkit-slider-thumb {
-  @apply w-3.5 h-3.5 bg-white rounded-full appearance-none border border-slate-300;
+  appearance: none;
+  width: 0.875rem;
+  height: 0.875rem;
+  border-radius: 9999px;
+  background-color: var(--sheet-ground);
+  border: 1px solid var(--sheet-muted);
 }
 
 @theme inline {
   --font-heading: var(--font-sans);
   --font-sans: 'Geist Variable', sans-serif;
+
+  /* The brand's own four inks. Everything below is derived from these or from
+     the sheet roles; no Tailwind palette alias is remapped, so a stray
+     `text-slate-500` stays visibly off-brand instead of silently drifting. */
   --color-brand-blue-dark: #156FB5;
   --color-brand-blue-light: #31A8E0;
   --color-brand-teal: #1F8A70;
   --color-brand-green-dark: #16A34A;
   --color-brand-green-light: #96C93D;
 
-  --color-blue-50: color-mix(in srgb, var(--color-brand-blue-light) 10%, white);
-  --color-blue-100: color-mix(in srgb, var(--color-brand-blue-light) 20%, white);
-  --color-blue-200: color-mix(in srgb, var(--color-brand-blue-light) 40%, white);
-  --color-blue-300: color-mix(in srgb, var(--color-brand-blue-light) 60%, white);
-  --color-blue-400: var(--color-brand-blue-light);
-  --color-blue-500: var(--color-brand-blue-dark);
-  --color-blue-600: color-mix(in srgb, var(--color-brand-blue-dark) 85%, black);
-  --color-blue-700: color-mix(in srgb, var(--color-brand-blue-dark) 70%, black);
-  --color-blue-800: color-mix(in srgb, var(--color-brand-blue-dark) 55%, black);
-  --color-blue-900: color-mix(in srgb, var(--color-brand-blue-dark) 40%, black);
-  --color-blue-950: color-mix(in srgb, var(--color-brand-blue-dark) 25%, black);
-
-  --color-emerald-400: var(--color-brand-green-light);
-  --color-emerald-500: var(--color-brand-green-dark);
-  --color-emerald-600: var(--color-brand-teal);
-
-  --color-amber-400: #F59E0B;
-  --color-amber-500: #D97706;
-
   /* Sheet roles — the workbench surface of the simulator.
-     One ground, one stage, one ink, one accent, two semantic tones. */
+     One ground, one panel, one stage, one ink, one accent, two semantic tones,
+     and the three group inks the drawing is assembled from. */
   --color-sheet-ground: var(--sheet-ground);
   --color-sheet-panel: var(--sheet-panel);
   --color-sheet-stage: var(--sheet-stage);
@@ -173,9 +166,14 @@ input[type="range"]::-webkit-slider-thumb {
   --color-sheet-muted: var(--sheet-muted);
   --color-sheet-accent: var(--sheet-accent);
   --color-sheet-accent-ink: var(--sheet-accent-ink);
+  --color-sheet-info: var(--sheet-info);
+  --color-sheet-alert: var(--sheet-alert);
   --color-sheet-warning: var(--sheet-warning);
+  --color-sheet-warning-ink: var(--sheet-warning-ink);
   --color-sheet-error: var(--sheet-error);
-  --color-sheet-tint: var(--sheet-tint);
+  --color-sheet-rx: var(--sheet-rx);
+  --color-sheet-frame: var(--sheet-frame);
+  --color-sheet-fit: var(--sheet-fit);
 
   --color-sidebar-ring: var(--sidebar-ring);
   --color-sidebar-border: var(--sidebar-border);
@@ -251,17 +249,26 @@ input[type="range"]::-webkit-slider-thumb {
   --sidebar-border: oklch(0.922 0 0);
   --sidebar-ring: var(--color-brand-blue-dark);
 
-  /* Sheet — light. Paper ground, a cooler panel, the board a step below. */
+  /* Sheet — light. Paper ground, a green-tinted panel, the board a step below,
+     and the two semantic surfaces kept apart: info reads cool, alert reads warm. */
   --sheet-ground: #ffffff;
-  --sheet-panel: #f4f6f7;
-  --sheet-stage: #e7edf0;
+  --sheet-panel: #f1f8f6;
+  --sheet-stage: #e6f1f4;
   --sheet-ink: #0c1418;
   --sheet-muted: #4f5b64;
   --sheet-accent: #156fb5;
   --sheet-accent-ink: #ffffff;
+  --sheet-info: #e8f3fb;
+  --sheet-alert: #fdf3e7;
   --sheet-warning: #9a4408;
+  --sheet-warning-ink: #ffffff;
   --sheet-error: #b42318;
-  --sheet-tint: #eaf2f9;
+
+  /* The three groups the drawing is assembled from: the prescription, the
+     frame, the fitting. Ink only — never a background wash. */
+  --sheet-rx: #156fb5;
+  --sheet-frame: #15705c;
+  --sheet-fit: #166534;
 }
 
 .dark {
@@ -297,15 +304,21 @@ input[type="range"]::-webkit-slider-thumb {
   --sidebar-border: oklch(1 0 0 / 10%);
   --sidebar-ring: var(--color-brand-blue-light);
 
-  /* Sheet — dark. The board is the lightest surface, the paper the darkest. */
-  --sheet-ground: #10171b;
-  --sheet-panel: #161f24;
-  --sheet-stage: #1c272d;
+  /* Sheet — dark. The board is the lightest surface, the paper the darkest.
+     The group inks lift so they still read as ink on the dark stage. */
+  --sheet-ground: #0f1716;
+  --sheet-panel: #14201f;
+  --sheet-stage: #1b2a2e;
   --sheet-ink: #eef3f5;
   --sheet-muted: #93a3ad;
   --sheet-accent: #4aa8e0;
   --sheet-accent-ink: #04141d;
+  --sheet-info: #16242d;
+  --sheet-alert: #2a1f12;
   --sheet-warning: #e8a33d;
+  --sheet-warning-ink: #2a1f12;
   --sheet-error: #ef7a6d;
-  --sheet-tint: #16242d;
+  --sheet-rx: #7fc8f0;
+  --sheet-frame: #4fbf9f;
+  --sheet-fit: #5bd08a;
 }

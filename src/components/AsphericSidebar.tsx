@@ -5,11 +5,7 @@ import {
   AsphericSurfaceConfig,
 } from "../lib/optic-engine/types";
 import { translations, Language } from "../lib/translations";
-import {
-  FrameIcon,
-  ChevronDownIcon,
-  LayersIcon,
-} from "lucide-react";
+import { ChevronDownIcon } from "lucide-react";
 import { ScrollArea } from "./ui/scroll-area";
 import { cn } from "../lib/utils";
 import { Switch } from "./ui/switch";
@@ -22,6 +18,7 @@ import { LensParametersSection } from "./Sidebar/LensParametersSection";
 import { FittingSpecsSection } from "./Sidebar/FittingSpecsSection";
 import { FrameGeometrySection } from "./Sidebar/FrameGeometrySection";
 import { SidebarHeader } from "./Sidebar/SidebarHeader";
+import { GroupMarker } from "./Sidebar/GroupMarker";
 
 import { useAsphericContext } from "../contexts/AsphericContext";
 import { INPUT_SPECS } from "../lib/optic-engine/validation";
@@ -46,14 +43,14 @@ function AsphericSurfacePanel({
   const [showCoeffs, setShowCoeffs] = useState(false);
 
   return (
-    <div className="border border-slate-200 dark:border-slate-700 rounded-lg p-3 space-y-3">
+    <div className="space-y-3 border border-sheet-stage p-3">
       {/* Header with active toggle */}
-      <div className="flex items-center justify-between">
-        <span className="text-[10px] font-bold text-slate-600 dark:text-slate-400 uppercase tracking-wider">
+      <div className="flex items-center justify-between gap-2">
+        <span className="text-[13px] font-medium text-sheet-ink">
           {title}
         </span>
         <div className="flex items-center gap-2">
-          <span className="text-[9px] text-slate-400">{t.surfaceActive}</span>
+          <span className="text-[13px] text-sheet-muted">{t.surfaceActive}</span>
           <Switch
             checked={config.isActive}
             onCheckedChange={(v) => onChange({ ...config, isActive: v })}
@@ -65,9 +62,9 @@ function AsphericSurfacePanel({
         <>
           {/* Conic K slider */}
           <div className="space-y-1">
-            <div className="flex items-center justify-between">
-              <span className="text-[9px] font-semibold text-slate-500">{t.conicConstant}</span>
-              <span className="text-[10px] font-mono font-bold text-slate-700 dark:text-slate-300">
+            <div className="flex items-center justify-between gap-2">
+              <span className="text-[13px] text-sheet-muted">{t.conicConstant}</span>
+              <span className="text-[16px] font-medium text-sheet-ink tnum">
                 {config.conic.toFixed(2)}
               </span>
             </div>
@@ -87,19 +84,19 @@ function AsphericSurfacePanel({
           <div>
             <button
               onClick={() => setShowCoeffs(!showCoeffs)}
-              className="text-[9px] font-bold text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 uppercase tracking-wider flex items-center gap-1"
+              className="flex w-full items-center justify-between gap-1 py-1 text-left text-[13px] font-medium text-sheet-ink transition-colors hover:text-sheet-accent"
             >
-              <ChevronDownIcon
-                size={10}
-                className={cn("transition-transform", showCoeffs && "rotate-180")}
-              />
               Coefficients
+              <ChevronDownIcon
+                size={14}
+                className={cn("text-sheet-muted transition-transform", showCoeffs && "rotate-180")}
+              />
             </button>
             {showCoeffs && (
-              <div className="grid grid-cols-2 gap-2 mt-2">
+              <div className="mt-2 grid grid-cols-2 gap-2">
                 {(['A2', 'A4', 'A6', 'A8'] as const).map((coeff) => (
                   <div key={coeff} className="flex flex-col gap-0.5">
-                    <span className="text-[8px] font-bold text-slate-400">{coeff}</span>
+                    <span className="text-[13px] text-sheet-muted">{coeff}</span>
                     <input
                       type="number"
                       step={0.0001}
@@ -108,7 +105,7 @@ function AsphericSurfacePanel({
                         const v = parseFloat(e.target.value);
                         onChange({ ...config, [coeff]: isNaN(v) ? 0 : v });
                       }}
-                      className="w-full h-7 px-2 text-[10px] font-mono font-bold border border-slate-200 dark:border-slate-700 rounded bg-transparent focus:outline-none focus:ring-1 focus:ring-blue-500"
+                      className="h-9 w-full rounded-sm bg-sheet-ground px-2 text-[16px] font-medium text-sheet-ink tnum focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sheet-accent"
                     />
                   </div>
                 ))}
@@ -175,25 +172,26 @@ export const AsphericSidebar: React.FC<AsphericSidebarProps> = ({ lang, isMobile
       />
 
       {/* Aspheric Surface Controls */}
-      <div className="border-b border-slate-100 dark:border-slate-800 last:border-0 py-3">
-        <div
-          className="w-full text-[11px] font-bold text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-slate-200 uppercase tracking-wider flex items-center justify-between py-2 cursor-pointer transition-colors outline-none hover:bg-slate-50 dark:hover:bg-slate-900/50 rounded px-1 -mx-1"
+      <div className="py-1">
+        <button
+          type="button"
+          className="flex w-full cursor-pointer items-center justify-between gap-2 py-2 text-left text-[13px] font-medium text-sheet-ink outline-none transition-colors hover:text-sheet-accent"
           onClick={() => toggleGroup("aspheric")}
         >
-          <div className="flex items-center gap-1.5">
-            <LayersIcon size={12} className="text-violet-500" />
-            <span>{t.asphericParams}</span>
-          </div>
+          <span className="flex min-w-0 items-center gap-2">
+            <GroupMarker group="rx" />
+            <span className="truncate">{t.asphericParams}</span>
+          </span>
           <ChevronDownIcon
-            size={14}
+            size={15}
             className={cn(
-              "text-slate-400 transition-transform duration-200",
+              "shrink-0 text-sheet-muted transition-transform duration-200",
               openGroup.aspheric && "rotate-180",
             )}
           />
-        </div>
+        </button>
         {openGroup.aspheric && (
-          <FieldGroup className="mt-3 text-left py-1 gap-4">
+          <FieldGroup className="mt-2 gap-4 py-1 text-left">
             <AsphericSurfacePanel
               title={t.asphericSurfaceFront}
               config={lens.asphericFront}
@@ -211,25 +209,26 @@ export const AsphericSidebar: React.FC<AsphericSidebarProps> = ({ lang, isMobile
       </div>
 
       {/* Frame Geometry */}
-      <div className="border-b border-slate-100 dark:border-slate-800 last:border-0 py-3">
-        <div
-          className="w-full text-[11px] font-bold text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-slate-200 uppercase tracking-wider flex items-center justify-between py-2 cursor-pointer transition-colors outline-none hover:bg-slate-50 dark:hover:bg-slate-900/50 rounded px-1 -mx-1"
+      <div className="py-1">
+        <button
+          type="button"
+          className="flex w-full cursor-pointer items-center justify-between gap-2 py-2 text-left text-[13px] font-medium text-sheet-ink outline-none transition-colors hover:text-sheet-accent"
           onClick={() => toggleGroup("frame")}
         >
-          <div className="flex items-center gap-1.5">
-            <FrameIcon size={12} className="text-emerald-500" />
-            <span>{t.frameGeometry}</span>
-          </div>
+          <span className="flex min-w-0 items-center gap-2">
+            <GroupMarker group="frame" />
+            <span className="truncate">{t.frameGeometry}</span>
+          </span>
           <ChevronDownIcon
-            size={14}
+            size={15}
             className={cn(
-              "text-slate-400 transition-transform duration-200",
+              "shrink-0 text-sheet-muted transition-transform duration-200",
               openGroup.frame && "rotate-180",
             )}
           />
-        </div>
+        </button>
         {openGroup.frame && (
-          <FieldGroup className="mt-3 text-left py-1 gap-4">
+          <FieldGroup className="mt-2 gap-4 py-1 text-left">
             <FrameGeometrySection
               frame={frame}
               frameType={frameType}
@@ -260,7 +259,7 @@ export const AsphericSidebar: React.FC<AsphericSidebarProps> = ({ lang, isMobile
 
   if (isMobile) {
     return (
-      <div className="space-y-4 px-4 py-3 rounded-2xl border-slate-200/60 dark:border-slate-800/80 shadow-sm max-w-xl mx-auto bg-white dark:bg-slate-950">
+      <div className="mx-auto max-w-xl bg-sheet-ground p-1">
         {renderFormContent()}
       </div>
     );
@@ -269,16 +268,13 @@ export const AsphericSidebar: React.FC<AsphericSidebarProps> = ({ lang, isMobile
   return (
     <aside
       className={cn(
-        "shrink-0 bg-white dark:bg-slate-950",
-        "border-r border-slate-100 dark:border-slate-850",
-        "flex flex-col h-full shadow-[4px_0_24px_rgba(0,0,0,0.015)]",
-        "text-left transition-all duration-200",
-        "w-[300px] lg:w-[340px]",
+        "flex h-full w-[320px] shrink-0 flex-col bg-sheet-panel lg:w-[352px]",
+        "text-left",
       )}
     >
       <SidebarHeader lang={lang} />
-      <ScrollArea className="flex-1 min-h-0">
-        <div className="px-5 py-4 space-y-2">{renderFormContent()}</div>
+      <ScrollArea className="min-h-0 flex-1">
+        <div className="px-5 pb-8">{renderFormContent()}</div>
       </ScrollArea>
     </aside>
   );

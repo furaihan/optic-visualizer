@@ -63,31 +63,35 @@ export function HeaderBar({ lang, view, onViewChange }: HeaderBarProps) {
   };
 
   return (
-    <header className="flex h-12 shrink-0 items-center justify-between gap-2 bg-sheet-ground px-2 sm:gap-3 sm:px-4">
-      <Tabs value={view} onValueChange={(v) => onViewChange(v as View)}>
-        <TabsList className="h-9 gap-0 rounded-none bg-sheet-panel p-1">
+    <header className="flex min-h-12 shrink-0 flex-wrap items-center justify-between gap-x-2 gap-y-1 bg-sheet-ground px-2 py-1 sm:gap-x-3 sm:px-4 lg:flex-nowrap lg:py-0">
+      <Tabs
+        value={view}
+        onValueChange={(v) => onViewChange(v as View)}
+        className="order-2 w-full min-w-0 lg:order-1 lg:w-auto lg:flex-1"
+      >
+        <TabsList className="h-9 w-full min-w-0 gap-0 rounded-none bg-sheet-panel p-1">
           <TabsTrigger
             value="side"
-            className="h-full rounded-none px-2 text-[13px] font-medium text-sheet-muted data-active:bg-sheet-ground data-active:text-sheet-ink group-data-[variant=default]/tabs-list:data-active:shadow-none sm:px-3"
+            className="h-full min-w-0 flex-1 rounded-none px-2 text-[13px] font-medium text-sheet-muted data-active:bg-sheet-ground data-active:text-sheet-ink group-data-[variant=default]/tabs-list:data-active:shadow-none sm:px-3"
           >
             {t.sideProfile}
           </TabsTrigger>
           <TabsTrigger
             value="top"
-            className="h-full rounded-none px-2 text-[13px] font-medium text-sheet-muted data-active:bg-sheet-ground data-active:text-sheet-ink group-data-[variant=default]/tabs-list:data-active:shadow-none sm:px-3"
+            className="h-full min-w-0 flex-1 rounded-none px-2 text-[13px] font-medium text-sheet-muted data-active:bg-sheet-ground data-active:text-sheet-ink group-data-[variant=default]/tabs-list:data-active:shadow-none sm:px-3"
           >
             {t.topDown}
           </TabsTrigger>
           <TabsTrigger
             value="front"
-            className="h-full rounded-none px-2 text-[13px] font-medium text-sheet-muted data-active:bg-sheet-ground data-active:text-sheet-ink group-data-[variant=default]/tabs-list:data-active:shadow-none sm:px-3"
+            className="h-full min-w-0 flex-1 rounded-none px-2 text-[13px] font-medium text-sheet-muted data-active:bg-sheet-ground data-active:text-sheet-ink group-data-[variant=default]/tabs-list:data-active:shadow-none sm:px-3"
           >
             {t.frontView}
           </TabsTrigger>
         </TabsList>
       </Tabs>
 
-      <div className="flex shrink-0 items-center gap-1 sm:gap-2">
+      <div className="order-1 flex shrink-0 items-center gap-1 sm:gap-2 lg:order-2">
         <Button
           variant="ghost"
           onClick={resetSession}
@@ -101,7 +105,7 @@ export function HeaderBar({ lang, view, onViewChange }: HeaderBarProps) {
 
         <Button
           onClick={copyOrder}
-          className="h-9 rounded-sm bg-sheet-accent px-2 text-[13px] font-medium text-white hover:bg-sheet-accent/90 active:translate-y-px sm:px-3"
+          className="h-9 rounded-sm bg-sheet-accent px-2 text-[13px] font-medium text-sheet-accent-ink hover:bg-sheet-accent/90 active:translate-y-px sm:px-3"
           title={t.copyOrder}
           aria-label={t.copyOrder}
         >
@@ -110,7 +114,7 @@ export function HeaderBar({ lang, view, onViewChange }: HeaderBarProps) {
           ) : (
             <CopyIcon size={14} aria-hidden="true" />
           )}
-          <span className={cn('hidden whitespace-nowrap sm:inline', copied === 'failed' && 'text-white')}>
+          <span className={cn('hidden whitespace-nowrap sm:inline', copied === 'failed' && 'text-sheet-accent-ink')}>
             {copied === 'done' ? t.copiedOrder : copied === 'failed' ? t.copyFailed : t.copyOrder}
           </span>
         </Button>

@@ -22,6 +22,10 @@ interface FrameProfileProps {
  * lens, the bevel groove marked by a dashed position line, and the two
  * protrusions dimensioned in their own band above the drawing so nothing
  * collides with anything else.
+ *
+ * The rim carries the frame ink — the same teal the Frame group uses in the
+ * inspector and on the lab order — so the object the optician set is the object
+ * they see.
  */
 export const FrameProfile: React.FC<FrameProfileProps> = ({
   frame,
@@ -59,7 +63,7 @@ export const FrameProfile: React.FC<FrameProfileProps> = ({
         y={top}
         width={depth}
         height={rim + 0.5}
-        className="text-sheet-ink"
+        className="text-sheet-frame"
         fill="currentColor"
         fillOpacity={0.3}
       />
@@ -68,7 +72,7 @@ export const FrameProfile: React.FC<FrameProfileProps> = ({
         y={bottom - rim - 0.5}
         width={depth}
         height={rim + 0.5}
-        className="text-sheet-ink"
+        className="text-sheet-frame"
         fill="currentColor"
         fillOpacity={0.3}
       />
@@ -78,7 +82,7 @@ export const FrameProfile: React.FC<FrameProfileProps> = ({
         y1={top + rim}
         x2={depth}
         y2={top + rim}
-        className="text-sheet-ink"
+        className="text-sheet-frame"
         stroke="currentColor"
         strokeWidth={1}
         strokeOpacity={0.35}
@@ -88,7 +92,7 @@ export const FrameProfile: React.FC<FrameProfileProps> = ({
         y1={bottom - rim}
         x2={depth}
         y2={bottom - rim}
-        className="text-sheet-ink"
+        className="text-sheet-frame"
         stroke="currentColor"
         strokeWidth={1}
         strokeOpacity={0.35}

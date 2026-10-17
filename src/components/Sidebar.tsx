@@ -11,6 +11,7 @@ import { LensParametersSection } from "./Sidebar/LensParametersSection";
 import { FittingSpecsSection } from "./Sidebar/FittingSpecsSection";
 import { FrameGeometrySection } from "./Sidebar/FrameGeometrySection";
 import { SidebarHeader } from "./Sidebar/SidebarHeader";
+import { GroupMarker } from "./Sidebar/GroupMarker";
 
 import { useOpticalContext } from "../contexts/OpticalContext";
 
@@ -22,6 +23,11 @@ interface SidebarProps {
 /**
  * The inspector: every input the engine takes, in the order the work happens —
  * the prescription, the frame, the fitting. Three groups, all open, no chrome.
+ *
+ * Each group carries its own ink as a 3px marker beside its name. Those are the
+ * same three inks the drawing uses, so the panel and the section read as one
+ * document: the blue input is the blue lens, the teal input is the teal rim,
+ * the green input is the green pupil mark.
  */
 export const Sidebar: React.FC<SidebarProps> = ({ lang, isMobile = false }) => {
   const {
@@ -77,12 +83,15 @@ export const Sidebar: React.FC<SidebarProps> = ({ lang, isMobile = false }) => {
       >
         <CollapsibleTrigger
           className={cn(
-            "flex w-full cursor-pointer items-center justify-between py-2 text-left",
+            "flex w-full cursor-pointer items-center justify-between gap-2 py-2 text-left",
             "text-[13px] font-medium text-sheet-ink outline-none",
             "transition-colors duration-150 hover:text-sheet-accent",
           )}
         >
-          <span>{t.frameGeometry}</span>
+          <span className="flex min-w-0 items-center gap-2">
+            <GroupMarker group="frame" />
+            <span className="truncate">{t.frameGeometry}</span>
+          </span>
           <ChevronDownIcon
             size={15}
             className={cn(

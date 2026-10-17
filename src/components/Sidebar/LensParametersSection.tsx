@@ -12,6 +12,7 @@ import {
 import { ChevronDownIcon } from "lucide-react";
 import { cn } from "../../lib/utils";
 import { FieldGroup } from "../ui/field";
+import { GroupMarker } from "./GroupMarker";
 
 interface LensParametersSectionProps {
   lens: LensParameters;
@@ -40,12 +41,15 @@ export const LensParametersSection: React.FC<LensParametersSectionProps> = ({
     >
       <CollapsibleTrigger
         className={cn(
-          "flex w-full cursor-pointer items-center justify-between py-2 text-left",
+          "flex w-full cursor-pointer items-center justify-between gap-2 py-2 text-left",
           "text-[13px] font-medium text-sheet-ink outline-none",
           "transition-colors duration-150 hover:text-sheet-accent",
         )}
       >
-        <span>{t.lensParams}</span>
+        <span className="flex min-w-0 items-center gap-2">
+          <GroupMarker group="rx" />
+          <span className="truncate">{t.lensParams}</span>
+        </span>
         <ChevronDownIcon
           size={15}
           className={cn(

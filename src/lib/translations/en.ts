@@ -160,6 +160,7 @@ export const translations_en: AppTranslations = {
   homeSubtitle: 'Choose a module below to start interactive lens simulation and geometrical audits.',
   homeLensVisualizer: 'Spectacle Lens Simulator',
   homeLensVisualizerDesc: 'Simulate cross-section edge thickness, base curve profiling, and structural audits for spectacle lenses.',
+  homeAsphericDesc: 'Per-surface conic and polynomial control, with sagittal and coma metrics on the same sheet.',
   homeContactLenses: 'Contact Lens Simulator',
   homeContactLensesDesc: 'Corneal fitting modeling and contact lens parametric calculations.',
 

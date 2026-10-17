@@ -51,20 +51,22 @@ export const FrontView: React.FC<FrontViewProps> = ({
   const warn = 'text-sheet-warning';
   const ink = 'text-sheet-ink';
   const muted = 'text-sheet-muted';
+  const rimInk = 'text-sheet-frame';
   const tone = (field: 'a' | 'b' | 'dbl' | 'ed') =>
     highlightedLimit === field ? warn : ink;
 
   const opening = (x: number, primary: boolean) => (
     <g key={x}>
-      {/* Lens opening: a flat tint, so the rim reads as a band around it. */}
+      {/* Lens opening: a flat tint of the prescription ink, so the rim reads as
+          a band of frame ink around it. */}
       <rect
         x={x}
         y={top}
         width={openingW}
         height={openingH}
-        className={primary ? 'text-sheet-accent' : 'text-sheet-muted'}
+        className={primary ? 'text-sheet-rx' : 'text-sheet-muted'}
         fill="currentColor"
-        fillOpacity={primary ? 0.1 : 0.06}
+        fillOpacity={primary ? 0.12 : 0.06}
       />
       {/* Rim: a drawn band of real thickness. */}
       <rect
@@ -73,10 +75,10 @@ export const FrontView: React.FC<FrontViewProps> = ({
         width={openingW}
         height={openingH}
         fill="none"
-        className={primary ? 'text-sheet-ink' : 'text-sheet-muted'}
+        className={primary ? rimInk : 'text-sheet-muted'}
         stroke="currentColor"
         strokeWidth={rimW}
-        strokeOpacity={primary ? 0.4 : 0.28}
+        strokeOpacity={primary ? 0.55 : 0.28}
       />
       {/* Effective diameter: the circle the blank must cover. */}
       <circle
@@ -90,12 +92,13 @@ export const FrontView: React.FC<FrontViewProps> = ({
         strokeDasharray={primary && highlightedLimit === 'ed' ? '7 4' : '5 5'}
         strokeOpacity={primary && highlightedLimit === 'ed' ? 1 : 0.45}
       />
-      {/* Pupil and PD crosshair. */}
+      {/* Pupil and PD crosshair, in the fitting ink: this mark is the one thing
+          on the drawing that comes from the fitting group, not from the frame. */}
       <g
         transform={`translate(${x + (frame.a / 2 - result.decentration) * scale}, ${
           originY + (frame.b / 2 - patient.fittingHeight) * scale
         })`}
-        className="text-sheet-error"
+        className="text-sheet-fit"
       >
         <circle r={7} fill="none" stroke="currentColor" strokeWidth={1.6} />
         <line x1={-13} y1={0} x2={13} y2={0} stroke="currentColor" strokeWidth={1} />

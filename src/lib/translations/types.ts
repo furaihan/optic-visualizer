@@ -152,6 +152,7 @@ export interface AppTranslations {
   homeSubtitle: string;
   homeLensVisualizer: string;
   homeLensVisualizerDesc: string;
+  homeAsphericDesc: string;
   homeContactLenses: string;
   homeContactLensesDesc: string;
 
