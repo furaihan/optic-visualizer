@@ -215,4 +215,89 @@ export const translations_id: AppTranslations = {
   edgeDetail: 'Detail tepi',
   scaleNote: 'Tidak berskala',
   invalidInput: 'Nilai ini sementara sampai input diperbaiki.',
+
+  // Landing page
+  landHeroTitle: 'Lensa ini muat di bingkai?',
+  landHeroLead:
+    'Masukkan resep dan bingkai. Baca ketebalan tepi, tonjolan, dan ukuran blank dari satu gambar — sebelum pesanan dikirim ke lab.',
+  landHeroAction: 'Buka simulator',
+  landHeroSecondary: 'Lihat kedua instrumen',
+  landHeroControl: 'Daya sferis',
+  landHeroControlHint:
+    'Geser nilai sphere dan gambarnya digambar ulang. Semua angka di bawahnya keluar dari mesin itu sendiri.',
+  landHeroReadout: 'Yang diukur gambar',
+  landHeroEngine: 'Mesin AMP_V4.2.0',
+  landHeroIndex: 'Indeks bias',
+  landStatement:
+    'Resep¦ dan bingkai¦ masuk. Satu gambar kerja¦ keluar: lensanya, tepinya, dan setiap angka yang diperiksa lab.',
+  landHowTitle: 'Tiga masukan',
+  landHow1: 'Pertama, resep.',
+  landHow1Body:
+    'Sphere, silinder, axis, indeks bias, dan base curve. Dari sini mesin menghitung dua radius permukaan dan sagitta pada radius efektif.',
+  landHow2: 'Lalu, bingkai.',
+  landHow2Body:
+    'Ukuran A, ukuran B, jembatan, diameter efektif, dan ketebalan rim. Lensa digambar di dalam rim ini, pada alur bevel yang diminta bingkai.',
+  landHow3: 'Terakhir, fitting.',
+  landHow3Body:
+    'Jarak pupil dan tinggi fitting menentukan pusat optis, sehingga desentrasi — dan prisma yang ditimbulkannya — sudah diketahui sebelum pesanan ditulis.',
+  landHowResponse: 'Yang kembali',
+  landShowcaseTitle: 'Peringatan adalah baris',
+  landShowcaseBody:
+    'Setiap pemeriksaan punya ambang batas, nilai, dan status. Buka barisnya untuk membaca catatan kliniknya; tidak ada apa pun yang melayang di atas gambar.',
+  landShowcaseState1: 'Saat datang',
+  landShowcaseState2: 'Dibuka',
+  landShowcaseState3: 'Melewati batas',
+  landFeaturesTitle: 'Angka Anda, bukan angka kami',
+  landFeaturesBody:
+    'Instrumen ini memakai apa yang sudah diketahui bingkai: ukuran, alur, dan kedalamannya. Tidak ada angka yang disembunyikan di balik default.',
+  landModulesTitle: 'Dua instrumen',
+  landModulesBody:
+    'Simulator kacamata bekerja dari resep dan bingkai. Instrumen aspheric bekerja dari permukaan: konstanta konik dan empat suku polinomial.',
+  landModuleOne: 'Simulator lensa kacamata',
+  landModuleOneBody:
+    'Potongan melintang, detail tepi, dan tampak depan dalam satu gambar, dengan hasil ukur yang dibaca dari gambar itu: ketebalan tepi, ketebalan tengah, tonjolan depan dan belakang, estimasi berat, prisma terinduksi, dan blank minimum.',
+  landModuleTwo: 'Desain permukaan aspheric',
+  landModuleTwoBody:
+    'Setiap permukaan punya konstanta konik dan suku A2, A4, A6, A8 sendiri, dengan aberasi sferis dan koma dibaca dari lembar yang sama.',
+  landModuleTwoOpen: 'Buka instrumen aspheric',
+  landProofTitle: 'Standar yang dipegangnya',
+  landProofMaterials: 'Material menurut sphere equivalent',
+  landProofLimits: 'Batas ergonomis',
+  landProofAbbe: 'Abbe',
+  landProofVolume: 'Volume tepi dibanding 1,50',
+  landBenchTitle: 'Meja yang digantikan',
+  landBenchBody:
+    'Sebelum ini, setiap angka di atas diambil dari lensometer dan pengukur, satu bingkai demi satu bingkai.',
+  landBenchCredit: 'Foto',
+  landBenchNote:
+    'Foto-foto di halaman ini berasal dari koleksi terbuka dan menampilkan meja kerja optisi, bukan produk ini.',
+  landFaqTitle: 'Pertanyaan',
+  landFaq1Q: 'Apakah ini menggantikan lensometer?',
+  landFaq1A:
+    'Tidak. Lensometer membaca kekuatan lensa yang sudah jadi. Alat ini menghitung geometri lensa yang belum dipotong: ketebalan tepi, ketebalan tengah, tonjolan terhadap rim, dan ukuran blank yang harus dipesan lab.',
+  landFaq2Q: 'Indeks berapa untuk −6,00 pada bingkai 54 mm?',
+  landFaq2A:
+    'Mesin menyarankan 1,67 di atas 5,00 D sphere equivalent, dan menaikkan lagi ketika ukuran mata mencapai 54 mm. Bingkai rimless minimal 1,61 agar bor tetap kuat; bingkai half-rim minimal 1,56 untuk alur senar.',
+  landFaq3Q: 'Apa arti min blank?',
+  landFaq3A:
+    'Blank lensa terkecil yang harus dipesan lab: dua kali radius yang dibutuhkan lensa, ditambah 2 mm tepi. Di atas 85 mm blank tidak bisa diproduksi.',
+  landFaq4Q: 'Batas apa saja yang diperiksa?',
+  landFaq4A:
+    'Ukuran A 35–65 mm, ukuran B 20–55 mm, jembatan 10–28 mm, diameter efektif maksimal 75 mm dan tidak boleh lebih kecil dari ukuran A. Nilai di luar batas ditandai di lembar hasil.',
+  landFaq5Q: 'Ke mana data saya dikirim?',
+  landFaq5A:
+    'Ke mana-mana. Mesin dan gambar berjalan di dalam browser, dan sesi disimpan hanya di browser ini. Tidak ada akun, dan tidak ada data yang dikirim ke server.',
+  landFaq6Q: 'Bisa membandingkan dua material?',
+  landFaq6A:
+    'Bisa. Simulator men superimposisi indeks kedua pada gambar yang sama, diarsir, sehingga ketebalan tepi keduanya bisa dibaca pada bingkai yang sama.',
+  landCtaLine: 'Mulai dari resep.',
+  landCtaBody:
+    'Simulator terbuka di meja kerja: gambar, pesanan lab, dan lembar hasil dalam satu lembar kerja.',
+  landFooterAbout: 'Geometri lensa untuk optisi dan lab optik.',
+  landFooterInstitute: 'Akademi Optometri Yogyakarta',
+  landFooterCity: 'Yogyakarta, Indonesia',
+  landFooterRights: '© 2026 Aktriyo Measuring Project',
+  landFooterPhotos: 'Foto',
+  landPhotoCredits:
+    '“Trial lens set” oleh Fatimah Bello (CC0); lensometer dan laboratorium optik (domain publik, US Navy dan US Army); “Optical Trial Lens Frame” dan “Eyeglasses” (CC BY 4.0) — semuanya via Wikimedia Commons.',
 };

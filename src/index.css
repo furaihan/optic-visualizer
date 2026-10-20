@@ -9,6 +9,13 @@
   body {
     @apply overflow-hidden bg-background text-foreground;
   }
+  /* The landing page is a document that scrolls. The body's overflow is
+     inherited by the viewport, so without this the wheel does nothing on a
+     route that is taller than the screen. Every other route keeps its own
+     scroll container and the hidden overflow. */
+  html.page-scroll body {
+    overflow: visible;
+  }
   * {
     @apply border-border outline-ring/50;
   }
@@ -127,6 +134,54 @@
     transition-duration: 0.01ms !important;
     animation-duration: 0.01ms !important;
     animation-iteration-count: 1 !important;
+  }
+}
+
+/* ------------------------------------------------------------------
+   Landing: sections arrive as they enter the window, and one photograph
+   drifts. The class that arms the arrival is added by script, so with
+   no script the page is simply there — nothing is ever hidden behind
+   an animation that failed to run.
+   ------------------------------------------------------------------ */
+
+.landing .reveal {
+  transition:
+    opacity 0.55s cubic-bezier(0.2, 0.7, 0.2, 1),
+    transform 0.55s cubic-bezier(0.2, 0.7, 0.2, 1);
+}
+
+.landing .reveal-1 { transition-delay: 70ms; }
+.landing .reveal-2 { transition-delay: 140ms; }
+.landing .reveal-3 { transition-delay: 210ms; }
+
+html.js-reveal .landing .reveal {
+  opacity: 0;
+  transform: translateY(18px);
+}
+
+html.js-reveal .landing .reveal.is-in {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* The one moving picture: a slow drift across the bench photograph. */
+@keyframes bench-drift {
+  from { transform: scale(1.03); }
+  to { transform: scale(1.09); }
+}
+
+.bench-drift {
+  animation: bench-drift 20s cubic-bezier(0.4, 0, 0.6, 1) infinite alternate;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html.js-reveal .landing .reveal {
+    opacity: 1;
+    transform: none;
+  }
+  .bench-drift {
+    animation: none;
+    transform: scale(1.03);
   }
 }
 

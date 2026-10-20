@@ -9,11 +9,33 @@ import { useTheme } from '../hooks/useTheme';
 import { BrandRule } from './BrandRule';
 
 export function RootLayout() {
+  // The landing page is a page that scrolls: the workbench keeps its own
+  // viewport, the front door does not, so the rail sticks and the page runs.
+  const isLanding = useRouterState({ select: (s) => s.location.pathname === '/' });
+
+  // The body carries overflow: hidden, which the viewport inherits — the
+  // wheel would do nothing on a route that scrolls the document. The class
+  // lifts it, and only for the route that needs it.
+  useEffect(() => {
+    document.documentElement.classList.toggle('page-scroll', isLanding);
+    return () => document.documentElement.classList.remove('page-scroll');
+  }, [isLanding]);
+
   return (
     <TooltipProvider delay={50}>
-      <div className="flex flex-col-reverse md:flex-row h-dvh w-full font-sans overflow-hidden transition-colors duration-200 bg-sheet-ground text-sheet-ink">
-        <GlobalNav />
-        <main className="flex-1 flex flex-col min-h-0 overflow-hidden relative">
+      <div
+        className={`flex w-full font-sans transition-colors duration-200 bg-sheet-ground text-sheet-ink ${
+          isLanding
+            ? 'flex-col min-h-dvh md:flex-row md:items-start'
+            : 'flex-col-reverse h-dvh overflow-hidden md:flex-row'
+        }`}
+      >
+        <GlobalNav isLanding={isLanding} />
+        <main
+          className={`flex-1 flex flex-col relative ${
+            isLanding ? 'min-h-dvh' : 'min-h-0 overflow-hidden'
+          }`}
+        >
           <Outlet />
         </main>
       </div>
@@ -21,7 +43,7 @@ export function RootLayout() {
   );
 }
 
-function GlobalNav() {
+function GlobalNav({ isLanding = false }: { isLanding?: boolean }) {
   const search = useSearch({ from: '__root__' });
   const currentSearch = useRouterState({ select: (s) => s.location.search as Record<string, unknown> });
   const navigate = useNavigate();
@@ -64,7 +86,7 @@ function GlobalNav() {
         </Button>
       )}
 
-      <nav className={`w-full bg-sheet-panel md:bg-sheet-panel shrink-0 flex md:flex-col items-center justify-between px-4 md:px-0 md:py-4 gap-2 md:gap-4 z-40 relative transition-[width,background-color] duration-300 h-16 ${isExpanded ? 'md:h-dvh md:w-16 md:flex' : 'md:hidden'}`}>
+      <nav className={`w-full bg-sheet-panel md:bg-sheet-panel shrink-0 flex md:flex-col items-center justify-between px-4 md:px-0 md:py-4 gap-2 md:gap-4 z-40 transition-[width,background-color] duration-300 h-16 ${isLanding ? 'relative md:sticky md:top-0 md:self-start' : 'relative'} ${isExpanded ? 'md:h-dvh md:w-16 md:flex' : 'md:hidden'}`}>
         <div className="flex md:flex-col gap-2 md:gap-4 w-full h-full md:h-auto items-center justify-between md:justify-center">
           <div className="flex md:flex-col gap-2 md:gap-4 justify-center md:items-center">
             {navItems.map((item) => (

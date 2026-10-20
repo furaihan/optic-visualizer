@@ -19,6 +19,8 @@ interface JobTicketProps {
   lang: Language;
   compareIndex?: number;
   compareResult?: CalculationResult;
+  /** Fields per block. Narrow panels read better with two. */
+  columns?: 2 | 3;
 }
 
 type Cell = { key: string; value: string; wide?: boolean };
@@ -38,6 +40,7 @@ export const JobTicket: React.FC<JobTicketProps> = ({
   lang,
   compareIndex,
   compareResult,
+  columns = 3,
 }) => {
   const t = translations[lang];
   const signed = (v: number, digits = 2) => `${v > 0 ? '+' : ''}${v.toFixed(digits)}`;
@@ -93,7 +96,7 @@ export const JobTicket: React.FC<JobTicketProps> = ({
             <GroupMarker group={block.group} />
             <span className="truncate">{block.title}</span>
           </p>
-          <dl className="grid grid-cols-3 gap-x-4 gap-y-3">
+          <dl className={`grid gap-x-4 gap-y-3 ${columns === 2 ? 'grid-cols-2' : 'grid-cols-3'}`}>
             {block.cells.map((cell) => (
               <div key={cell.key} className="flex min-w-0 flex-col gap-0.5">
                 <dt className="text-[13px] leading-tight text-sheet-muted">{cell.key}</dt>

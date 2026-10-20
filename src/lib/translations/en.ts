@@ -215,4 +215,89 @@ export const translations_en: AppTranslations = {
   edgeDetail: 'Edge detail',
   scaleNote: 'Not to scale',
   invalidInput: 'These values are placeholders until the inputs are valid.',
+
+  // Landing page
+  landHeroTitle: 'Will this lens fit this frame?',
+  landHeroLead:
+    'Enter the prescription and the frame. Read the edge thickness, the protrusion and the blank size off one drawing — before the order goes to the lab.',
+  landHeroAction: 'Open the simulator',
+  landHeroSecondary: 'See both instruments',
+  landHeroControl: 'Sphere power',
+  landHeroControlHint:
+    'Drag the sphere and the drawing redraws. Every number under it is the engine’s own output.',
+  landHeroReadout: 'What the drawing measures',
+  landHeroEngine: 'Engine AMP_V4.2.0',
+  landHeroIndex: 'Refractive index',
+  landStatement:
+    'A prescription¦ and a frame¦ go in. One measured drawing¦ comes out: the lens, its edge, and every number a lab checks.',
+  landHowTitle: 'Three entries',
+  landHow1: 'First, the prescription.',
+  landHow1Body:
+    'Sphere, cylinder, axis, refractive index and base curve. From these the engine derives the two surface radii and the sagitta at the effective radius.',
+  landHow2: 'Then, the frame.',
+  landHow2Body:
+    'A-size, B-size, bridge, effective diameter and rim depth. The lens is drawn inside this rim, at the bevel groove the frame asks for.',
+  landHow3: 'Then, the fitting.',
+  landHow3Body:
+    'Pupillary distance and fitting height place the optical centre, so the decentration — and the prism it induces — are known before the order is written.',
+  landHowResponse: 'What comes back',
+  landShowcaseTitle: 'A warning is a row',
+  landShowcaseBody:
+    'Every check carries a threshold, a value and a status. Open the row to read the clinical note behind it; nothing floats over the drawing.',
+  landShowcaseState1: 'As it arrives',
+  landShowcaseState2: 'Opened',
+  landShowcaseState3: 'Over the limit',
+  landFeaturesTitle: 'Your numbers, not ours',
+  landFeaturesBody:
+    'The instrument takes what the frame already says: its sizes, its groove, its depth. Nothing is hidden behind a default.',
+  landModulesTitle: 'Two instruments',
+  landModulesBody:
+    'The spectacle simulator works from a prescription and a frame. The aspheric instrument works from a surface: a conic constant and four polynomial terms.',
+  landModuleOne: 'Spectacle lens simulator',
+  landModuleOneBody:
+    'Cross-section, edge detail and front elevation on one drawing, with the measurements read off it: edge thickness, centre thickness, anterior and posterior protrusion, estimated weight, induced prism and the minimum blank.',
+  landModuleTwo: 'Aspheric surface design',
+  landModuleTwoBody:
+    'Each surface carries its own conic constant and A2, A4, A6 and A8 terms, with the spherical aberration and the coma read off the same sheet.',
+  landModuleTwoOpen: 'Open the aspheric instrument',
+  landProofTitle: 'The standards it holds to',
+  landProofMaterials: 'Materials, by sphere equivalent',
+  landProofLimits: 'Ergonomic limits',
+  landProofAbbe: 'Abbe',
+  landProofVolume: 'Edge volume vs 1.50',
+  landBenchTitle: 'The bench this replaces',
+  landBenchBody:
+    'Before this, every one of these numbers came off a lensometer and a gauge, one frame at a time.',
+  landBenchCredit: 'Photograph',
+  landBenchNote:
+    'The photographs on this page come from open collections and show opticians’ benches, not this product.',
+  landFaqTitle: 'Questions',
+  landFaq1Q: 'Does this replace a lensometer?',
+  landFaq1A:
+    'No. A lensometer reads the power of a lens that already exists. This calculates the geometry of a lens you have not cut yet: edge thickness, centre thickness, how far it stands out of the rim, and the blank the lab must order.',
+  landFaq2Q: 'Which index for a −6.00 in a 54 mm frame?',
+  landFaq2A:
+    'The engine recommends 1.67 above 5.00 D of sphere equivalent, and raises it once more when the eye size reaches 54 mm. Rimless frames need 1.61 at the very least for drilling; half-rim frames need 1.56 for the groove.',
+  landFaq3Q: 'What does min blank mean?',
+  landFaq3A:
+    'The smallest lens blank the lab has to order: twice the radius the lens needs, plus 2 mm of edge. Above 85 mm the blank cannot be produced.',
+  landFaq4Q: 'Which limits does it check?',
+  landFaq4A:
+    'A-size 35–65 mm, B-size 20–55 mm, bridge 10–28 mm, effective diameter no larger than 75 mm and never smaller than the A-size. Outside those bounds the input is flagged on the sheet.',
+  landFaq5Q: 'Where does my data go?',
+  landFaq5A:
+    'Nowhere. The engine and the drawing run in the browser, and the session is kept in this browser only. There is no account, and nothing is sent to a server.',
+  landFaq6Q: 'Can I compare two materials?',
+  landFaq6A:
+    'Yes. The simulator overlays a second index on the same drawing, hatched, so both edge thicknesses can be read against the same frame.',
+  landCtaLine: 'Start with a prescription.',
+  landCtaBody:
+    'The simulator opens on the workbench: the drawing, the lab order and the measurement sheet on one sheet of paper.',
+  landFooterAbout: 'Lens geometry for opticians and optical labs.',
+  landFooterInstitute: 'Akademi Optometri Yogyakarta',
+  landFooterCity: 'Yogyakarta, Indonesia',
+  landFooterRights: '© 2026 Aktriyo Measuring Project',
+  landFooterPhotos: 'Photographs',
+  landPhotoCredits:
+    '“Trial lens set” by Fatimah Bello (CC0); the lensometer and the optical laboratory (public domain, US Navy and US Army); “Optical Trial Lens Frame” and “Eyeglasses” (CC BY 4.0) — all via Wikimedia Commons.',
 };
