@@ -1,0 +1,18 @@
+# graphify corpus exclusions (gitignore syntax; merged with .gitignore, can only exclude MORE)
+#
+# Vendored agent skill packs: not part of the optical-tools app.
+# 59 files of skill docs + their own scripts/assets/libraries.
+.agents/
+
+# Installed design-taste skill assets (already in .gitignore)
+.taste-skill/
+
+# Build output, deps, coverage
+node_modules/
+dist/
+build/
+coverage/
+
+# Secrets and logs (also caught by the built-in sensitive-file filter)
+.env*
+*.log

@@ -9,3 +9,11 @@ coverage/
 deploy-guide.md
 deploy-guide-docker.md
 .taste-skill/
+
+# graphify: commit the graph and its docs, ignore machine-local + regenerable files
+graphify-out/cache/
+graphify-out/cost.json
+graphify-out/graph.html
+graphify-out/.graphify_python
+graphify-out/.graphify_root
+graphify-out/.graphify_build.json
