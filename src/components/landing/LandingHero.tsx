@@ -2,6 +2,7 @@ import React, { useMemo, useState } from 'react';
 import { Link } from '@tanstack/react-router';
 import { ArrowRightIcon } from 'lucide-react';
 import { translations, type Language } from '@lib/translations';
+import { MATERIALS_DB } from '@data/materials';
 import { buttonVariants } from '@components/ui/button';
 import { Visualizer } from '@components/Visualizer';
 import type { LensIndex } from '@lib/optic-engine/types';
@@ -15,6 +16,7 @@ import {
   computeExample,
   signed,
 } from './work';
+import { useDrift } from './useDrift';
 
 /**
  * The front door.
@@ -30,16 +32,23 @@ export function LandingHero({ lang }: { lang: Language }) {
 
   const lens = useMemo(() => ({ ...EXAMPLE_LENS, sph, index }), [sph, index]);
   const result = useMemo(() => computeExample(lens), [lens]);
+  const activeMaterial = useMemo(
+    () => MATERIALS_DB.find((material) => Math.abs(material.index - index) < 0.02),
+    [index],
+  );
+  // The one moving picture on the page: the drawing board drifts against the
+  // scroll, a few pixels, so the first screen reads as a board and not a shot.
+  const drawingRef = useDrift<HTMLDivElement>(22);
 
   return (
-    <section className="mx-auto w-full max-w-[1200px] px-6 pt-14 pb-20 sm:px-10 lg:pt-20 lg:pb-28">
-      <div className="grid gap-10 lg:grid-cols-[minmax(0,0.9fr)_minmax(0,1.1fr)] lg:items-start lg:gap-x-14 lg:gap-y-6">
+    <section className="mx-auto w-full max-w-[1200px] px-6 pt-10 pb-16 sm:px-10 lg:pt-16 lg:pb-24">
+      <div className="grid gap-10 lg:grid-cols-[minmax(0,0.82fr)_minmax(0,1.18fr)] lg:items-start lg:gap-x-12 lg:gap-y-6">
         <div className="order-1 lg:col-start-1 lg:row-start-1">
-          <h1 className="reveal max-w-[17ch] text-[36px] font-medium leading-[1.04] tracking-[-0.035em] text-sheet-ink lg:text-[62px] lg:leading-[1.02]">
+          <h1 className="reveal max-w-[15ch] text-[36px] font-medium leading-[1.04] tracking-[-0.035em] text-sheet-ink lg:text-[62px] lg:leading-[1.02]">
             {t.landHeroTitle}
           </h1>
 
-          <p className="reveal reveal-1 mt-6 max-w-[44ch] text-[18px] leading-[1.55] text-sheet-muted">
+          <p className="reveal reveal-1 mt-6 max-w-[46ch] text-[20px] leading-[1.55] text-sheet-muted">
             {t.landHeroLead}
           </p>
 
@@ -70,18 +79,20 @@ export function LandingHero({ lang }: { lang: Language }) {
 
         {/* The product, doing its job, at its own size. */}
         <div className="reveal reveal-2 order-2 lg:col-start-2 lg:row-start-1 lg:row-span-2 lg:pt-2">
-          <div className="h-[540px] lg:h-[560px]">
-            <Visualizer
-              lens={lens}
-              frame={EXAMPLE_FRAME}
-              patient={EXAMPLE_PATIENT}
-              result={result}
-              lang={lang}
-              view="side"
-              bevelPercent={EXAMPLE_BEVEL}
-            />
+          <div ref={drawingRef} className="will-change-transform">
+            <div className="h-[500px] lg:h-[600px]">
+              <Visualizer
+                lens={lens}
+                frame={EXAMPLE_FRAME}
+                patient={EXAMPLE_PATIENT}
+                result={result}
+                lang={lang}
+                view="side"
+                bevelPercent={EXAMPLE_BEVEL}
+              />
+            </div>
           </div>
-          <p className="mt-3 flex flex-wrap items-baseline justify-between gap-x-6 gap-y-1 text-[13px] text-sheet-muted">
+          <p className="mt-4 flex flex-wrap items-baseline justify-between gap-x-6 gap-y-1 text-[13px] text-sheet-muted">
             <span>{t.landHeroReadout}</span>
             <span className="tnum">{t.landHeroEngine}</span>
           </p>
@@ -114,8 +125,15 @@ export function LandingHero({ lang }: { lang: Language }) {
             />
 
             <div className="mt-6">
-              <p className="text-[13px] text-sheet-muted">{t.landHeroIndex}</p>
-              <div className="mt-2 flex flex-wrap gap-2">
+              <div className="flex items-baseline justify-between gap-4">
+                <p className="text-[16px] font-medium text-sheet-ink">
+                  {t.landHeroIndex}
+                </p>
+                <span className="text-[16px] text-sheet-muted tnum">
+                  {t.landProofAbbe} {activeMaterial?.abbe ?? '—'}
+                </span>
+              </div>
+              <div className="mt-3 grid grid-cols-5 gap-1.5 sm:gap-2">
                 {INDEX_LADDER.map((value) => {
                   const active = value === index;
                   return (
@@ -124,14 +142,18 @@ export function LandingHero({ lang }: { lang: Language }) {
                       type="button"
                       onClick={() => setIndex(value)}
                       aria-pressed={active}
-                      className={`flex items-baseline gap-2 rounded-sm px-3 py-2 text-[16px] transition-colors duration-150 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sheet-accent ${
+                      className={`flex flex-col items-center gap-0.5 rounded-sm px-1 py-2 transition-colors duration-150 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sheet-accent ${
                         active
                           ? 'bg-sheet-ink text-sheet-ground'
                           : 'bg-sheet-panel text-sheet-ink hover:bg-sheet-stage'
                       }`}
                     >
-                      <span className="tnum">{value.toFixed(2)}</span>
-                      <span className="text-[13px] opacity-80">{MATERIAL_FOR[value]}</span>
+                      <span className="text-[16px] leading-none tnum">
+                        {value.toFixed(2)}
+                      </span>
+                      <span className="text-[13px] leading-none opacity-80">
+                        {MATERIAL_FOR[value]}
+                      </span>
                     </button>
                   );
                 })}

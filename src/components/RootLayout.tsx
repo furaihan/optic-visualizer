@@ -7,11 +7,16 @@ import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuIte
 import { Toggle } from './ui/toggle';
 import { useTheme } from '../hooks/useTheme';
 import { BrandRule } from './BrandRule';
+import { LandingNav } from './landing/LandingNav';
 
 export function RootLayout() {
   // The landing page is a page that scrolls: the workbench keeps its own
-  // viewport, the front door does not, so the rail sticks and the page runs.
+  // viewport, the front door does not, so the page runs under a plain bar.
+  // The workbench keeps its icon rail; the front door gets a bar of its own,
+  // because a rail down the left edge would push every line of the landing
+  // page 64px off centre.
   const isLanding = useRouterState({ select: (s) => s.location.pathname === '/' });
+  const { lang } = useSearch({ from: '__root__' });
 
   // The body carries overflow: hidden, which the viewport inherits — the
   // wheel would do nothing on a route that scrolls the document. The class
@@ -26,11 +31,11 @@ export function RootLayout() {
       <div
         className={`flex w-full font-sans transition-colors duration-200 bg-sheet-ground text-sheet-ink ${
           isLanding
-            ? 'flex-col min-h-dvh md:flex-row md:items-start'
+            ? 'flex-col min-h-dvh'
             : 'flex-col-reverse h-dvh overflow-hidden md:flex-row'
         }`}
       >
-        <GlobalNav isLanding={isLanding} />
+        {isLanding ? <LandingNav lang={lang} /> : <GlobalNav />}
         <main
           className={`flex-1 flex flex-col relative ${
             isLanding ? 'min-h-dvh' : 'min-h-0 overflow-hidden'
@@ -43,7 +48,7 @@ export function RootLayout() {
   );
 }
 
-function GlobalNav({ isLanding = false }: { isLanding?: boolean }) {
+function GlobalNav() {
   const search = useSearch({ from: '__root__' });
   const currentSearch = useRouterState({ select: (s) => s.location.search as Record<string, unknown> });
   const navigate = useNavigate();
@@ -86,7 +91,7 @@ function GlobalNav({ isLanding = false }: { isLanding?: boolean }) {
         </Button>
       )}
 
-      <nav className={`w-full bg-sheet-panel md:bg-sheet-panel shrink-0 flex md:flex-col items-center justify-between px-4 md:px-0 md:py-4 gap-2 md:gap-4 z-40 transition-[width,background-color] duration-300 h-16 ${isLanding ? 'relative md:sticky md:top-0 md:self-start' : 'relative'} ${isExpanded ? 'md:h-dvh md:w-16 md:flex' : 'md:hidden'}`}>
+      <nav className={`w-full bg-sheet-panel md:bg-sheet-panel shrink-0 flex md:flex-col items-center justify-between px-4 md:px-0 md:py-4 gap-2 md:gap-4 z-40 transition-[width,background-color] duration-300 h-16 relative ${isExpanded ? 'md:h-dvh md:w-16 md:flex' : 'md:hidden'}`}>
         <div className="flex md:flex-col gap-2 md:gap-4 w-full h-full md:h-auto items-center justify-between md:justify-center">
           <div className="flex md:flex-col gap-2 md:gap-4 justify-center md:items-center">
             {navItems.map((item) => (

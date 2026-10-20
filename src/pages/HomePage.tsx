@@ -34,7 +34,7 @@ export function HomePage() {
 
       <LandingStatement lang={lang} />
 
-      <div className="flex flex-col gap-24 sm:gap-32">
+      <div className="flex flex-col gap-20 sm:gap-28 lg:gap-36">
         <LandingHowItWorks lang={lang} />
         <LandingShowcase lang={lang} />
         <LandingFeatures lang={lang} />

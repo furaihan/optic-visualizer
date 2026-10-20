@@ -139,10 +139,15 @@
 
 /* ------------------------------------------------------------------
    Landing: sections arrive as they enter the window, and one photograph
-   drifts. The class that arms the arrival is added by script, so with
-   no script the page is simply there — nothing is ever hidden behind
-   an animation that failed to run.
+   drifts. The class that hides an element is added by script and only
+   while that element is still below the fold, so nothing on the page is
+   ever hidden because an animation did not fire.
    ------------------------------------------------------------------ */
+
+/* An anchored section must clear the bar it lands under. */
+.landing section[id] {
+  scroll-margin-top: 96px;
+}
 
 .landing .reveal {
   transition:
@@ -154,12 +159,12 @@
 .landing .reveal-2 { transition-delay: 140ms; }
 .landing .reveal-3 { transition-delay: 210ms; }
 
-html.js-reveal .landing .reveal {
+.landing .reveal.is-pending {
   opacity: 0;
   transform: translateY(18px);
 }
 
-html.js-reveal .landing .reveal.is-in {
+.landing .reveal.is-in {
   opacity: 1;
   transform: translateY(0);
 }
@@ -175,9 +180,10 @@ html.js-reveal .landing .reveal.is-in {
 }
 
 @media (prefers-reduced-motion: reduce) {
-  html.js-reveal .landing .reveal {
-    opacity: 1;
-    transform: none;
+  .landing .reveal {
+    opacity: 1 !important;
+    transform: none !important;
+    transition: none !important;
   }
   .bench-drift {
     animation: none;

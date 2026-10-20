@@ -7,6 +7,10 @@ import { GroupMarker, type SheetGroup } from '@components/Sidebar/GroupMarker';
  *
  * Every control the instrument reads is named here, in the position the
  * workbench puts it. Point at a note and its control is picked out.
+ *
+ * The rows are set 76px apart so a note in the margin has room to breathe:
+ * at 64px the six notes nearly touched each other and the margin read as a
+ * wall of small type.
  */
 export function LandingFeatures({ lang }: { lang: Language }) {
   const t = translations[lang];
@@ -34,10 +38,12 @@ export function LandingFeatures({ lang }: { lang: Language }) {
     { id: 'bevel', title: t.bevelPos, body: t.tipBevelPos, side: 'right' as const },
   ];
 
-  const rowTop = (id: string) => {
-    const index = rows.findIndex((row) => row.id === id);
-    return index * 64 + 12;
-  };
+  // The row pitch, and the offset of a note from the top of its row.
+  const ROW = 76;
+  const rowTop = (id: string) => rows.findIndex((row) => row.id === id) * ROW + 16;
+
+  const noteClass =
+    'absolute w-[25ch] text-left focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-sheet-accent';
 
   return (
     <section className="mx-auto w-full max-w-[1200px] px-6 sm:px-10">
@@ -46,7 +52,7 @@ export function LandingFeatures({ lang }: { lang: Language }) {
           <h2 className="text-[32px] font-medium leading-[1.1] tracking-[-0.025em] text-sheet-ink">
             {t.landFeaturesTitle}
           </h2>
-          <p className="mt-4 max-w-[44ch] text-[18px] leading-[1.6] text-sheet-muted">
+          <p className="mt-4 max-w-[44ch] text-[20px] leading-[1.6] text-sheet-muted">
             {t.landFeaturesBody}
           </p>
         </div>
@@ -64,11 +70,15 @@ export function LandingFeatures({ lang }: { lang: Language }) {
                 onMouseLeave={() => setActive(null)}
                 onFocus={() => setActive(note.id)}
                 onBlur={() => setActive(null)}
-                className="absolute right-0 w-[26ch] text-right focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-sheet-accent"
+                className={`${noteClass} right-0 text-right`}
                 style={{ top: rowTop(note.id) }}
               >
-                <span className="block text-[18px] font-medium text-sheet-ink">{note.title}</span>
-                <span className="mt-1 block text-[16px] leading-snug text-sheet-muted">{note.body}</span>
+                <span className="block text-[20px] font-medium leading-tight text-sheet-ink">
+                  {note.title}
+                </span>
+                <span className="mt-1 block text-[16px] leading-snug text-sheet-muted">
+                  {note.body}
+                </span>
               </button>
             ))}
         </div>
@@ -80,9 +90,10 @@ export function LandingFeatures({ lang }: { lang: Language }) {
               return (
                 <div
                   key={row.id}
-                  className={`flex h-16 items-center justify-between gap-4 px-4 transition-colors duration-150 ${
+                  className={`flex items-center justify-between gap-4 px-4 transition-colors duration-150 ${
                     picked ? 'bg-sheet-info' : 'bg-sheet-panel'
                   }`}
+                  style={{ height: ROW }}
                 >
                   <span className="flex min-w-0 items-center gap-2">
                     <GroupMarker group={row.group} />
@@ -117,21 +128,26 @@ export function LandingFeatures({ lang }: { lang: Language }) {
                 onMouseLeave={() => setActive(null)}
                 onFocus={() => setActive(note.id)}
                 onBlur={() => setActive(null)}
-                className="absolute left-0 w-[26ch] text-left focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-sheet-accent"
+                className={`${noteClass} left-0`}
                 style={{ top: rowTop(note.id) }}
               >
-                <span className="block text-[18px] font-medium text-sheet-ink">{note.title}</span>
-                <span className="mt-1 block text-[16px] leading-snug text-sheet-muted">{note.body}</span>
+                <span className="block text-[20px] font-medium leading-tight text-sheet-ink">
+                  {note.title}
+                </span>
+                <span className="mt-1 block text-[16px] leading-snug text-sheet-muted">
+                  {note.body}
+                </span>
               </button>
             ))}
         </div>
       </div>
 
-      {/* On a phone the notes sit under the panel, in the same order. */}
-      <dl className="mt-10 flex flex-col gap-6 lg:hidden">
+      {/* On a phone the notes sit under the panel, in two columns, so the
+          section reads as one thing instead of a list twice over. */}
+      <dl className="mt-10 grid grid-cols-1 gap-x-6 gap-y-6 sm:grid-cols-2 lg:hidden">
         {notes.map((note) => (
           <div key={note.id}>
-            <dt className="text-[18px] font-medium text-sheet-ink">{note.title}</dt>
+            <dt className="text-[20px] font-medium text-sheet-ink">{note.title}</dt>
             <dd className="mt-1 text-[16px] leading-snug text-sheet-muted">{note.body}</dd>
           </div>
         ))}

@@ -122,15 +122,24 @@ export const Visualizer: React.FC<VisualizerProps> = React.memo(
 
     const PAD = 34;
     const GAP = 54;
-    const LABEL_BAND = 56;
+    // The band under the drawing carries two things: the groove percentage,
+    // which the frame profile prints under the rim, and the view's own name.
+    // They are set 44px apart so the two labels never touch.
+    const LABEL_BAND = 76;
+    // The protrusions are dimensioned in their own band above the rim. The
+    // board has to carry that band, or the dimension is drawn above the sheet
+    // and is cut off by its own edge.
+    const DIM_BAND = 64;
 
     const BOARD_W = compact
       ? PAD + sectionW + 26 + detailW + PAD
-      : PAD + sectionW + GAP + detailW + GAP + frontW + PAD + 30;
+      : PAD + sectionW + GAP + detailW + GAP + frontW + PAD + 54;
     // The sheet is one screen tall where it can be: the board takes what is
     // left after the claim, the order and the schedule.
-    const BOARD_H = Math.max(sectionH, detailH, compact ? 0 : frontH) + PAD + LABEL_BAND + 18;    const originX = PAD + Math.abs(minX) * S;
-    const originY = PAD + Math.max(sectionH, detailH, frontH) / 2;
+    const BOARD_H =
+      Math.max(sectionH, detailH, compact ? 0 : frontH) + PAD + LABEL_BAND + DIM_BAND + 18;
+    const originX = PAD + Math.abs(minX) * S;
+    const originY = PAD + DIM_BAND + Math.max(sectionH, detailH, frontH) / 2;
     const detailOriginX = PAD + sectionW + (compact ? 26 : GAP) + Math.abs(minX) * detailZoom;
     const frontOriginX = PAD + sectionW + GAP + detailW + GAP + (frame.a + frame.dbl) * frontScale;
     const frontOriginY = originY;
@@ -261,19 +270,24 @@ export const Visualizer: React.FC<VisualizerProps> = React.memo(
                   />
                 )}
 
-                {/* Each drawing names itself, as a sheet's views do. */}
+                {/* Each drawing names itself, as a sheet's views do. The names
+                    are clamped inside the board: a longer translation (the
+                    Indonesian "Tampilan Potongan Melintang") would otherwise
+                    run off the left edge of the sheet. */}
                 <g className="text-sheet-muted" fill="currentColor" fontSize={12}>
-                  <text x={originX} y={BOARD_H - 14} textAnchor="middle">
-                    {t.crossSection}
-                  </text>
-                  <text x={detailOriginX + detailW / 2} y={BOARD_H - 14} textAnchor="middle">
-                    {t.edgeDetail}
-                  </text>
-                  {!compact && (
-                    <text x={frontOriginX + frontW / 4} y={BOARD_H - 14} textAnchor="middle">
-                      {t.frontView}
-                    </text>
-                  )}
+                  {[
+                    { text: t.crossSection, x: originX },
+                    { text: t.edgeDetail, x: detailOriginX + detailW / 2 },
+                    ...(compact ? [] : [{ text: t.frontView, x: frontOriginX + frontW / 4 }]),
+                  ].map((label) => {
+                    const half = (label.text.length * 12 * 0.54) / 2;
+                    const x = Math.min(Math.max(label.x, half + 4), BOARD_W - half - 4);
+                    return (
+                      <text key={label.text} x={x} y={BOARD_H - 14} textAnchor="middle">
+                        {label.text}
+                      </text>
+                    );
+                  })}
                 </g>
               </>
             ) : view === 'front' ? (
@@ -327,7 +341,7 @@ export const Visualizer: React.FC<VisualizerProps> = React.memo(
                   }`}
                 >
                   <span className="text-[13px] leading-tight text-sheet-muted">{row.name}</span>
-                  <span className="text-[18px] font-medium leading-tight text-sheet-ink tnum">
+                  <span className="text-[20px] font-medium leading-tight text-sheet-ink tnum">
                     {row.value}
                   </span>
                   <span className={`text-[13px] leading-tight tnum ${row.ok ? 'text-sheet-muted' : 'text-sheet-warning'}`}>

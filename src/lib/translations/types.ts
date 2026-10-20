@@ -209,6 +209,14 @@ export interface AppTranslations {
   invalidInput: string;
 
   // Landing page
+  landNavLabel: string;
+  landNavHow: string;
+  landNavInstruments: string;
+  landNavStandards: string;
+  landNavQuestions: string;
+  landNavContact: string;
+  landNavLanguage: string;
+  landNavMenu: string;
   landHeroTitle: string;
   landHeroLead: string;
   landHeroAction: string;
@@ -248,8 +256,6 @@ export interface AppTranslations {
   landProofVolume: string;
   landBenchTitle: string;
   landBenchBody: string;
-  landBenchCredit: string;
-  landBenchNote: string;
   landFaqTitle: string;
   landFaq1Q: string;
   landFaq1A: string;

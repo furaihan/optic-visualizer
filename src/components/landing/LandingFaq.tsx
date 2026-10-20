@@ -18,10 +18,10 @@ export function LandingFaq({ lang }: { lang: Language }) {
   ];
 
   return (
-    <section className="mx-auto w-full max-w-[1200px] px-6 sm:px-10">
+    <section id="questions" className="mx-auto w-full max-w-[1200px] px-6 sm:px-10">
       <div className="grid gap-10 lg:grid-cols-12 lg:gap-12">
         <div className="lg:col-span-4">
-          <h2 className="reveal text-[32px] font-medium leading-[1.08] tracking-[-0.03em] text-sheet-ink lg:sticky lg:top-24">
+          <h2 className="reveal text-[32px] font-medium leading-[1.08] tracking-[-0.03em] text-sheet-ink">
             {t.landFaqTitle}
           </h2>
         </div>
@@ -31,16 +31,16 @@ export function LandingFaq({ lang }: { lang: Language }) {
             <details
               key={question.q}
               name="landing-faq"
-              className="group rounded-sm bg-transparent open:bg-sheet-info lg:bg-sheet-panel lg:open:bg-sheet-info"
+              className="group rounded-sm bg-transparent transition-colors duration-150 open:bg-sheet-info lg:bg-sheet-panel lg:hover:bg-sheet-stage lg:open:bg-sheet-info"
             >
-              <summary className="flex cursor-pointer list-none items-center justify-between gap-6 px-6 py-5 text-[18px] font-medium text-sheet-ink focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sheet-accent">
+              <summary className="flex cursor-pointer list-none items-center justify-between gap-6 px-6 py-5 text-[20px] font-medium text-sheet-ink focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sheet-accent">
                 {question.q}
                 <span
                   aria-hidden="true"
                   className="relative h-4 w-4 shrink-0 before:absolute before:left-0 before:top-1/2 before:h-[3px] before:w-4 before:-translate-y-1/2 before:bg-current after:absolute after:left-1/2 after:top-0 after:h-4 after:w-[3px] after:-translate-x-1/2 after:bg-current after:transition-transform after:duration-200 group-open:after:scale-y-0"
                 />
               </summary>
-              <p className="max-w-[62ch] px-6 pb-6 text-[18px] leading-[1.6] text-sheet-ink">
+              <p className="max-w-[62ch] px-6 pb-6 text-[20px] leading-[1.6] text-sheet-ink">
                 {question.a}
               </p>
             </details>

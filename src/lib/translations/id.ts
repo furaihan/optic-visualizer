@@ -217,9 +217,17 @@ export const translations_id: AppTranslations = {
   invalidInput: 'Nilai ini sementara sampai input diperbaiki.',
 
   // Landing page
+  landNavLabel: 'Bagian halaman depan',
+  landNavHow: 'Cara kerja',
+  landNavInstruments: 'Instrumen',
+  landNavStandards: 'Standar',
+  landNavQuestions: 'Pertanyaan',
+  landNavContact: 'Kontak',
+  landNavLanguage: 'Bahasa',
+  landNavMenu: 'Menu',
   landHeroTitle: 'Lensa ini muat di bingkai?',
   landHeroLead:
-    'Masukkan resep dan bingkai. Baca ketebalan tepi, tonjolan, dan ukuran blank dari satu gambar — sebelum pesanan dikirim ke lab.',
+    'Aktriyo mengukur lensa sebelum lab memotongnya. Masukkan resep dan bingkai; baca ketebalan tepi, tonjolan, dan ukuran blank dari satu gambar.',
   landHeroAction: 'Buka simulator',
   landHeroSecondary: 'Lihat kedua instrumen',
   landHeroControl: 'Daya sferis',
@@ -268,9 +276,6 @@ export const translations_id: AppTranslations = {
   landBenchTitle: 'Meja yang digantikan',
   landBenchBody:
     'Sebelum ini, setiap angka di atas diambil dari lensometer dan pengukur, satu bingkai demi satu bingkai.',
-  landBenchCredit: 'Foto',
-  landBenchNote:
-    'Foto-foto di halaman ini berasal dari koleksi terbuka dan menampilkan meja kerja optisi, bukan produk ini.',
   landFaqTitle: 'Pertanyaan',
   landFaq1Q: 'Apakah ini menggantikan lensometer?',
   landFaq1A:
@@ -299,5 +304,5 @@ export const translations_id: AppTranslations = {
   landFooterRights: '© 2026 Aktriyo Measuring Project',
   landFooterPhotos: 'Foto',
   landPhotoCredits:
-    '“Trial lens set” oleh Fatimah Bello (CC0); lensometer dan laboratorium optik (domain publik, US Navy dan US Army); “Optical Trial Lens Frame” dan “Eyeglasses” (CC BY 4.0) — semuanya via Wikimedia Commons.',
+    '“Trial lens set” oleh Fatimah Bello (CC0); lensometer dan laboratorium optik (domain publik, US Navy dan US Army); dua foto trial frame (domain publik, US Air Force) — semuanya via Wikimedia Commons.',
 };

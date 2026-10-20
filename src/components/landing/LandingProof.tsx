@@ -30,7 +30,7 @@ export function LandingProof({ lang }: { lang: Language }) {
   ];
 
   return (
-    <section className="mx-auto w-full max-w-[1200px] px-6 sm:px-10">
+    <section id="standards" className="mx-auto w-full max-w-[1200px] px-6 sm:px-10">
       <div className="reveal grid gap-6 lg:grid-cols-12 lg:gap-12">
         <div className="lg:col-span-5">
           <h2 className="text-[32px] font-medium leading-[1.1] tracking-[-0.025em] text-sheet-ink">

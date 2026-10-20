@@ -56,7 +56,7 @@ export function LandingHowItWorks({ lang }: { lang: Language }) {
   ];
 
   return (
-    <section className="mx-auto w-full max-w-[1200px] px-6 sm:px-10">
+    <section id="how" className="mx-auto w-full max-w-[1200px] px-6 sm:px-10">
       <h2 className="reveal text-[32px] font-medium leading-[1.1] tracking-[-0.025em] text-sheet-ink">
         {t.landHowTitle}
       </h2>
@@ -67,16 +67,16 @@ export function LandingHowItWorks({ lang }: { lang: Language }) {
             key={step.title}
             className="reveal grid gap-8 lg:grid-cols-12 lg:gap-12"
           >
-            <div className="lg:col-span-5">
-              <h3 className="text-[26px] font-medium leading-[1.15] tracking-[-0.02em] text-sheet-ink">
+            <div className="reveal lg:col-span-5">
+              <h3 className="text-[22px] font-medium leading-[1.15] tracking-[-0.02em] text-sheet-ink">
                 {step.title}
               </h3>
-              <p className="mt-4 max-w-[46ch] text-[18px] leading-[1.6] text-sheet-muted">
+              <p className="mt-4 max-w-[46ch] text-[20px] leading-[1.6] text-sheet-muted">
                 {step.body}
               </p>
             </div>
 
-            <div className="flex flex-col gap-4 lg:col-span-7">
+            <div className="reveal reveal-1 flex flex-col gap-4 lg:col-span-7">
               <CallPanel
                 group={step.group}
                 title={step.callTitle}
@@ -108,10 +108,10 @@ export function LandingHowItWorks({ lang }: { lang: Language }) {
         {/* The third entry: the fitting, and the sheet that comes out of it. */}
         <div className="reveal grid gap-8 lg:grid-cols-12 lg:gap-12">
           <div className="lg:col-span-5">
-            <h3 className="text-[26px] font-medium leading-[1.15] tracking-[-0.02em] text-sheet-ink">
+            <h3 className="text-[22px] font-medium leading-[1.15] tracking-[-0.02em] text-sheet-ink">
               {t.landHow3}
             </h3>
-            <p className="mt-4 max-w-[46ch] text-[18px] leading-[1.6] text-sheet-muted">
+            <p className="mt-4 max-w-[46ch] text-[20px] leading-[1.6] text-sheet-muted">
               {t.landHow3Body}
             </p>
             <div className="mt-6 max-w-[420px]">
@@ -128,7 +128,7 @@ export function LandingHowItWorks({ lang }: { lang: Language }) {
             </div>
           </div>
 
-          <div className="lg:col-span-7">
+          <div className="reveal reveal-1 lg:col-span-7">
             <MeasurementSheet
               result={result}
               lang={lang}

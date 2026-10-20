@@ -37,7 +37,7 @@ export function LandingModules({ lang }: { lang: Language }) {
           <h2 className="text-[32px] font-medium leading-[1.1] tracking-[-0.025em] text-sheet-ink">
             {t.landModulesTitle}
           </h2>
-          <p className="mt-4 max-w-[42ch] text-[18px] leading-[1.6] text-sheet-muted">
+          <p className="mt-4 max-w-[42ch] text-[20px] leading-[1.6] text-sheet-muted">
             {t.landModulesBody}
           </p>
         </div>
@@ -45,10 +45,10 @@ export function LandingModules({ lang }: { lang: Language }) {
 
       <div className="mt-16 grid gap-16 lg:grid-cols-12 lg:gap-12">
         <div className="reveal lg:col-span-6">
-          <h3 className="text-[26px] font-medium leading-[1.12] tracking-[-0.025em] text-sheet-ink">
+          <h3 className="text-[22px] font-medium leading-[1.12] tracking-[-0.025em] text-sheet-ink">
             {t.landModuleOne}
           </h3>
-          <p className="mt-5 max-w-[46ch] text-[18px] leading-[1.6] text-sheet-muted">
+          <p className="mt-5 max-w-[46ch] text-[20px] leading-[1.6] text-sheet-muted">
             {t.landModuleOneBody}
           </p>
 
@@ -66,7 +66,7 @@ export function LandingModules({ lang }: { lang: Language }) {
           <Link
             to="/visualizer"
             search={{ lang, activeTab: 'visualizer', view: 'side' }}
-            className="group mt-9 inline-flex items-center gap-2 text-[18px] font-medium text-sheet-ink underline decoration-sheet-muted underline-offset-[6px] transition-colors hover:decoration-sheet-ink focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-sheet-accent"
+            className="group mt-9 inline-flex items-center gap-2 text-[20px] font-medium text-sheet-ink underline decoration-sheet-muted underline-offset-[6px] transition-colors hover:decoration-sheet-ink focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-sheet-accent"
           >
             {t.landHeroAction}
             <ArrowRightIcon
@@ -77,10 +77,10 @@ export function LandingModules({ lang }: { lang: Language }) {
         </div>
 
         <div className="reveal reveal-1 lg:col-span-5 lg:col-start-8 lg:pt-10">
-          <h3 className="text-[26px] font-medium leading-[1.15] tracking-[-0.02em] text-sheet-ink">
+          <h3 className="text-[22px] font-medium leading-[1.15] tracking-[-0.02em] text-sheet-ink">
             {t.landModuleTwo}
           </h3>
-          <p className="mt-5 max-w-[44ch] text-[18px] leading-[1.6] text-sheet-muted">
+          <p className="mt-5 max-w-[44ch] text-[20px] leading-[1.6] text-sheet-muted">
             {t.landModuleTwoBody}
           </p>
 
@@ -99,7 +99,7 @@ export function LandingModules({ lang }: { lang: Language }) {
           <Link
             to="/aspheric"
             search={{ lang, activeTab: 'visualizer', view: 'side' }}
-            className="group mt-9 inline-flex items-center gap-2 text-[18px] font-medium text-sheet-ink underline decoration-sheet-muted underline-offset-[6px] transition-colors hover:decoration-sheet-ink focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-sheet-accent"
+            className="group mt-9 inline-flex items-center gap-2 text-[20px] font-medium text-sheet-ink underline decoration-sheet-muted underline-offset-[6px] transition-colors hover:decoration-sheet-ink focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-sheet-accent"
           >
             {t.landModuleTwoOpen}
             <ArrowRightIcon

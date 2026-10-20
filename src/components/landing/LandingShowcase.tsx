@@ -75,7 +75,7 @@ export function LandingShowcase({ lang }: { lang: Language }) {
           <h2 className="text-[32px] font-medium leading-[1.1] tracking-[-0.025em] text-sheet-ink">
             {t.landShowcaseTitle}
           </h2>
-          <p className="mt-4 max-w-[42ch] text-[18px] leading-[1.6] text-sheet-muted">
+          <p className="mt-4 max-w-[42ch] text-[20px] leading-[1.6] text-sheet-muted">
             {t.landShowcaseBody}
           </p>
         </div>
@@ -86,14 +86,17 @@ export function LandingShowcase({ lang }: { lang: Language }) {
           <div
             key={state.label}
             className={`reveal grid gap-4 lg:grid-cols-12 lg:gap-10 ${
-              index === 2 ? 'reveal-2' : ''
+              index === 1 ? 'reveal-1' : index === 2 ? 'reveal-2' : ''
             }`}
           >
-            <p className="text-[18px] leading-snug text-sheet-muted lg:col-span-3 lg:pt-4 lg:text-right">
+            <p className="text-[20px] leading-snug text-sheet-muted lg:col-span-3 lg:pt-4 lg:text-right">
               {state.label}
               <span className="mt-1 block text-[13px] text-sheet-muted tnum">{state.rx}</span>
             </p>
-            <div data-ui className="overflow-hidden rounded-sm lg:col-span-6">
+            <div
+              data-ui
+              className="overflow-hidden rounded-sm transition-transform duration-200 hover:-translate-y-0.5 lg:col-span-6"
+            >
               {state.row}
             </div>
           </div>

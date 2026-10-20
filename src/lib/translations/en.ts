@@ -217,9 +217,17 @@ export const translations_en: AppTranslations = {
   invalidInput: 'These values are placeholders until the inputs are valid.',
 
   // Landing page
+  landNavLabel: 'Landing page sections',
+  landNavHow: 'How it works',
+  landNavInstruments: 'Instruments',
+  landNavStandards: 'Standards',
+  landNavQuestions: 'Questions',
+  landNavContact: 'Contact',
+  landNavLanguage: 'Language',
+  landNavMenu: 'Menu',
   landHeroTitle: 'Will this lens fit this frame?',
   landHeroLead:
-    'Enter the prescription and the frame. Read the edge thickness, the protrusion and the blank size off one drawing — before the order goes to the lab.',
+    'Aktriyo measures the lens before the lab cuts it. Enter the prescription and the frame; read the edge thickness, the protrusion and the blank size off one drawing.',
   landHeroAction: 'Open the simulator',
   landHeroSecondary: 'See both instruments',
   landHeroControl: 'Sphere power',
@@ -268,9 +276,6 @@ export const translations_en: AppTranslations = {
   landBenchTitle: 'The bench this replaces',
   landBenchBody:
     'Before this, every one of these numbers came off a lensometer and a gauge, one frame at a time.',
-  landBenchCredit: 'Photograph',
-  landBenchNote:
-    'The photographs on this page come from open collections and show opticians’ benches, not this product.',
   landFaqTitle: 'Questions',
   landFaq1Q: 'Does this replace a lensometer?',
   landFaq1A:
@@ -299,5 +304,5 @@ export const translations_en: AppTranslations = {
   landFooterRights: '© 2026 Aktriyo Measuring Project',
   landFooterPhotos: 'Photographs',
   landPhotoCredits:
-    '“Trial lens set” by Fatimah Bello (CC0); the lensometer and the optical laboratory (public domain, US Navy and US Army); “Optical Trial Lens Frame” and “Eyeglasses” (CC BY 4.0) — all via Wikimedia Commons.',
+    '“Trial lens set” by Fatimah Bello (CC0); the lensometer and the optical laboratory (public domain, US Navy and US Army); the two trial-frame photographs (public domain, US Air Force) — all via Wikimedia Commons.',
 };

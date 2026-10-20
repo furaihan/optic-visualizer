@@ -91,44 +91,50 @@ export function SheetRow({
 /**
  * The inline marks inside the statement: tight crops of the drawing, each
  * the thing the word beside it names. Drawn in the inks of the drawing.
+ *
+ * They are set at cap height and a little wider than tall, with no frame of
+ * their own, so they read as an object dropped into the sentence rather than
+ * as a small icon.
  */
 export function MiniMark({ kind }: { kind: 'rx' | 'frame' | 'drawing' }) {
   const common = {
-    width: '1.35em',
-    height: '1.02em',
-    viewBox: '0 0 46 34',
+    width: '2em',
+    height: '1.06em',
+    viewBox: '0 0 80 42',
     fill: 'none',
     xmlns: 'http://www.w3.org/2000/svg',
     'aria-hidden': true,
     focusable: false,
-    style: { verticalAlign: '-0.12em' } as React.CSSProperties,
+    style: { verticalAlign: '-0.16em' } as React.CSSProperties,
   } as const;
 
   // On a phone the sentence reads without them; a mark at that size only
   // breaks the line.
-  const mark = 'hidden md:inline-block';
+  const mark = 'hidden md:inline-block mx-[0.16em]';
 
   if (kind === 'rx') {
-    // The prescription block: three measured fields on a panel.
+    // The prescription block: a measure bar and two value bars.
     return (
       <svg {...common} className={mark}>
-        <rect width="46" height="34" rx="2" className="fill-sheet-panel" />
-        <rect x="4" y="6" width="3" height="22" rx="1.5" className="fill-sheet-rx" />
-        <rect x="11" y="8" width="24" height="4" rx="2" className="fill-sheet-rx" />
-        <rect x="11" y="15" width="16" height="4" rx="2" className="fill-sheet-rx" />
-        <rect x="11" y="22" width="30" height="4" rx="2" className="fill-sheet-rx" />
+        <rect x="0" y="3" width="80" height="36" rx="2" className="fill-sheet-panel" />
+        <rect x="8" y="10" width="5" height="22" rx="2.5" className="fill-sheet-rx" />
+        <rect x="20" y="11" width="26" height="7" rx="1" className="fill-sheet-rx" />
+        <rect x="20" y="24" width="16" height="7" rx="1" className="fill-sheet-rx" />
+        <rect x="52" y="11" width="20" height="7" rx="1" className="fill-sheet-ink" fillOpacity="0.45" />
+        <rect x="52" y="24" width="12" height="7" rx="1" className="fill-sheet-ink" fillOpacity="0.45" />
       </svg>
     );
   }
 
   if (kind === 'frame') {
-    // The rim in section: two bands and the groove between them.
+    // The rim in section: the band above and below, the lens edge between.
     return (
       <svg {...common} className={mark}>
-        <rect width="46" height="34" rx="2" className="fill-sheet-stage" />
-        <rect x="10" y="2" width="20" height="7" className="fill-sheet-frame" fillOpacity={0.35} />
-        <rect x="10" y="25" width="20" height="7" className="fill-sheet-frame" fillOpacity={0.35} />
-        <line x1="21" y1="2" x2="21" y2="32" className="stroke-sheet-frame" strokeWidth="1.4" strokeDasharray="4 3" />
+        <rect x="0" y="3" width="80" height="36" rx="2" className="fill-sheet-stage" />
+        <rect x="22" y="5" width="36" height="9" className="fill-sheet-frame" fillOpacity="0.45" />
+        <rect x="22" y="28" width="36" height="9" className="fill-sheet-frame" fillOpacity="0.45" />
+        <rect x="28" y="14" width="24" height="14" className="fill-sheet-rx" fillOpacity="0.28" />
+        <line x1="40" y1="5" x2="40" y2="37" className="stroke-sheet-muted" strokeWidth="1.4" strokeDasharray="4 3" />
       </svg>
     );
   }
@@ -136,12 +142,12 @@ export function MiniMark({ kind }: { kind: 'rx' | 'frame' | 'drawing' }) {
   // The drawing: the lens in section, curved at the front.
   return (
     <svg {...common} className={mark}>
-      <rect width="46" height="34" rx="2" className="fill-sheet-stage" />
+      <rect x="0" y="3" width="80" height="36" rx="2" className="fill-sheet-stage" />
       <path
-        d="M18 4 Q12 17 18 30 L26 30 Q21 17 26 4 Z"
-        className="fill-sheet-rx"
-        fillOpacity={0.26}
-        strokeWidth="1.6"
+        d="M34 5 Q22 21 34 37 L48 37 Q38 21 48 5 Z"
+        className="fill-sheet-rx stroke-sheet-rx"
+        fillOpacity="0.34"
+        strokeWidth="2"
       />
     </svg>
   );

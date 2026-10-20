@@ -22,7 +22,7 @@ export function LandingClosing({ lang }: { lang: Language }) {
           <p className="text-[36px] font-medium leading-[1.04] tracking-[-0.035em] text-sheet-ink lg:text-[62px] lg:leading-[1.02]">
             {t.landCtaLine}
           </p>
-          <p className="mt-6 max-w-[40ch] text-[18px] leading-[1.6] text-sheet-muted">
+          <p className="mt-6 max-w-[40ch] text-[20px] leading-[1.6] text-sheet-muted">
             {t.landCtaBody}
           </p>
           <Link

@@ -79,7 +79,7 @@ export function LandingFooter({ lang }: { lang: Language }) {
         >
           <span className="text-[13px] opacity-80">{t.landHeroEngine}</span>
           <span className="flex items-end justify-between gap-4">
-            <span className="max-w-[16ch] text-[26px] font-medium leading-[1.1] tracking-[-0.02em]">
+            <span className="max-w-[16ch] text-[22px] font-medium leading-[1.1] tracking-[-0.02em]">
               {t.landHeroAction}
             </span>            <ArrowRightIcon
               className="h-7 w-7 shrink-0 transition-transform duration-200 group-hover:translate-x-1"
