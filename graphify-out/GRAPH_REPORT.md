@@ -1,30 +1,35 @@
 # Graph Report - optic-tools  (2026-10-20)
 
 ## Corpus Check
-- 129 files · ~155,129 words
+- 124 files · ~156,547 words
 - Verdict: corpus is large enough that graph structure adds value.
 - Unclassified: 5 file(s) not represented in the graph (top: (none) 2, .lock 1, .toml 1)
 
 ## Summary
-- 609 nodes · 1799 edges · 26 communities (23 shown, 3 thin omitted)
+- 614 nodes · 1812 edges · 29 communities (22 shown, 7 thin omitted)
 - Extraction: 97% EXTRACTED · 3% INFERRED · 0% AMBIGUOUS · INFERRED: 49 edges (avg confidence: 0.85)
-- Token cost: 3,910 input · 2,680 output
+- Token cost: 0 input · 0 output
+
+## Graph Freshness
+- Built from commit: `71f16ef0`
+- Run `git rev-parse HEAD` and compare to check if the graph is stale.
+- Run `graphify update .` after code changes (no API cost).
 
 ## Community Hubs (Navigation)
 - Sidebar Controls & UI Primitives
 - Aspheric Engine & Visualizer
 - App Shell & Layout
 - Landing Page & Home
-- UI Primitives (Alert/Item/Popover)
+- item.tsx
 - README Domain Concepts
-- Routing & Route Tree
+- cn
 - TypeScript Path Aliases
 - shadcn components.json Config
 - package.json Manifest
 - Navigation & Theme Menus
 - Cards, Buttons & Contact
 - Runtime Dependencies
-- Contexts & Providers
+- index.css (global stylesheet)
 - Trial Lens Set (bench photo)
 - Select Component Family
 - Dev Dependencies
@@ -37,68 +42,66 @@
 - Intent Skills Sync Script
 - Resizable Panel Components
 - Global CSS Type Shim
+- class-variance-authority
+- alert.tsx
 
 ## God Nodes (most connected - your core abstractions)
-1. `react` - 66 edges
-2. `Language` - 56 edges
-3. `translations` - 40 edges
-4. `cn` - 36 edges
-5. `FrameParameters` - 28 edges
-6. `CalculationResult` - 23 edges
+1. `react` - 67 edges
+2. `Language` - 58 edges
+3. `translations` - 41 edges
+4. `FrameParameters` - 28 edges
+5. `cn` - 26 edges
+6. `CalculationResult` - 25 edges
 7. `@tanstack/react-router` - 22 edges
 8. `PatientParameters` - 22 edges
 9. `lucide-react` - 20 edges
 10. `@base-ui/react` - 18 edges
 
 ## Surprising Connections (you probably didn't know these)
+- `SimulatorLayout()` --calls--> `BrandRule()`  [EXTRACTED]
+  src/routes/simulator-layout.tsx → src/components/BrandRule.tsx
+- `LabelWithTooltipProps` --references--> `Language`  [EXTRACTED]
+  src/components/Sidebar/LabelWithTooltip.tsx → src/lib/translations/types.ts
 - `HTML Entry Point (index.html)` --conceptually_related_to--> `Optical Tools`  [INFERRED]
   index.html → README.md
-- `Optical Tools (Indonesian README)` --semantically_similar_to--> `Optical Tools`  [INFERRED] [semantically similar]
-  README-id.md → README.md
-- `Rumus Mesin Inti` --semantically_similar_to--> `Core Engine Formulas`  [INFERRED] [semantically similar]
-  README-id.md → README.md
-- `Rekomendasi Material Pintar` --semantically_similar_to--> `Smart Material Recommendation Engine`  [INFERRED] [semantically similar]
-  README-id.md → README.md
-- `Aturan Khusus Jenis Bingkai` --semantically_similar_to--> `Frame-Type Recommendation Overrides`  [INFERRED] [semantically similar]
-  README-id.md → README.md
+- `AMP - Aktriyo Measuring Project (page title)` --semantically_similar_to--> `Akademi Optometri Yogyakarta (Aktriyo)`  [INFERRED] [semantically similar]
+  index.html → README.md
+- `AMP - Aktriyo Measuring Project (page title)` --semantically_similar_to--> `AMP_V4.2.0 Engine Core`  [INFERRED] [semantically similar]
+  index.html → README.md
 
 ## Import Cycles
 - None detected.
 
 ## Hyperedges (group relationships)
-- **Spherical Lens Thickness & Protrusion Calculation Pipeline** — readme_combined_decentration, readme_effective_radius, readme_surface_radii, readme_sagitta_formula, readme_center_edge_thickness, readme_frame_protrusion [EXTRACTED 1.00]
 - **Aspheric Engine Calculation Pipeline** — readme_aspheric_engine, readme_aspheric_sagitta_formula, readme_per_surface_control, readme_aberration_metrics [EXTRACTED 1.00]
+- **Spherical Lens Thickness & Protrusion Calculation Pipeline** — readme_combined_decentration, readme_effective_radius, readme_surface_radii, readme_sagitta_formula, readme_center_edge_thickness, readme_frame_protrusion [EXTRACTED 1.00]
 - **AGENTS.md Agent Workflow Policies** — agents_intent_skill_loading, agents_graphify_knowledge_graph, agents_graphify_query_first_rule [INFERRED 0.85]
 
-## Communities (26 total, 3 thin omitted)
+## Communities (29 total, 7 thin omitted)
 
 ### Community 0 - "Sidebar Controls & UI Primitives"
-Cohesion: 0.07
-Nodes (63): cn, lucide-react, AsphericSidebar(), AsphericSidebarProps, AsphericSurfacePanel(), BevelControl(), BevelControlProps, Control() (+55 more)
+Cohesion: 0.09
+Nodes (54): lucide-react, AsphericSidebar(), AsphericSurfacePanel(), BrandRule(), BevelControl(), Control(), FittingSpecsSection(), FrameGeometrySection() (+46 more)
 
 ### Community 1 - "Aspheric Engine & Visualizer"
-Cohesion: 0.08
-Nodes (59): asphericPath(), AsphericVisualizer, AsphericVisualizerProps, LensPosition, sphericalArc(), Cell, JobTicketProps, MeasurementSheetProps (+51 more)
+Cohesion: 0.07
+Nodes (72): AsphericSidebarProps, asphericPath(), AsphericVisualizer, AsphericVisualizerProps, LensPosition, sphericalArc(), Cell, JobTicketProps (+64 more)
 
 ### Community 2 - "App Shell & Layout"
-Cohesion: 0.13
-Nodes (35): AsphericDesktopGrid(), ErrorBoundary, AppFooter(), DesktopGrid(), HeaderBar(), HeaderBarProps, MobileTabManager(), MobileTabManagerProps (+27 more)
+Cohesion: 0.08
+Nodes (52): @tanstack/react-router, AsphericDesktopGrid(), ErrorBoundary, Props, State, AppFooter(), DesktopGrid(), HeaderBar() (+44 more)
 
 ### Community 3 - "Landing Page & Home"
-Cohesion: 0.12
-Nodes (31): react, LandingBench(), LandingClosing(), LandingFaq(), LandingFeatures(), LandingFooter(), LandingHero(), LandingHowItWorks() (+23 more)
+Cohesion: 0.11
+Nodes (33): react, LandingBench(), LandingClosing(), LandingFaq(), LandingFeatures(), LandingFooter(), LandingHero(), LandingHowItWorks() (+25 more)
 
-### Community 4 - "UI Primitives (Alert/Item/Popover)"
-Cohesion: 0.06
-Nodes (17): @base-ui/react, class-variance-authority, Alert(), alertVariants, FieldSeparator(), Item(), ItemGroup(), ItemMedia() (+9 more)
+### Community 4 - "item.tsx"
+Cohesion: 0.16
+Nodes (9): FieldSeparator(), Item(), ItemGroup(), ItemMedia(), itemMediaVariants, ItemSeparator(), ItemTitle(), itemVariants (+1 more)
 
 ### Community 5 - "README Domain Concepts"
 Cohesion: 0.08
 Nodes (31): graphify-out Knowledge Graph, AMP - Aktriyo Measuring Project (page title), HTML Entry Point (index.html), Aberration Metrics (SA0, Coma X), Akademi Optometri Yogyakarta (Aktriyo), AMP_ASPH_V1.0.0 Aspheric Engine Core, AMP_V4.2.0 Engine Core, Project Architecture Layout (+23 more)
-
-### Community 6 - "Routing & Route Tree"
-Cohesion: 0.16
-Nodes (18): @tanstack/react-router, BrandRule(), asphericRoute, contactRoute, indexRoute, GlobalSearchParams, rootRoute, Register (+10 more)
 
 ### Community 7 - "TypeScript Path Aliases"
 Cohesion: 0.08
@@ -109,24 +112,20 @@ Cohesion: 0.09
 Nodes (21): aliases, components, hooks, lib, ui, utils, iconLibrary, menuAccent (+13 more)
 
 ### Community 9 - "package.json Manifest"
-Cohesion: 0.09
-Nodes (21): engines, bun, intent, skills, name, packageManager, private, type (+13 more)
+Cohesion: 0.10
+Nodes (20): engines, bun, intent, skills, name, packageManager, private, type (+12 more)
 
 ### Community 10 - "Navigation & Theme Menus"
-Cohesion: 0.16
-Nodes (11): LandingNav(), GlobalNav(), NavItem(), RootLayout(), DropdownMenu(), DropdownMenuContent(), DropdownMenuItem(), DropdownMenuSubContent() (+3 more)
+Cohesion: 0.08
+Nodes (23): react-dom, LandingNav(), GlobalNav(), NavItem(), RootLayout(), DropdownMenu(), DropdownMenuContent(), DropdownMenuItem() (+15 more)
 
 ### Community 11 - "Cards, Buttons & Contact"
-Cohesion: 0.18
-Nodes (9): Props, State, Badge(), badgeVariants, Button(), buttonVariants, Card(), CardContent() (+1 more)
+Cohesion: 0.22
+Nodes (6): Badge(), badgeVariants, Button(), Card(), CardContent(), ContactPage()
 
 ### Community 12 - "Runtime Dependencies"
 Cohesion: 0.13
 Nodes (15): dependencies, @base-ui/react, class-variance-authority, cn, @fontsource-variable/geist, lucide-react, react, react-dom (+7 more)
-
-### Community 13 - "Contexts & Providers"
-Cohesion: 0.15
-Nodes (12): AsphericContext, AsphericProvider(), AsphericState, OpticalProvider(), initialState, Theme, ThemeContext, ThemeProvider() (+4 more)
 
 ### Community 14 - "Trial Lens Set (bench photo)"
 Cohesion: 0.31
@@ -164,35 +163,39 @@ Nodes (7): US Navy Hospital Eye Examination Photograph (050129-N-6477M-012), Cli
 Cohesion: 0.67
 Nodes (6): Trial Frame Reading Photograph, Presbyopia and Near-Vision Correction, Near-Vision Reading Card, Subjective Refraction Examination, Ophthalmic Trial Frame, Community Vision Screening Setting
 
+### Community 26 - "class-variance-authority"
+Cohesion: 0.43
+Nodes (4): class-variance-authority, ToggleGroupContext, ToggleGroupItem(), toggleVariants
+
 ## Ambiguous Edges - Review These
-- `Trial Lens Set` → `Accessories Compartment (occluders and marking pen)`  [AMBIGUOUS]
+- `Accessories Compartment (occluders and marking pen)` → `Trial Lens Set`  [AMBIGUOUS]
   src/assets/bench/trial-lens-set.jpg · relation: shares_data_with
-- `Trial Frame Reading Photograph` → `Presbyopia and Near-Vision Correction`  [AMBIGUOUS]
+- `Presbyopia and Near-Vision Correction` → `Trial Frame Reading Photograph`  [AMBIGUOUS]
   src/assets/bench/trial-frame-reading.jpg · relation: semantically_similar_to
 
 ## Knowledge Gaps
 - **22 isolated node(s):** `@fontsource-variable/geist`, `shadcn`, `tw-animate-css`, `@types/node`, `@types/react` (+17 more)
-  These have ≤1 connection - possible missing edges or undocumented components. (Counts symbols only; 196 node(s) total have ≤1 connection when file, concept and rationale nodes are included.)
-- **3 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
+  These have ≤1 connection - possible missing edges or undocumented components. (Counts symbols only; 197 node(s) total have ≤1 connection when file, concept and rationale nodes are included.)
+- **7 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
 
 ## Suggested Questions
 _Questions this graph is uniquely positioned to answer:_
 
-- **Why does `react` connect `Landing Page & Home` to `Sidebar Controls & UI Primitives`, `Aspheric Engine & Visualizer`, `App Shell & Layout`, `UI Primitives (Alert/Item/Popover)`, `package.json Manifest`, `Navigation & Theme Menus`, `Cards, Buttons & Contact`, `Contexts & Providers`, `Select Component Family`?**
-  _High betweenness centrality (0.291) - this node is a cross-community bridge._
+- **Why does `react` connect `Landing Page & Home` to `Sidebar Controls & UI Primitives`, `Aspheric Engine & Visualizer`, `App Shell & Layout`, `item.tsx`, `cn`, `package.json Manifest`, `Navigation & Theme Menus`, `Cards, Buttons & Contact`, `Select Component Family`, `class-variance-authority`, `popover.tsx`, `alert.tsx`?**
+  _High betweenness centrality (0.306) - this node is a cross-community bridge._
 - **What connects `@fontsource-variable/geist`, `shadcn`, `tw-animate-css` to the rest of the system?**
   _22 weakly-connected nodes found - possible documentation gaps or missing edges._
 - **Should `Sidebar Controls & UI Primitives` be split into smaller, more focused modules?**
-  _Cohesion score 0.0743127147766323 - nodes in this community are weakly interconnected._
-- **Why does `cn` connect `Sidebar Controls & UI Primitives` to `App Shell & Layout`, `UI Primitives (Alert/Item/Popover)`, `Routing & Route Tree`, `package.json Manifest`, `Navigation & Theme Menus`, `Cards, Buttons & Contact`, `Select Component Family`, `Resizable Panel Components`?**
-  _High betweenness centrality (0.071) - this node is a cross-community bridge._
+  _Cohesion score 0.08634538152610442 - nodes in this community are weakly interconnected._
+- **Why does `@tanstack/react-router` connect `App Shell & Layout` to `package.json Manifest`, `Navigation & Theme Menus`, `Landing Page & Home`?**
+  _High betweenness centrality (0.047) - this node is a cross-community bridge._
 - **Should `Aspheric Engine & Visualizer` be split into smaller, more focused modules?**
-  _Cohesion score 0.08364197530864198 - nodes in this community are weakly interconnected._
+  _Cohesion score 0.0696528555431131 - nodes in this community are weakly interconnected._
 
 ### Low-confidence Hints
 _AMBIGUOUS edges — the extractor was unsure. Verify before acting on these._
 
-- **What is the exact relationship between `Trial Lens Set` and `Accessories Compartment (occluders and marking pen)`?**
+- **What is the exact relationship between `Accessories Compartment (occluders and marking pen)` and `Trial Lens Set`?**
   _Edge tagged AMBIGUOUS (relation: shares_data_with) - confidence is low._
-- **What is the exact relationship between `Trial Frame Reading Photograph` and `Presbyopia and Near-Vision Correction`?**
+- **What is the exact relationship between `Presbyopia and Near-Vision Correction` and `Trial Frame Reading Photograph`?**
   _Edge tagged AMBIGUOUS (relation: semantically_similar_to) - confidence is low._
