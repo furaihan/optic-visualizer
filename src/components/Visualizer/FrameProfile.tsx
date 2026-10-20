@@ -106,9 +106,9 @@ export const FrameProfile: React.FC<FrameProfileProps> = ({
         onClick={() => onSelectTarget?.(activeTarget === 'groove' ? null : 'groove')}
       >
         <line
-          x1={grooveX}
+          x1={grooveX * scale}
           y1={top}
-          x2={grooveX}
+          x2={grooveX * scale}
           y2={bottom}
           stroke="currentColor"
           strokeWidth={activeTarget === 'groove' ? 1.75 : 1}
@@ -123,7 +123,7 @@ export const FrameProfile: React.FC<FrameProfileProps> = ({
           fontSize={16}
           style={{ fontVariantNumeric: 'tabular-nums' }}
         >
-          {Math.round(frame.depth ? (grooveX / scale / frame.depth) * 100 : 0)}%
+          {Math.round(frame.depth ? (grooveX / frame.depth) * 100 : 0)}%
         </text>
       </g>
 

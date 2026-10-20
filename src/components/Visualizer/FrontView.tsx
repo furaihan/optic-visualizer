@@ -95,7 +95,7 @@ export const FrontView: React.FC<FrontViewProps> = ({
       {/* Pupil and PD crosshair, in the fitting ink: this mark is the one thing
           on the drawing that comes from the fitting group, not from the frame. */}
       <g
-        transform={`translate(${x + (frame.a / 2 - result.decentration) * scale}, ${
+        transform={`translate(${x + (frame.a / 2 - (result.decentrationH ?? result.decentration)) * scale}, ${
           originY + (frame.b / 2 - patient.fittingHeight) * scale
         })`}
         className="text-sheet-fit"

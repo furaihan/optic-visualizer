@@ -40,6 +40,7 @@ export function calculateLens(
   // 1. Decentration
   const framePD = a + dbl;
   const decentration = Math.abs(framePD - pd) / 2; // Horizontal
+  const decentrationH = (framePD - pd) / 2; // Signed horizontal
   const decentrationV = Math.abs(patient.fittingHeight - frame.b / 2); // Vertical
   const decentrationCombined = Math.sqrt(
     decentration * decentration + decentrationV * decentrationV,
@@ -93,7 +94,7 @@ export function calculateLens(
     ct = minThickness;
     // Similar logic: ensure thickness components correctly combine
     if (backPower <= 0) {
-      et = ct + Math.abs(s2 - s1);
+      et = ct + (s2 - s1);
     } else {
       et = ct + Math.abs(s1) + Math.abs(s2);
     }
@@ -212,6 +213,7 @@ export function calculateLens(
     s1,
     s2,
     decentration,
+    decentrationH,
     y,
     weight,
     density,

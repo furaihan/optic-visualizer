@@ -55,6 +55,7 @@ export interface CalculationResult {
   s1: number; // Sagitta front
   s2: number; // Sagitta back
   decentration: number;
+  decentrationH?: number; // signed horizontal decentration (framePD - PD)/2
   y: number; // Half diameter for max thickness calc
   weight: number; // Estimated lens weight in grams
   density: number; // Material density in g/cm³
@@ -80,6 +81,7 @@ export interface AsphericCalculationResult {
   s1: number;
   s2: number;
   decentration: number;
+  decentrationH?: number; // signed horizontal decentration (framePD - PD)/2
   y: number;
   weight: number;
   density: number;

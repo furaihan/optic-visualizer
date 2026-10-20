@@ -45,23 +45,25 @@ export const Visualizer: React.FC<VisualizerProps> = React.memo(
     const [target, setTarget] = useState<CaliperTarget>(null);
 
     const primaryPos = useMemo<LensPosition>(() => {
-      const etX_start = -result.anteriorProtrusion + result.s1;
-      const etX_end = etX_start + result.et;
-      const grooveX = etX_start + result.et / 2;
-      const frontApexX = -result.anteriorProtrusion;
+      const groovePosition = frame.depth * bevelPercent;
+      const etX_start = groovePosition - result.et / 2;
+      const etX_end = groovePosition + result.et / 2;
+      const grooveX = groovePosition;
+      const frontApexX = etX_start - result.s1;
       const backApexX = frontApexX + result.ct;
       return { etX_start, etX_end, grooveX, frontApexX, backApexX };
-    }, [result]);
+    }, [result, frame.depth, bevelPercent]);
 
     const comparePos = useMemo<LensPosition | null>(() => {
       if (!compareResult) return null;
-      const etX_start = -compareResult.anteriorProtrusion + compareResult.s1;
-      const etX_end = etX_start + compareResult.et;
-      const grooveX = etX_start + compareResult.et / 2;
-      const frontApexX = -compareResult.anteriorProtrusion;
+      const groovePosition = frame.depth * bevelPercent;
+      const etX_start = groovePosition - compareResult.et / 2;
+      const etX_end = groovePosition + compareResult.et / 2;
+      const grooveX = groovePosition;
+      const frontApexX = etX_start - compareResult.s1;
       const backApexX = frontApexX + compareResult.ct;
       return { etX_start, etX_end, grooveX, frontApexX, backApexX };
-    }, [compareResult]);
+    }, [compareResult, frame.depth, bevelPercent]);
 
     const mm = (v: number) => `${v.toFixed(2)} mm`;
 

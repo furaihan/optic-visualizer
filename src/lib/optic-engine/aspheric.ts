@@ -60,6 +60,7 @@ export function calculateAsphericLens(
   // Decentration (same as spherical)
   const framePD = a + dbl;
   const decentration = Math.abs(framePD - pd) / 2;
+  const decentrationH = (framePD - pd) / 2;
   const decentrationV = Math.abs(fittingHeight - frame.b / 2);
   const decentrationCombined = Math.sqrt(
     decentration * decentration + decentrationV * decentrationV,
@@ -91,8 +92,7 @@ export function calculateAsphericLens(
       })
     : r1 === Infinity
       ? 0
-      : Math.abs(r1) -
-        Math.sqrt(Math.max(0, Math.abs(r1) * Math.abs(r1) - y * y));
+      : Math.abs(r1) - Math.sqrt(Math.max(0, Math.abs(r1) * Math.abs(r1) - Math.min(Math.abs(y), Math.abs(r1) * 0.999) ** 2));
 
   const s2 = asphericBack.isActive
     ? getAsphericSag(r2, y, asphericBack.conic, {
@@ -103,8 +103,7 @@ export function calculateAsphericLens(
       })
     : r2 === Infinity
       ? 0
-      : Math.abs(r2) -
-        Math.sqrt(Math.max(0, Math.abs(r2) * Math.abs(r2) - y * y));
+      : Math.abs(r2) - Math.sqrt(Math.max(0, Math.abs(r2) * Math.abs(r2) - Math.min(Math.abs(y), Math.abs(r2) * 0.999) ** 2));
 
   // Thickness (same logic as spherical for now - dapat di-refine)
   let ct: number, et: number;
@@ -187,6 +186,7 @@ export function calculateAsphericLens(
     s1,
     s2,
     decentration,
+    decentrationH,
     y,
     weight,
     density,
