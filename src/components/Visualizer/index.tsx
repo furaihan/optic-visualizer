@@ -9,16 +9,32 @@ import { EdgeDetail } from './EdgeDetail';
 import { SheetDefs } from './SheetDefs';
 import { CompareLegend } from './CompareLegend';
 import { useMediaQuery } from '../../hooks/useMediaQuery';
+import { useElementSize } from '../../hooks/useElementWidth';
+import { sheetGeometry, SHEET, CHAR_WIDTH } from './sheet';
+import { Tabs, TabsList, TabsTrigger } from '../ui/tabs';
 
 type CaliperRow = {
   id: Exclude<CaliperTarget, null>;
   name: string;
+  /** The short name, for the sheet's narrow row. */
+  short: string;
+  /** The value with its unit. */
   value: string;
+  /** The value on its own, for the narrow row where the unit does not fit. */
+  number: string;
   compareValue?: string;
+  /** The threshold, with its unit. */
   limit: string;
+  /** The threshold on its own, for the narrow row. */
+  limitShort: string;
   ok: boolean;
   note: string;
 };
+
+/**
+ * The sheet's proportions live in ./sheet, so the spherical board and the
+ * aspheric board are cut from the same pattern.
+ */
 
 /**
  * The drawing board.
@@ -40,9 +56,13 @@ export const Visualizer: React.FC<VisualizerProps> = React.memo(
     view,
     highlightedLimit = null,
     bevelPercent = 0.33,
+    variant = 'classic',
+    onViewChange,
   }) => {
     const t = translations[lang];
     const [target, setTarget] = useState<CaliperTarget>(null);
+    const sheet = SHEET[variant];
+    const { ref: boardRef, width, height } = useElementSize<HTMLDivElement>();
 
     const primaryPos = useMemo<LensPosition>(() => {
       const groovePosition = frame.depth * bevelPercent;
@@ -79,44 +99,59 @@ export const Visualizer: React.FC<VisualizerProps> = React.memo(
       {
         id: 'ct',
         name: t.center,
+        short: t.shortCalCenter,
         value: mm(result.ct),
+        number: result.ct.toFixed(2),
         compareValue: compareResult ? against(compareResult.ct) : undefined,
-        limit: '≥ 1.00',
+        limit: '≥ 1.00 mm',
+        limitShort: '≥1.00',
         ok: result.ct >= 1,
         note: t.caliperCt,
       },
       {
         id: 'et',
         name: t.edgeThick,
+        short: t.shortCalEdge,
         value: mm(result.et),
+        number: result.et.toFixed(2),
         compareValue: compareResult ? against(compareResult.et) : undefined,
-        limit: '≤ 6.00',
+        limit: '≤ 6.00 mm',
+        limitShort: '≤6.00',
         ok: result.et <= 6,
         note: t.caliperEt,
       },
       {
         id: 'anterior',
         name: t.anteriorProt,
+        short: t.shortCalAnterior,
         value: mm(result.anteriorProtrusion),
+        number: result.anteriorProtrusion.toFixed(2),
         compareValue: compareResult ? against(compareResult.anteriorProtrusion) : undefined,
-        limit: '≤ 1.50',
+        limit: '≤ 1.50 mm',
+        limitShort: '≤1.50',
         ok: result.anteriorProtrusion <= 1.5,
         note: t.caliperAnterior,
       },
       {
         id: 'posterior',
         name: t.posteriorProt,
+        short: t.shortCalPosterior,
         value: mm(result.posteriorProtrusion),
+        number: result.posteriorProtrusion.toFixed(2),
         compareValue: compareResult ? against(compareResult.posteriorProtrusion) : undefined,
-        limit: '≤ 2.00',
+        limit: '≤ 2.00 mm',
+        limitShort: '≤2.00',
         ok: result.posteriorProtrusion <= 2,
         note: t.caliperPosterior,
       },
       {
         id: 'groove',
         name: t.groove,
+        short: t.shortCalGroove,
         value: `${Math.round(bevelPercent * 100)}%`,
-        limit: '0–100',
+        number: `${Math.round(bevelPercent * 100)}%`,
+        limit: '0–100%',
+        limitShort: '0–100',
         ok: true,
         note: t.caliperGroove,
       },
@@ -139,7 +174,6 @@ export const Visualizer: React.FC<VisualizerProps> = React.memo(
     // further: the board is height-bound, so a taller detail would only shrink
     // the whole sheet back down again.
     const detailZoom = comparing ? 14 : 13;
-    const frontScale = 2.6;
 
     const minX = -Math.max(result.anteriorProtrusion, compareResult?.anteriorProtrusion ?? 0);
     const maxX = Math.max(
@@ -160,35 +194,50 @@ export const Visualizer: React.FC<VisualizerProps> = React.memo(
     // assumed, which both over-declared the board and let the drawing overrun.
     const detailH = 18 * detailZoom;
 
-    const frontW = (frame.a * 2 + frame.dbl) * frontScale;
-    const frontH = (frame.b + 8) * frontScale;
+    const geo = sheetGeometry({
+      variant,
+      sectionW,
+      sectionH,
+      detailW,
+      detailH,
+      frontW1: frame.a * 2 + frame.dbl,
+      frontH1: frame.b + 8,
+      inset: Math.abs(minX) * S,
+      detailInset: Math.abs(minX) * detailZoom,
+      frontInset1: frame.a + frame.dbl,
+      compact,
+      canvasW: width,
+      canvasH: height,
+    });
 
-    const PAD = 24;
-    const GAP = 44;
-    // The bands above and below the drawing are sized to what is actually
-    // drawn in them, not rounded up. The board is height-bound — 486 units of
-    // canvas into ~350px — so every unit of slack here is taken straight out
-    // of the type size: 60 units of margin is 60 units of smaller labels.
-    // Above: the protrusion dimension and its value. Below: the groove
-    // percentage and the view's own name.
-    const DIM_BAND = 60;
-    const LABEL_BAND = 46;
+    // The elevation is drawn at the magnification that fills the sheet, and it
+    // gives up its place on the strip when no magnification fits.
+    const frontScale = geo.frontScale ?? 2;
+    const showFront = geo.frontScale !== null;
 
-    const BOARD_W = compact
-      ? PAD + sectionW + 26 + detailW + PAD
-      : PAD + sectionW + GAP + detailW + GAP + frontW + PAD + 54;
-    // The sheet is one screen tall where it can be: the board takes what is
-    // left after the claim, the order and the schedule.
-    const BOARD_H =
-      Math.max(sectionH, detailH, compact ? 0 : frontH) + PAD + LABEL_BAND + DIM_BAND + 18;
-    const originX = PAD + Math.abs(minX) * S;
-    const originY = PAD + DIM_BAND + Math.max(sectionH, detailH, frontH) / 2;
-    const detailOriginX = PAD + sectionW + (compact ? 26 : GAP) + Math.abs(minX) * detailZoom;
-    const frontOriginX = PAD + sectionW + GAP + detailW + GAP + (frame.a + frame.dbl) * frontScale;
+    const PAD = geo.pad;
+    const DIM_BAND = geo.dimBand;
+    const BOARD_W = geo.width;
+    const BOARD_H = geo.height;
+    const originX = geo.originX;
+    const originY = geo.originY;
+    const detailOriginX = geo.detailOriginX;
+    const frontOriginX = geo.frontOriginX;
     const frontOriginY = originY;
 
     const viewTitle =
       view === 'side' ? t.crossSection : view === 'top' ? t.topDown : t.frontView;
+
+    // The center thickness is measured across the lens, which sits close to
+    // the sheet's left edge. Its value is kept inside the sheet: centred on
+    // the line where it fits, and at the line's start where it does not.
+    const ctText = `CT ${result.ct.toFixed(2)}`;
+    const ctHalf = (ctText.length * CHAR_WIDTH) / 2;
+    const ctCentre = originX + ((primaryPos.frontApexX + primaryPos.backApexX) / 2) * S;
+    const ctLabel =
+      ctCentre - ctHalf >= 4
+        ? { x: ctCentre, anchor: 'middle' as const }
+        : { x: originX + primaryPos.frontApexX * S + 6, anchor: 'start' as const };
 
     const pick = (next: Exclude<CaliperTarget, null>) =>
       setTarget((current) => (current === next ? null : next));
@@ -196,24 +245,69 @@ export const Visualizer: React.FC<VisualizerProps> = React.memo(
     return (
       <div
         data-ui
+        ref={boardRef}
         className="flex h-full min-h-[340px] w-full flex-col overflow-hidden rounded-sm bg-sheet-stage"
       >
-        <div className="flex shrink-0 flex-wrap items-baseline justify-between gap-x-4 gap-y-1 px-4 pt-3">
-          <h2 className="text-[13px] font-medium text-sheet-ink">{viewTitle}</h2>
-          {compareResult && view !== 'front' ? (
-            <CompareLegend
-              lang={lang}
-              index={lens.index}
-              compareIndex={compareLens?.index ?? null}
-              result={result}
-              compareResult={compareResult}
-            />
-          ) : (
-            <p className="text-[13px] text-sheet-muted">
-              {compareResult && view === 'front' ? t.compareFrontNote : t.scaleNote}
-            </p>
-          )}
-        </div>
+        {/* The sheet's header says what the sheet has to say beyond the
+            drawing itself: the drawing switcher, the comparison, or the
+            view's own name. On the workbench it is only there when there is
+            something to say — every row it takes is a row the drawing does
+            not get. */}
+        {(variant === 'classic' || onViewChange || (compareResult && view !== 'front')) && (
+          <div
+            className={`flex shrink-0 flex-wrap items-center justify-between gap-x-4 gap-y-1 ${
+              compact ? 'px-3 py-1' : 'px-4 pt-3'
+            }`}
+          >
+            {onViewChange ? (
+              <Tabs
+                value={view}
+                onValueChange={(v) => onViewChange(v as 'side' | 'top' | 'front')}
+              >
+                <TabsList
+                  className={`gap-0 rounded-sm bg-sheet-panel p-0.5 ${
+                    compact ? 'h-7' : 'h-8'
+                  }`}
+                >
+                  <TabsTrigger
+                    value="side"
+                    className="h-full rounded-sm px-2 text-[13px] font-medium text-sheet-muted data-active:bg-sheet-ground data-active:text-sheet-ink group-data-[variant=default]/tabs-list:data-active:shadow-none"
+                  >
+                    {t.sideProfile}
+                  </TabsTrigger>
+                  <TabsTrigger
+                    value="top"
+                    className="h-full rounded-sm px-2 text-[13px] font-medium text-sheet-muted data-active:bg-sheet-ground data-active:text-sheet-ink group-data-[variant=default]/tabs-list:data-active:shadow-none"
+                  >
+                    {t.topDown}
+                  </TabsTrigger>
+                  <TabsTrigger
+                    value="front"
+                    className="h-full rounded-sm px-2 text-[13px] font-medium text-sheet-muted data-active:bg-sheet-ground data-active:text-sheet-ink group-data-[variant=default]/tabs-list:data-active:shadow-none"
+                  >
+                    {t.frontView}
+                  </TabsTrigger>
+                </TabsList>
+              </Tabs>
+            ) : (
+              <h2 className="text-[13px] font-medium text-sheet-ink">{viewTitle}</h2>
+            )}
+
+            {compareResult && view !== 'front' ? (
+              <CompareLegend
+                lang={lang}
+                index={lens.index}
+                compareIndex={compareLens?.index ?? null}
+                result={result}
+                compareResult={compareResult}
+              />
+            ) : variant === 'classic' ? (
+              <p className="text-[13px] text-sheet-muted">
+                {compareResult && view === 'front' ? t.compareFrontNote : t.scaleNote}
+              </p>
+            ) : null}
+          </div>
+        )}
 
         {/* The drawing strip. It keeps a floor of its own so the schedule
             below can never squeeze it to a sliver on a short screen. */}
@@ -279,7 +373,10 @@ export const Visualizer: React.FC<VisualizerProps> = React.memo(
                   />
                 )}
 
-                {/* CT across the lens. */}
+                {/* CT across the lens. The value sits above the line, and when
+                    the line is too close to the sheet's edge for the value to
+                    fit, the value moves to the line's start rather than off
+                    the sheet. */}
                 <g
                   className={`cursor-help ${target === 'ct' ? 'text-sheet-warning' : 'text-sheet-ink'}`}
                   onMouseEnter={() => setTarget('ct')}
@@ -297,9 +394,9 @@ export const Visualizer: React.FC<VisualizerProps> = React.memo(
                     markerEnd="url(#sheet-arrow)"
                   />
                   <text
-                    x={originX + ((primaryPos.frontApexX + primaryPos.backApexX) / 2) * S}
+                    x={ctLabel.x}
                     y={originY - (frame.b / 2) * S * 0.55 - 8}
-                    textAnchor="middle"
+                    textAnchor={ctLabel.anchor}
                     fill="currentColor"
                     fontSize={16}
                     fontWeight={600}
@@ -322,7 +419,8 @@ export const Visualizer: React.FC<VisualizerProps> = React.memo(
                   compareResult={compareResult}
                   comparePos={comparePos}
                 />
-                {!compact && (
+
+                {showFront && (
                   <FrontView
                     frame={frame}
                     patient={patient}
@@ -341,14 +439,21 @@ export const Visualizer: React.FC<VisualizerProps> = React.memo(
                     run off the left edge of the sheet. */}
                 <g className="text-sheet-muted" fill="currentColor" fontSize={16}>
                   {[
-                    { text: t.crossSection, x: originX },
-                    { text: t.edgeDetail, x: detailOriginX + detailW / 2 },
-                    ...(compact ? [] : [{ text: t.frontView, x: frontOriginX + frontW / 4 }]),
+                    { text: compact ? t.shortCrossSection : t.crossSection, x: originX },
+                    { text: compact ? t.shortEdgeDetail : t.edgeDetail, x: detailOriginX + detailW / 2 },
+                    ...(showFront
+                      ? [
+                          {
+                            text: t.frontView,
+                            x: frontOriginX + (frame.a * 2 + frame.dbl) * frontScale * 0.25,
+                          },
+                        ]
+                      : []),
                   ].map((label) => {
-                    const half = (label.text.length * 12 * 0.54) / 2;
+                    const half = (label.text.length * CHAR_WIDTH) / 2;
                     const x = Math.min(Math.max(label.x, half + 4), BOARD_W - half - 4);
                     return (
-                      <text key={label.text} x={x} y={BOARD_H - 14} textAnchor="middle">
+                      <text key={label.text} x={x} y={BOARD_H - sheet.nameY} textAnchor="middle">
                         {label.text}
                       </text>
                     );
@@ -388,8 +493,13 @@ export const Visualizer: React.FC<VisualizerProps> = React.memo(
         </div>
 
         {/* The schedule: what the drawing measures, and its tolerance. */}
-        <div className="shrink-0 px-2 pb-2">
-          <div className="grid grid-cols-2 gap-px bg-sheet-stage sm:grid-cols-3 lg:grid-cols-5">            {calipers.map((row, index) => {
+        <div className={`shrink-0 px-2 ${variant === 'classic' ? 'pb-2' : 'pb-1.5'}`}>
+          <div
+            className={`grid gap-px bg-sheet-stage ${
+              compact ? 'grid-cols-5' : 'grid-cols-2 sm:grid-cols-3 lg:grid-cols-5'
+            }`}
+          >
+            {calipers.map((row, index) => {
               const isActive = target === row.id;
               return (
                 <button
@@ -401,39 +511,94 @@ export const Visualizer: React.FC<VisualizerProps> = React.memo(
                   onBlur={() => setTarget(null)}
                   onClick={() => pick(row.id)}
                   aria-pressed={isActive}
-                  className={`sheet-rise delay-${index + 1} flex flex-col gap-0.5 px-3 py-2 text-left transition-colors duration-150 ${
+                  className={`sheet-rise delay-${index + 1} flex flex-col gap-0.5 text-left transition-colors duration-150 ${
+                    compact
+                      ? 'px-1 py-1'
+                      : variant === 'classic'
+                        ? 'px-3 py-2'
+                        : 'px-3 py-1'
+                  } ${
                     isActive ? 'bg-sheet-ground' : 'bg-sheet-panel hover:bg-sheet-info'
                   }`}
                 >
-                  <span className="text-[13px] leading-tight text-sheet-muted">{row.name}</span>
-                  {/* The comparison value sits on the value's own line, not on a
-                      line of its own: every extra line in the schedule takes
-                      height straight out of the drawing above it. */}
-                  <span className="flex items-baseline gap-1.5 leading-tight">
-                    <span className="text-[20px] font-medium text-sheet-ink tnum">{row.value}</span>
-                    {row.compareValue && (
-                      <span className="text-[13px] text-sheet-muted tnum">
-                        → {row.compareValue}
+                  {/* On a narrow sheet the row is two lines: the caliper's name
+                      above, the value below. Every line the schedule takes is
+                      a line the drawing does not get, and the thresholds are
+                      in the table under the sheet. */}
+                  {compact ? (
+                    <>
+                      <span className="text-[12px] leading-tight text-sheet-muted">
+                        {row.short}
                       </span>
-                    )}
-                  </span>
-                  <span className={`text-[13px] leading-tight tnum ${row.ok ? 'text-sheet-muted' : 'text-sheet-warning'}`}>
-                    {row.ok ? t.withinLimit : t.overLimit} · {row.limit} mm
-                  </span>
+                      <span
+                        className={`font-medium leading-tight tnum text-[16px] ${
+                          row.ok ? 'text-sheet-ink' : 'text-sheet-warning'
+                        }`}
+                      >
+                        {row.number}
+                      </span>
+                    </>
+                  ) : (
+                    <>
+                      <span className="text-[13px] leading-tight text-sheet-muted">
+                        {row.name}
+                      </span>
+                      <span className="flex items-baseline gap-1.5 leading-tight">
+                        <span
+                          className={`font-medium text-sheet-ink tnum ${
+                            variant === 'classic' ? 'text-[20px]' : 'text-[18px]'
+                          }`}
+                        >
+                          {row.value}
+                        </span>
+                        {row.compareValue && (
+                          <span className="text-[13px] text-sheet-muted tnum">
+                            → {row.compareValue}
+                          </span>
+                        )}
+                      </span>
+                      <span
+                        className={`leading-tight tnum ${
+                          row.ok ? 'text-sheet-muted' : 'text-sheet-warning'
+                        } ${variant === 'classic' ? 'text-[13px]' : 'text-[12px]'}`}
+                      >
+                        {row.ok ? t.withinLimit : t.overLimit} · {row.limit}
+                      </span>
+                    </>
+                  )}
                 </button>
               );
             })}
           </div>
 
-          {/* The definition of whichever caliper is being read. */}
-          <p
-            key={active ? active.id : 'hint'}
-            className={`caliper-snap mt-2 min-h-[20px] px-1 text-[13px] leading-snug ${
-              active ? 'text-sheet-ink' : 'text-sheet-muted'
-            }`}
-          >
-            {active ? active.note : t.caliperHint}
-          </p>
+          {/* The caption row: the definition of whichever caliper is being
+              read, and the scale the sheet is drawn at. */}
+          {variant === 'classic' ? (
+            <p
+              key={active ? active.id : 'hint'}
+              className={`caliper-snap mt-2 min-h-[20px] px-1 text-[13px] leading-snug ${
+                active ? 'text-sheet-ink' : 'text-sheet-muted'
+              }`}
+            >
+              {active ? active.note : t.caliperHint}
+            </p>
+          ) : (
+            <div className="mt-1.5 flex min-h-[20px] items-baseline justify-between gap-4 px-1">
+              <p
+                key={active ? active.id : 'hint'}
+                className={`caliper-snap text-[13px] leading-snug ${
+                  active ? 'text-sheet-ink' : 'text-sheet-muted'
+                } ${compact ? 'line-clamp-1' : ''}`}
+              >
+                {active ? active.note : t.caliperHint}
+              </p>
+              {!compact && !(compareResult && view !== 'front') && (
+                <p className="shrink-0 whitespace-nowrap text-[13px] text-sheet-muted">
+                  {t.sheetScaleNote.replace('{s}', String(S)).replace('{f}', String(frontScale))}
+                </p>
+              )}
+            </div>
+          )}
         </div>
       </div>
     );
@@ -450,7 +615,9 @@ export const Visualizer: React.FC<VisualizerProps> = React.memo(
       prevProps.view === nextProps.view &&
       prevProps.highlightedLimit === nextProps.highlightedLimit &&
       prevProps.frameType === nextProps.frameType &&
-      prevProps.bevelPercent === nextProps.bevelPercent
+      prevProps.bevelPercent === nextProps.bevelPercent &&
+      prevProps.variant === nextProps.variant &&
+      prevProps.onViewChange === nextProps.onViewChange
     );
   },
 );

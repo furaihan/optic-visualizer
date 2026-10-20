@@ -1,33 +1,33 @@
-# Graph Report - optic-tools  (2026-10-20)
+# Graph Report - optic-tools  (2026-10-21)
 
 ## Corpus Check
-- 124 files · ~156,547 words
+- 136 files · ~162,607 words
 - Verdict: corpus is large enough that graph structure adds value.
 - Unclassified: 5 file(s) not represented in the graph (top: (none) 2, .lock 1, .toml 1)
 
 ## Summary
-- 614 nodes · 1812 edges · 29 communities (22 shown, 7 thin omitted)
-- Extraction: 97% EXTRACTED · 3% INFERRED · 0% AMBIGUOUS · INFERRED: 49 edges (avg confidence: 0.85)
+- 655 nodes · 2002 edges · 26 communities (22 shown, 4 thin omitted)
+- Extraction: 97% EXTRACTED · 2% INFERRED · 0% AMBIGUOUS · INFERRED: 49 edges (avg confidence: 0.85)
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
-- Built from commit: `71f16ef0`
+- Built from commit: `2046c86c`
 - Run `git rev-parse HEAD` and compare to check if the graph is stale.
 - Run `graphify update .` after code changes (no API cost).
 
 ## Community Hubs (Navigation)
 - Sidebar Controls & UI Primitives
 - Aspheric Engine & Visualizer
-- App Shell & Layout
+- @tanstack/react-router
 - Landing Page & Home
-- item.tsx
+- AsphericSidebar.tsx
 - README Domain Concepts
-- cn
+- optic-engine/types.ts
 - TypeScript Path Aliases
 - shadcn components.json Config
 - package.json Manifest
 - Navigation & Theme Menus
-- Cards, Buttons & Contact
+- MobileWorkbench.tsx
 - Runtime Dependencies
 - index.css (global stylesheet)
 - Trial Lens Set (bench photo)
@@ -42,31 +42,29 @@
 - Intent Skills Sync Script
 - Resizable Panel Components
 - Global CSS Type Shim
-- class-variance-authority
-- alert.tsx
 
 ## God Nodes (most connected - your core abstractions)
-1. `react` - 67 edges
+1. `react` - 70 edges
 2. `Language` - 58 edges
-3. `translations` - 41 edges
-4. `FrameParameters` - 28 edges
-5. `cn` - 26 edges
-6. `CalculationResult` - 25 edges
-7. `@tanstack/react-router` - 22 edges
-8. `PatientParameters` - 22 edges
-9. `lucide-react` - 20 edges
-10. `@base-ui/react` - 18 edges
+3. `translations` - 46 edges
+4. `CalculationResult` - 30 edges
+5. `FrameParameters` - 29 edges
+6. `cn` - 26 edges
+7. `@tanstack/react-router` - 23 edges
+8. `lucide-react` - 23 edges
+9. `PatientParameters` - 23 edges
+10. `Visualizer` - 20 edges
 
 ## Surprising Connections (you probably didn't know these)
 - `SimulatorLayout()` --calls--> `BrandRule()`  [EXTRACTED]
   src/routes/simulator-layout.tsx → src/components/BrandRule.tsx
 - `LabelWithTooltipProps` --references--> `Language`  [EXTRACTED]
   src/components/Sidebar/LabelWithTooltip.tsx → src/lib/translations/types.ts
+- `ItemSeparator()` --calls--> `Separator()`  [EXTRACTED]
+  src/components/ui/item.tsx → src/components/ui/separator.tsx
 - `HTML Entry Point (index.html)` --conceptually_related_to--> `Optical Tools`  [INFERRED]
   index.html → README.md
 - `AMP - Aktriyo Measuring Project (page title)` --semantically_similar_to--> `Akademi Optometri Yogyakarta (Aktriyo)`  [INFERRED] [semantically similar]
-  index.html → README.md
-- `AMP - Aktriyo Measuring Project (page title)` --semantically_similar_to--> `AMP_V4.2.0 Engine Core`  [INFERRED] [semantically similar]
   index.html → README.md
 
 ## Import Cycles
@@ -77,31 +75,35 @@
 - **Spherical Lens Thickness & Protrusion Calculation Pipeline** — readme_combined_decentration, readme_effective_radius, readme_surface_radii, readme_sagitta_formula, readme_center_edge_thickness, readme_frame_protrusion [EXTRACTED 1.00]
 - **AGENTS.md Agent Workflow Policies** — agents_intent_skill_loading, agents_graphify_knowledge_graph, agents_graphify_query_first_rule [INFERRED 0.85]
 
-## Communities (29 total, 7 thin omitted)
+## Communities (26 total, 4 thin omitted)
 
 ### Community 0 - "Sidebar Controls & UI Primitives"
-Cohesion: 0.09
-Nodes (54): lucide-react, AsphericSidebar(), AsphericSurfacePanel(), BrandRule(), BevelControl(), Control(), FittingSpecsSection(), FrameGeometrySection() (+46 more)
+Cohesion: 0.06
+Nodes (42): @base-ui/react, class-variance-authority, cn, BevelControl(), Control(), FrameGeometrySection(), FrameInput(), FrameInputProps (+34 more)
 
 ### Community 1 - "Aspheric Engine & Visualizer"
-Cohesion: 0.07
-Nodes (72): AsphericSidebarProps, asphericPath(), AsphericVisualizer, AsphericVisualizerProps, LensPosition, sphericalArc(), Cell, JobTicketProps (+64 more)
+Cohesion: 0.06
+Nodes (78): vitest, AsphericSidebarProps, asphericPath(), AsphericVisualizer, AsphericVisualizerProps, LensPosition, sphericalArc(), MobileTabManager() (+70 more)
 
-### Community 2 - "App Shell & Layout"
-Cohesion: 0.08
-Nodes (52): @tanstack/react-router, AsphericDesktopGrid(), ErrorBoundary, Props, State, AppFooter(), DesktopGrid(), HeaderBar() (+44 more)
+### Community 2 - "@tanstack/react-router"
+Cohesion: 0.14
+Nodes (22): @tanstack/react-router, SimulatorShell(), SimulatorShellProps, useResponsiveViewport(), AsphericPage(), VisualizerPage(), asphericRoute, contactRoute (+14 more)
 
 ### Community 3 - "Landing Page & Home"
 Cohesion: 0.11
-Nodes (33): react, LandingBench(), LandingClosing(), LandingFaq(), LandingFeatures(), LandingFooter(), LandingHero(), LandingHowItWorks() (+25 more)
+Nodes (34): react, LandingBench(), LandingClosing(), LandingFaq(), LandingFeatures(), LandingFooter(), LandingHero(), LandingHowItWorks() (+26 more)
 
-### Community 4 - "item.tsx"
-Cohesion: 0.16
-Nodes (9): FieldSeparator(), Item(), ItemGroup(), ItemMedia(), itemMediaVariants, ItemSeparator(), ItemTitle(), itemVariants (+1 more)
+### Community 4 - "AsphericSidebar.tsx"
+Cohesion: 0.13
+Nodes (26): AsphericSidebar(), AsphericSurfacePanel(), BrandRule(), FittingSpecsSection(), GroupMarker(), INK, LensParametersSection(), LensParametersSectionProps (+18 more)
 
 ### Community 5 - "README Domain Concepts"
 Cohesion: 0.08
 Nodes (31): graphify-out Knowledge Graph, AMP - Aktriyo Measuring Project (page title), HTML Entry Point (index.html), Aberration Metrics (SA0, Coma X), Akademi Optometri Yogyakarta (Aktriyo), AMP_ASPH_V1.0.0 Aspheric Engine Core, AMP_V4.2.0 Engine Core, Project Architecture Layout (+23 more)
+
+### Community 6 - "optic-engine/types.ts"
+Cohesion: 0.10
+Nodes (36): react-dom, AsphericDesktopGrid(), ErrorBoundary, Props, State, AsphericMobileViews(), DesktopGrid(), MobileViews() (+28 more)
 
 ### Community 7 - "TypeScript Path Aliases"
 Cohesion: 0.08
@@ -113,15 +115,15 @@ Nodes (21): aliases, components, hooks, lib, ui, utils, iconLibrary, menuAccent 
 
 ### Community 9 - "package.json Manifest"
 Cohesion: 0.10
-Nodes (20): engines, bun, intent, skills, name, packageManager, private, type (+12 more)
+Nodes (19): engines, bun, intent, skills, name, packageManager, private, type (+11 more)
 
 ### Community 10 - "Navigation & Theme Menus"
-Cohesion: 0.08
-Nodes (23): react-dom, LandingNav(), GlobalNav(), NavItem(), RootLayout(), DropdownMenu(), DropdownMenuContent(), DropdownMenuItem() (+15 more)
+Cohesion: 0.11
+Nodes (22): LandingNav(), GlobalNav(), NavItem(), RootLayout(), MATERIAL_FOR, RefractiveIndexDropdown(), RefractiveIndexDropdownProps, DropdownMenu() (+14 more)
 
-### Community 11 - "Cards, Buttons & Contact"
-Cohesion: 0.22
-Nodes (6): Badge(), badgeVariants, Button(), Card(), CardContent(), ContactPage()
+### Community 11 - "MobileWorkbench.tsx"
+Cohesion: 0.12
+Nodes (26): lucide-react, AppFooter(), FooterFigures, CopyOrderButton(), HeaderBar(), HeaderBarProps, InspectorDrawer(), InspectorDrawerProps (+18 more)
 
 ### Community 12 - "Runtime Dependencies"
 Cohesion: 0.13
@@ -163,10 +165,6 @@ Nodes (7): US Navy Hospital Eye Examination Photograph (050129-N-6477M-012), Cli
 Cohesion: 0.67
 Nodes (6): Trial Frame Reading Photograph, Presbyopia and Near-Vision Correction, Near-Vision Reading Card, Subjective Refraction Examination, Ophthalmic Trial Frame, Community Vision Screening Setting
 
-### Community 26 - "class-variance-authority"
-Cohesion: 0.43
-Nodes (4): class-variance-authority, ToggleGroupContext, ToggleGroupItem(), toggleVariants
-
 ## Ambiguous Edges - Review These
 - `Accessories Compartment (occluders and marking pen)` → `Trial Lens Set`  [AMBIGUOUS]
   src/assets/bench/trial-lens-set.jpg · relation: shares_data_with
@@ -175,22 +173,22 @@ Nodes (4): class-variance-authority, ToggleGroupContext, ToggleGroupItem(), togg
 
 ## Knowledge Gaps
 - **22 isolated node(s):** `@fontsource-variable/geist`, `shadcn`, `tw-animate-css`, `@types/node`, `@types/react` (+17 more)
-  These have ≤1 connection - possible missing edges or undocumented components. (Counts symbols only; 197 node(s) total have ≤1 connection when file, concept and rationale nodes are included.)
-- **7 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
+  These have ≤1 connection - possible missing edges or undocumented components. (Counts symbols only; 208 node(s) total have ≤1 connection when file, concept and rationale nodes are included.)
+- **4 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
 
 ## Suggested Questions
 _Questions this graph is uniquely positioned to answer:_
 
-- **Why does `react` connect `Landing Page & Home` to `Sidebar Controls & UI Primitives`, `Aspheric Engine & Visualizer`, `App Shell & Layout`, `item.tsx`, `cn`, `package.json Manifest`, `Navigation & Theme Menus`, `Cards, Buttons & Contact`, `Select Component Family`, `class-variance-authority`, `popover.tsx`, `alert.tsx`?**
-  _High betweenness centrality (0.306) - this node is a cross-community bridge._
+- **Why does `react` connect `Landing Page & Home` to `Sidebar Controls & UI Primitives`, `Aspheric Engine & Visualizer`, `@tanstack/react-router`, `AsphericSidebar.tsx`, `optic-engine/types.ts`, `package.json Manifest`, `Navigation & Theme Menus`, `MobileWorkbench.tsx`, `Select Component Family`?**
+  _High betweenness centrality (0.294) - this node is a cross-community bridge._
 - **What connects `@fontsource-variable/geist`, `shadcn`, `tw-animate-css` to the rest of the system?**
   _22 weakly-connected nodes found - possible documentation gaps or missing edges._
 - **Should `Sidebar Controls & UI Primitives` be split into smaller, more focused modules?**
-  _Cohesion score 0.08634538152610442 - nodes in this community are weakly interconnected._
-- **Why does `@tanstack/react-router` connect `App Shell & Layout` to `package.json Manifest`, `Navigation & Theme Menus`, `Landing Page & Home`?**
-  _High betweenness centrality (0.047) - this node is a cross-community bridge._
+  _Cohesion score 0.058115025594700394 - nodes in this community are weakly interconnected._
+- **Why does `@tanstack/react-router` connect `@tanstack/react-router` to `package.json Manifest`, `Navigation & Theme Menus`, `Landing Page & Home`, `optic-engine/types.ts`?**
+  _High betweenness centrality (0.049) - this node is a cross-community bridge._
 - **Should `Aspheric Engine & Visualizer` be split into smaller, more focused modules?**
-  _Cohesion score 0.0696528555431131 - nodes in this community are weakly interconnected._
+  _Cohesion score 0.055757575757575756 - nodes in this community are weakly interconnected._
 
 ### Low-confidence Hints
 _AMBIGUOUS edges — the extractor was unsure. Verify before acting on these._

@@ -5,22 +5,19 @@ import { JobTicket } from '../sheet/JobTicket';
 import { MeasurementSheet } from '../sheet/MeasurementSheet';
 import { RecommendationRow } from '../sheet/RecommendationRow';
 import { useOpticalContext } from '../../contexts/OpticalContext';
-import { ScrollArea } from '../ui/scroll-area';
 import ErrorBoundary from '../ErrorBoundary';
 import type { SimulatorSearchParams } from '../../types/search-params';
-import { Tabs, TabsList, TabsTrigger, TabsContent } from '../ui/tabs';
 import { translations } from '../../lib/translations';
-import { AppFooter } from './AppFooter';
-import { ValidationAlerts } from './ValidationAlerts';
-import { HeaderBar } from './HeaderBar';
-import { useState } from 'react';
+import { WorkbenchLayout } from './WorkbenchLayout';
+import { labOrderLines } from '../../lib/labOrder';
+import { findingSentence } from '../../lib/verdict';
 
 /**
  * The workbench, desktop.
  *
- * Inspector on the left, then the workspace read top to bottom as one lab
- * sheet: the claim, the order, the drawing with its caliper schedule, then the
- * measured values and the engine's recommendation.
+ * The sheet, the order and the table, in the order a lab reads them. The
+ * drawing takes the height the rest of the frame leaves, so the sheet and its
+ * schedule land inside the first screen.
  */
 export function DesktopGrid() {
   const search = useSearch({ strict: false }) as unknown as SimulatorSearchParams;
@@ -28,7 +25,6 @@ export function DesktopGrid() {
   const view = search.view;
   const navigate = useNavigate();
   const t = translations[lang];
-  const [mode, setMode] = useState<'simple' | 'advanced'>('simple');
 
   const {
     lens,
@@ -40,6 +36,8 @@ export function DesktopGrid() {
     compareIndex,
     result,
     compareResult,
+    validation,
+    resetSession,
   } = useOpticalContext();
 
   const compareLens = compareMode ? { ...lens, index: compareIndex } : undefined;
@@ -64,112 +62,60 @@ export function DesktopGrid() {
         frameType={frameType}
         highlightedLimit={null}
         bevelPercent={bevelPercent}
+        variant="workbench"
       />
     </ErrorBoundary>
   );
 
+  const ticket = (
+    <JobTicket
+      lens={lens}
+      frame={frame}
+      patient={patient}
+      result={result}
+      frameType={frameType}
+      bevelPercent={bevelPercent}
+      lang={lang}
+      compareIndex={compareMode ? compareIndex : undefined}
+      compareResult={compareResult}
+      variant="compact"
+    />
+  );
+
+  const table = (isAdvanced: boolean) => (
+    <>
+      <MeasurementSheet
+        result={result}
+        compareResult={compareResult}
+        lang={lang}
+        frame={frame}
+        lens={lens}
+        isAdvanced={isAdvanced}
+      />
+      <RecommendationRow result={result} lensIndex={lens.index} lang={lang} />
+    </>
+  );
+
   return (
-    <div className="flex h-full w-full flex-1 overflow-hidden bg-sheet-ground">
-      <div className="hidden shrink-0 bg-sheet-ground md:block">
-        <Sidebar lang={lang} />
-      </div>
-
-      <div className="relative flex h-full min-w-0 flex-1 flex-col overflow-hidden">
-        <HeaderBar
-          lang={lang}
-          view={view}
-          activeTab="visualizer"
-          onViewChange={(v) => navigate({ search: { ...search, view: v } } as any)}
-        />
-        <ValidationAlerts lang={lang} />
-
-        <ScrollArea className="min-h-0 flex-1">
-          <div className="flex flex-col gap-12 px-3 pb-12 pt-4 sm:px-4">
-            {/* The claim of the page, in two lines at most. */}
-            <div className="flex flex-col gap-2 lg:max-w-[64ch]">
-              <h1 className="sheet-rise text-[28px] font-medium leading-[1.15] tracking-[-0.025em] text-sheet-ink sm:text-[34px]">
-                {t.workbenchTitle}
-              </h1>
-              <p className="sheet-rise delay-1 max-w-[58ch] text-[16px] leading-relaxed text-sheet-ink">
-                {t.workbenchLead}
-              </p>
-            </div>
-
-            <JobTicket
-              lens={lens}
-              frame={frame}
-              patient={patient}
-              result={result}
-              frameType={frameType}
-              bevelPercent={bevelPercent}
-              lang={lang}
-              compareIndex={compareMode ? compareIndex : undefined}
-              compareResult={compareResult}
-            />
-
-            {/* The drawing gets the full width, so all three views and the
-                schedule fit without any one of them shrinking to a thumbnail.
-                The board is height-bound, not width-bound: the drawing uses
-                barely half the width available, and its type scales with the
-                height alone. So the height is set by legibility — enough for a
-                15-unit label to land above 11px — and compare mode gets more
-                still, because two outlines a fraction of a millimetre apart
-                need every pixel the board can spare. */}
-            <div
-              className={`sheet-rise delay-2 ${
-                compareMode
-                  ? 'h-[62vh] min-h-[500px] xl:h-[560px]'
-                  : 'h-[56vh] min-h-[440px] xl:h-[500px]'
-              }`}
-            >
-              {board}
-            </div>
-
-            <Tabs value={mode} onValueChange={(v) => setMode(v as 'simple' | 'advanced')}>
-              <TabsList className="h-9 gap-0 rounded-none bg-sheet-panel p-1">
-                <TabsTrigger
-                  value="simple"
-                  className="h-full rounded-none px-3 text-[13px] font-medium text-sheet-muted data-active:bg-sheet-ground data-active:text-sheet-ink group-data-[variant=default]/tabs-list:data-active:shadow-none"
-                >
-                  {t.tabImage}
-                </TabsTrigger>
-                <TabsTrigger
-                  value="advanced"
-                  className="h-full rounded-none px-3 text-[13px] font-medium text-sheet-muted data-active:bg-sheet-ground data-active:text-sheet-ink group-data-[variant=default]/tabs-list:data-active:shadow-none"
-                >
-                  {t.tabStatistics}
-                </TabsTrigger>
-              </TabsList>
-
-              <TabsContent value="simple" className="mt-6 flex flex-col gap-8 focus-visible:outline-none">
-                <MeasurementSheet
-                  result={result}
-                  compareResult={compareResult}
-                  lang={lang}
-                  frame={frame}
-                  lens={lens}
-                  isAdvanced={false}
-                />
-                <RecommendationRow result={result} lensIndex={lens.index} lang={lang} />
-              </TabsContent>
-
-              <TabsContent value="advanced" className="mt-6 flex flex-col gap-8 focus-visible:outline-none">
-                <MeasurementSheet
-                  result={result}
-                  compareResult={compareResult}
-                  lang={lang}
-                  frame={frame}
-                  lens={lens}
-                  isAdvanced
-                />
-                <RecommendationRow result={result} lensIndex={lens.index} lang={lang} />
-              </TabsContent>
-            </Tabs>
-          </div>
-        </ScrollArea>
-
-        <AppFooter lang={lang} />
-      </div>
-    </div>
+    <WorkbenchLayout
+      lang={lang}
+      view={view}
+      onViewChange={(v) => navigate({ search: { ...search, view: v } } as any)}
+      title={t.workbenchTitle}
+      finding={result.error ? t.workbenchLead : findingSentence(result, lens, t)}
+      ticket={ticket}
+      board={board}
+      simple={table(false)}
+      advanced={table(true)}
+      inspector={<Sidebar lang={lang} />}
+      order={labOrderLines(lens, frame, patient, result, frameType, bevelPercent, t)}
+      onReset={resetSession}
+      errors={validation.errors}
+      figures={{
+        framePd: frame.a + frame.dbl,
+        decentration: result.decentration,
+        minBlank: result.y * 2 + 2,
+      }}
+    />
   );
 }

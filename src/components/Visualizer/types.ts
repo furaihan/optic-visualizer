@@ -20,6 +20,14 @@ export interface VisualizerProps {
   highlightedLimit?: "a" | "b" | "dbl" | "ed" | null;
   /** Bevel position as a share of frame depth, for the groove caliper. */
   bevelPercent?: number;
+  /**
+   * The sheet's proportions. `classic` is the sheet the landing page shows
+   * and it is left exactly as it was; `workbench` is the workbench's own,
+   * with tighter margins and a bigger type.
+   */
+  variant?: "classic" | "workbench";
+  /** The drawing switcher, when the page carries it on the drawing itself. */
+  onViewChange?: (view: "side" | "top" | "front") => void;
 }
 
 export interface LensPosition {

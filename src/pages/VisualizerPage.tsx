@@ -12,13 +12,8 @@ export default function VisualizerPage() {
 
   return (
     <SimulatorShell
-      lang={search.lang}
-      view={search.view}
-      activeTab={search.activeTab}
-      onViewChange={(view) => navigate({ search: { ...search, view } } as any)}
-      onTabChange={(tab) => navigate({ search: { ...search, activeTab: tab } } as any)}
-      grid={<DesktopGrid />}
-      mobileExtra={<MobileViews />}
+      desk={<DesktopGrid />}
+      phone={<MobileViews />}
     />
   );
 }

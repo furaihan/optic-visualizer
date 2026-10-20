@@ -168,6 +168,9 @@ export interface AppTranslations {
   coeffA8: string;
   sphAberration: string;
   coma: string;
+  asphericDetailK: string;
+  asphericDetailSa: string;
+  asphericDetailComa: string;
   asphericNav: string;
   asphericParams: string;
   asphericWorkbenchTitle: string;
@@ -176,6 +179,42 @@ export interface AppTranslations {
   // Sheet (redesigned /visualizer)
   workbenchTitle: string;
   workbenchLead: string;
+  /** The one finding the sheet leads with, stated under the title. */
+  findingWithin: string;
+  findingOver: string;
+  findingUnder: string;
+  findingAnterior: string;
+  findingPosterior: string;
+  findingEt: string;
+  findingCt: string;
+  findingWeight: string;
+  findingPrism: string;
+  findingBlank: string;
+  /** The scale the sheet's two views are drawn at. */
+  sheetScaleNote: string;
+  scaleBarLabel: string;
+  inspectorLabel: string;
+  shortIndex: string;
+  shortDepth: string;
+  shortType: string;
+  shortHeight: string;
+  shortBevel: string;
+  shortDecentration: string;
+  shortFramePd: string;
+  /** The aspheric sheet's own row: the surfaces, the conic and the figures. */
+  shortKFront: string;
+  shortKBack: string;
+  shortFrontSurface: string;
+  shortBackSurface: string;
+  /** The calipers' short names, for the sheet's narrow row. */
+  shortCalCenter: string;
+  shortCalEdge: string;
+  shortCalAnterior: string;
+  shortCalPosterior: string;
+  shortCalGroove: string;
+  /** The views' short names, for the sheet's narrow strip. */
+  shortCrossSection: string;
+  shortEdgeDetail: string;
   copyOrder: string;
   copiedOrder: string;
   copyFailed: string;

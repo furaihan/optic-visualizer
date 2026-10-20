@@ -156,6 +156,43 @@ export const MeasurementSheet: React.FC<MeasurementSheetProps> = ({
         detail: t.limitWarningA(frame?.a ?? 0, Number((result.y * 2 + 2).toFixed(0))),
       },
     );
+
+    // The aspheric surfaces bring their own figures. They are the engine's
+    // detail, so they belong with the rest of it — and a figure the engine does
+    // not compute is never printed as a zero.
+    const aspheric = result as unknown as {
+      sa0?: number;
+      comaX?: number;
+      conic?: number;
+    };
+    if (typeof aspheric.sa0 === 'number') {
+      rows.push(
+        {
+          id: 'k',
+          label: t.conicConstant,
+          value: aspheric.conic !== undefined ? aspheric.conic.toFixed(2) : '—',
+          limit: 'No limit',
+          ok: true,
+          detail: t.asphericDetailK,
+        },
+        {
+          id: 'sa',
+          label: t.sphAberration,
+          value: aspheric.sa0.toFixed(3),
+          limit: 'No limit',
+          ok: true,
+          detail: t.asphericDetailSa,
+        },
+        {
+          id: 'coma',
+          label: t.coma,
+          value: '—',
+          limit: 'No limit',
+          ok: true,
+          detail: t.asphericDetailComa,
+        },
+      );
+    }
   }
 
   const flagged = rows.filter((r) => !r.ok);

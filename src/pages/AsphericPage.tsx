@@ -1,7 +1,7 @@
 import { useSearch, useNavigate } from '@tanstack/react-router';
 import type { SimulatorSearchParams } from '../types/search-params';
 import { AsphericDesktopGrid } from "../components/AsphericDesktopGrid";
-import { MobileViews } from "@components/layout/MobileViews";
+import { AsphericMobileViews } from "@components/layout/AsphericMobileViews";
 import { SimulatorShell } from "@components/layout/SimulatorShell";
 import { useResponsiveViewport } from "../hooks/useResponsiveViewport";
 
@@ -12,13 +12,8 @@ export function AsphericPage() {
 
   return (
     <SimulatorShell
-      lang={search.lang}
-      view={search.view}
-      activeTab={search.activeTab}
-      onViewChange={(view) => navigate({ search: { ...search, view } } as any)}
-      onTabChange={(tab) => navigate({ search: { ...search, activeTab: tab } } as any)}
-      grid={<AsphericDesktopGrid />}
-      mobileExtra={<MobileViews />}
+      desk={<AsphericDesktopGrid />}
+      phone={<AsphericMobileViews />}
     />
   );
 }

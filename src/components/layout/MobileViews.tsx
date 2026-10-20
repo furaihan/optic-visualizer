@@ -1,15 +1,16 @@
-import { useState } from "react";
-import { Sidebar } from "../Sidebar";
-import { Visualizer } from "../Visualizer";
-import { JobTicket } from "../sheet/JobTicket";
-import { MeasurementSheet } from "../sheet/MeasurementSheet";
-import { RecommendationRow } from "../sheet/RecommendationRow";
-import { useOpticalContext } from "../../contexts/OpticalContext";
-import { ScrollArea } from "../ui/scroll-area";
-import ErrorBoundary from "../ErrorBoundary";
-import { useSearch } from '@tanstack/react-router';
+import { useSearch, useNavigate } from '@tanstack/react-router';
+import { Sidebar } from '../Sidebar';
+import { Visualizer } from '../Visualizer';
+import { JobTicket } from '../sheet/JobTicket';
+import { MeasurementSheet } from '../sheet/MeasurementSheet';
+import { RecommendationRow } from '../sheet/RecommendationRow';
+import { useOpticalContext } from '../../contexts/OpticalContext';
+import ErrorBoundary from '../ErrorBoundary';
 import type { SimulatorSearchParams } from '../../types/search-params';
-import { translations } from "../../lib/translations";
+import { translations } from '../../lib/translations';
+import { MobileWorkbench } from './MobileWorkbench';
+import { labOrderLines } from '../../lib/labOrder';
+import { findingSentence } from '../../lib/verdict';
 
 /**
  * The phone composition, which is its own layout rather than the desktop
@@ -21,9 +22,8 @@ export function MobileViews() {
   const lang = search.lang;
   const view = search.view;
   const activeTab = search.activeTab;
+  const navigate = useNavigate();
   const t = translations[lang];
-
-  const [mode, setMode] = useState<'simple' | 'advanced'>('simple');
 
   const {
     lens,
@@ -36,6 +36,7 @@ export function MobileViews() {
     result,
     compareResult,
     validation,
+    resetSession,
   } = useOpticalContext();
 
   const compareLens = compareMode ? { ...lens, index: compareIndex } : undefined;
@@ -60,101 +61,61 @@ export function MobileViews() {
         frameType={frameType}
         highlightedLimit={null}
         bevelPercent={bevelPercent}
+        variant="workbench"
+        onViewChange={(v) => navigate({ search: { ...search, view: v } } as any)}
       />
     </ErrorBoundary>
   );
 
+  const ticket = (
+    <JobTicket
+      lens={lens}
+      frame={frame}
+      patient={patient}
+      result={result}
+      frameType={frameType}
+      bevelPercent={bevelPercent}
+      lang={lang}
+      compareIndex={compareMode ? compareIndex : undefined}
+      compareResult={compareResult}
+      variant="compact"
+    />
+  );
+
+  const table = (isAdvanced: boolean) => (
+    <>
+      <MeasurementSheet
+        result={result}
+        compareResult={compareResult}
+        lang={lang}
+        frame={frame}
+        lens={lens}
+        isAdvanced={isAdvanced}
+      />
+      <RecommendationRow result={result} lensIndex={lens.index} lang={lang} />
+    </>
+  );
+
   return (
-    <div className="mt-3 flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden md:hidden">
-      {activeTab === "visualizer" && (
-        <div className="sheet-fade flex min-h-0 flex-1 flex-col">
-          <ScrollArea className="min-h-0 flex-1">
-            <div className="flex flex-col gap-6 pb-8">
-              <div className="flex flex-col gap-1.5">
-                <h1 className="text-[24px] font-medium leading-[1.15] tracking-[-0.02em] text-sheet-ink">
-                  {t.workbenchTitle}
-                </h1>
-                <p className="text-[16px] leading-relaxed text-sheet-ink">{t.workbenchLead}</p>
-              </div>
-
-              <div
-                className={`min-w-0 ${
-                  compareMode ? 'h-[78vh] min-h-[520px]' : 'h-[74vh] min-h-[480px]'
-                }`}
-              >
-                {board}
-              </div>
-
-              <JobTicket
-                lens={lens}
-                frame={frame}
-                patient={patient}
-                result={result}
-                frameType={frameType}
-                bevelPercent={bevelPercent}
-                lang={lang}
-                compareIndex={compareMode ? compareIndex : undefined}
-                compareResult={compareResult}
-              />
-            </div>
-          </ScrollArea>
-        </div>
-      )}
-
-      {activeTab === "summary" && (
-        <div className="sheet-fade flex min-h-0 flex-1 flex-col">
-          <ScrollArea className="min-h-0 flex-1">
-            <div className="flex flex-col gap-6 pb-8">
-              <div className="flex items-baseline gap-1 bg-sheet-panel p-1">
-                <button
-                  type="button"
-                  onClick={() => setMode('simple')}
-                  className={`min-h-9 flex-1 px-3 text-[13px] font-medium transition-colors duration-150 ${
-                    mode === 'simple'
-                      ? 'bg-sheet-ground text-sheet-ink'
-                      : 'text-sheet-muted hover:text-sheet-ink'
-                  }`}
-                  aria-pressed={mode === 'simple'}
-                >
-                  {t.tabImage}
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setMode('advanced')}
-                  className={`min-h-9 flex-1 px-3 text-[13px] font-medium transition-colors duration-150 ${
-                    mode === 'advanced'
-                      ? 'bg-sheet-ground text-sheet-ink'
-                      : 'text-sheet-muted hover:text-sheet-ink'
-                  }`}
-                  aria-pressed={mode === 'advanced'}
-                >
-                  {t.tabStatistics}
-                </button>
-              </div>
-
-              <MeasurementSheet
-                result={result}
-                compareResult={compareResult}
-                lang={lang}
-                frame={frame}
-                lens={lens}
-                isAdvanced={mode === 'advanced'}
-              />
-              <RecommendationRow result={result} lensIndex={lens.index} lang={lang} />
-            </div>
-          </ScrollArea>
-        </div>
-      )}
-
-      {activeTab === "parameters" && (
-        <div className="sheet-fade flex min-h-0 flex-1 flex-col">
-          <ScrollArea className="min-h-0 flex-1">
-            <div className="pb-8">
-              <Sidebar lang={lang} isMobile />
-            </div>
-          </ScrollArea>
-        </div>
-      )}
-    </div>
+    <MobileWorkbench
+      lang={lang}
+      activeTab={activeTab}
+      onTabChange={(tab) => navigate({ search: { ...search, activeTab: tab } } as any)}
+      title={t.workbenchTitle}
+      finding={result.error ? t.workbenchLead : findingSentence(result, lens, t)}
+      board={board}
+      ticket={ticket}
+      simple={table(false)}
+      advanced={table(true)}
+      parameters={<Sidebar lang={lang} isMobile />}
+      order={labOrderLines(lens, frame, patient, result, frameType, bevelPercent, t)}
+      onReset={resetSession}
+      errors={validation.errors}
+      figures={{
+        framePd: frame.a + frame.dbl,
+        decentration: result.decentration,
+        minBlank: result.y * 2 + 2,
+      }}
+    />
   );
 }

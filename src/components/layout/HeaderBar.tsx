@@ -1,123 +1,91 @@
-import { useOpticalContext } from '../../contexts/OpticalContext';
 import { translations } from '../../lib/translations';
 import type { Language, View } from '../../types/search-params';
-import { RotateCcwIcon, CopyIcon, CheckIcon } from "lucide-react";
+import { SlidersIcon } from 'lucide-react';
 import { Button } from '../ui/button';
 import { Tabs, TabsList, TabsTrigger } from '../ui/tabs';
-import { cn } from '../../lib/utils';
-import { useState } from 'react';
+import { CopyOrderButton } from './CopyOrderButton';
+import { ResetButton } from './ResetButton';
 
 type HeaderBarProps = {
   lang: Language;
   view: View;
   activeTab?: string;
   onViewChange: (view: View) => void;
+  /** The session's reset, from the page that owns the state. */
+  onReset: () => void;
+  /** The lab order, already written as plain text lines. */
+  order: string[];
+  /** The drawing switcher. The phone carries it on the drawing itself. */
+  showViews?: boolean;
+  /** Opens the inspector where it is a drawer rather than a column. */
+  onToggleInspector?: () => void;
+  inspectorOpen?: boolean;
 };
 
 /**
  * The toolbar of the workbench: which drawing you are looking at on the left,
- * the two session actions on the right. One flat surface, no chrome.
+ * the session's actions on the right. One flat surface, no chrome.
  */
-export function HeaderBar({ lang, view, onViewChange }: HeaderBarProps) {
+export function HeaderBar({
+  lang,
+  view,
+  onViewChange,
+  onReset,
+  order,
+  showViews = true,
+  onToggleInspector,
+  inspectorOpen = false,
+}: HeaderBarProps) {
   const t = translations[lang];
-  const { resetSession, lens, frame, patient, result, frameType, bevelPercent } = useOpticalContext();
-  const [copied, setCopied] = useState<'idle' | 'done' | 'failed'>('idle');
-
-  /**
-   * The lab order as plain text, the format a lab can paste into its own sheet.
-   * Clipboard API first; a hidden textarea fallback for non-secure contexts.
-   */
-  const copyOrder = async () => {
-    const signed = (v: number) => `${v > 0 ? '+' : ''}${v.toFixed(2)}`;
-    const lines = [
-      `${t.labOrder}`,
-      `${t.rxLine}: SPH ${signed(lens.sph)}  CYL ${signed(lens.cyl)}  AXIS ${lens.axis}°  n ${lens.index.toFixed(2)}  BC ${lens.baseCurve.toFixed(2)}`,
-      `${t.frameLine}: A ${frame.a}  B ${frame.b}  DBL ${frame.dbl}  ED ${frame.ed}  ${t.frameDepth} ${frame.depth.toFixed(1)} mm`,
-      `${t.fittingLine}: PD ${patient.pd}  ${t.fittingHeight} ${patient.fittingHeight}  ${t.bevelPos} ${Math.round(bevelPercent * 100)}%`,
-      `${t.edgeThick} ${result.et.toFixed(2)} mm  |  ${t.center} ${result.ct.toFixed(2)} mm`,
-      `${t.anteriorProt} ${result.anteriorProtrusion.toFixed(2)} mm  |  ${t.posteriorProt} ${result.posteriorProtrusion.toFixed(2)} mm`,
-      `${t.lensWeight} ${result.weight.toFixed(1)} g  |  ${t.minBlank} ${(result.y * 2 + 2).toFixed(0)} mm`,
-      `${t.frameType}: ${frameType}`,
-    ];
-    const text = lines.join('\n');
-    try {
-      await navigator.clipboard.writeText(text);
-      setCopied('done');
-    } catch {
-      try {
-        const area = document.createElement('textarea');
-        area.value = text;
-        area.setAttribute('readonly', '');
-        area.style.position = 'fixed';
-        area.style.opacity = '0';
-        document.body.appendChild(area);
-        area.select();
-        document.execCommand('copy');
-        document.body.removeChild(area);
-        setCopied('done');
-      } catch {
-        setCopied('failed');
-      }
-    }
-    window.setTimeout(() => setCopied('idle'), 2200);
-  };
 
   return (
-    <header className="flex min-h-12 shrink-0 flex-wrap items-center justify-between gap-x-2 gap-y-1 bg-sheet-ground px-2 py-1 sm:gap-x-3 sm:px-4 lg:flex-nowrap lg:py-0">
-      <Tabs
-        value={view}
-        onValueChange={(v) => onViewChange(v as View)}
-        className="order-2 w-full min-w-0 lg:order-1 lg:w-auto lg:flex-1"
-      >
-        <TabsList className="h-9 w-full min-w-0 gap-0 rounded-none bg-sheet-panel p-1">
-          <TabsTrigger
-            value="side"
-            className="h-full min-w-0 flex-1 rounded-none px-2 text-[13px] font-medium text-sheet-muted data-active:bg-sheet-ground data-active:text-sheet-ink group-data-[variant=default]/tabs-list:data-active:shadow-none sm:px-3"
-          >
-            {t.sideProfile}
-          </TabsTrigger>
-          <TabsTrigger
-            value="top"
-            className="h-full min-w-0 flex-1 rounded-none px-2 text-[13px] font-medium text-sheet-muted data-active:bg-sheet-ground data-active:text-sheet-ink group-data-[variant=default]/tabs-list:data-active:shadow-none sm:px-3"
-          >
-            {t.topDown}
-          </TabsTrigger>
-          <TabsTrigger
-            value="front"
-            className="h-full min-w-0 flex-1 rounded-none px-2 text-[13px] font-medium text-sheet-muted data-active:bg-sheet-ground data-active:text-sheet-ink group-data-[variant=default]/tabs-list:data-active:shadow-none sm:px-3"
-          >
-            {t.frontView}
-          </TabsTrigger>
-        </TabsList>
-      </Tabs>
-
-      <div className="order-1 flex shrink-0 items-center gap-1 sm:gap-2 lg:order-2">
+    <header className="flex min-h-12 shrink-0 items-center justify-between gap-2 bg-sheet-ground px-3 py-1 sm:px-4">
+      {onToggleInspector && (
         <Button
           variant="ghost"
-          onClick={resetSession}
-          className="h-9 rounded-sm px-2 text-[13px] font-medium text-sheet-muted hover:bg-sheet-panel hover:text-sheet-ink sm:px-2.5"
-          title={t.resetTitle}
-          aria-label={t.resetSession}
+          onClick={onToggleInspector}
+          className="order-1 h-9 shrink-0 rounded-sm px-2 text-[13px] font-medium text-sheet-muted hover:bg-sheet-panel hover:text-sheet-ink lg:hidden"
+          aria-expanded={inspectorOpen}
+          aria-label={t.inspectorLabel}
+          title={t.inspectorLabel}
         >
-          <RotateCcwIcon size={14} aria-hidden="true" />
-          <span className="hidden sm:inline">{t.reset}</span>
+          <SlidersIcon size={14} aria-hidden="true" />
+          <span className="hidden sm:inline">{t.inspectorLabel}</span>
         </Button>
+      )}
 
-        <Button
-          onClick={copyOrder}
-          className="h-9 rounded-sm bg-sheet-accent px-2 text-[13px] font-medium text-sheet-accent-ink hover:bg-sheet-accent/90 active:translate-y-px sm:px-3"
-          title={t.copyOrder}
-          aria-label={t.copyOrder}
+      {showViews && (
+        <Tabs
+          value={view}
+          onValueChange={(v) => onViewChange(v as View)}
+          className="order-2 min-w-0"
         >
-          {copied === 'done' ? (
-            <CheckIcon size={14} aria-hidden="true" />
-          ) : (
-            <CopyIcon size={14} aria-hidden="true" />
-          )}
-          <span className={cn('hidden whitespace-nowrap sm:inline', copied === 'failed' && 'text-sheet-accent-ink')}>
-            {copied === 'done' ? t.copiedOrder : copied === 'failed' ? t.copyFailed : t.copyOrder}
-          </span>
-        </Button>
+          <TabsList className="h-9 w-auto min-w-0 gap-0 rounded-none bg-sheet-panel p-1">
+            <TabsTrigger
+              value="side"
+              className="h-full min-w-0 rounded-none px-3 text-[13px] font-medium text-sheet-muted data-active:bg-sheet-ground data-active:text-sheet-ink group-data-[variant=default]/tabs-list:data-active:shadow-none"
+            >
+              {t.sideProfile}
+            </TabsTrigger>
+            <TabsTrigger
+              value="top"
+              className="h-full min-w-0 rounded-none px-3 text-[13px] font-medium text-sheet-muted data-active:bg-sheet-ground data-active:text-sheet-ink group-data-[variant=default]/tabs-list:data-active:shadow-none"
+            >
+              {t.topDown}
+            </TabsTrigger>
+            <TabsTrigger
+              value="front"
+              className="h-full min-w-0 rounded-none px-3 text-[13px] font-medium text-sheet-muted data-active:bg-sheet-ground data-active:text-sheet-ink group-data-[variant=default]/tabs-list:data-active:shadow-none"
+            >
+              {t.frontView}
+            </TabsTrigger>
+          </TabsList>
+        </Tabs>
+      )}
+
+      <div className="order-3 ml-auto flex shrink-0 items-center gap-1 sm:gap-2">
+        <ResetButton lang={lang} onReset={onReset} />
+        <CopyOrderButton lang={lang} order={order} />
       </div>
     </header>
   );

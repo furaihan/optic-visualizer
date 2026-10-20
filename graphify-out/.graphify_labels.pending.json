@@ -1,8 +1,7 @@
 {
-  "4": "item.tsx",
-  "6": "cn",
-  "13": "index.css (global stylesheet)",
-  "26": "class-variance-authority",
-  "27": "popover.tsx",
-  "28": "alert.tsx"
+  "2": "@tanstack/react-router",
+  "4": "AsphericSidebar.tsx",
+  "6": "optic-engine/types.ts",
+  "11": "MobileWorkbench.tsx",
+  "13": "index.css (global stylesheet)"
 }
