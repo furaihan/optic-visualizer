@@ -178,6 +178,8 @@ export const translations_en: AppTranslations = {
   coma: 'Coma X',
   asphericNav: 'Aspheric Lenses',
   asphericParams: 'Aspheric Parameters',
+  asphericWorkbenchTitle: 'Aspheric lens workbench',
+  asphericWorkbenchLead: 'Set the conic and polynomial coefficients per surface and read the resulting thickness, protrusion and aberration figures.',
 
   // Sheet (redesigned /visualizer)
   workbenchTitle: 'Will this lens fit this frame?',

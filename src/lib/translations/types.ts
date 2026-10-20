@@ -170,6 +170,8 @@ export interface AppTranslations {
   coma: string;
   asphericNav: string;
   asphericParams: string;
+  asphericWorkbenchTitle: string;
+  asphericWorkbenchLead: string;
 
   // Sheet (redesigned /visualizer)
   workbenchTitle: string;

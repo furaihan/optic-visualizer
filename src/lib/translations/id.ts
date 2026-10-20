@@ -178,6 +178,8 @@ export const translations_id: AppTranslations = {
   coma: 'Coma X',
   asphericNav: 'Lensa Aspheric',
   asphericParams: 'Parameter Aspheric',
+  asphericWorkbenchTitle: 'Meja kerja lensa asferis',
+  asphericWorkbenchLead: 'Atur konstanta konik dan koefisien polinomial per permukaan, lalu baca angka ketebalan, tonjolan dan aberasi yang dihasilkan.',
 
   // Sheet (redesigned /visualizer) — Indonesian wording needs a native review pass.
   workbenchTitle: 'Apakah lensa ini muat di bingkai ini?',

@@ -60,13 +60,13 @@ export function AsphericDesktopGrid() {
         <ValidationAlerts lang={lang} />
 
         <ScrollArea className="min-h-0 flex-1">
-          <div className="flex flex-col gap-8 px-3 pb-12 pt-4 sm:px-4">
+          <div className="flex flex-col gap-12 px-3 pb-12 pt-4 sm:px-4">
             <div className="flex flex-col gap-2 lg:max-w-[64ch]">
-              <h1 className="text-[28px] font-medium leading-[1.15] tracking-[-0.025em] text-sheet-ink sm:text-[34px]">
-                {t.asphericMode}
+              <h1 className="sheet-rise text-[28px] font-medium leading-[1.15] tracking-[-0.025em] text-sheet-ink sm:text-[34px]">
+                {t.asphericWorkbenchTitle}
               </h1>
-              <p className="max-w-[58ch] text-[16px] leading-relaxed text-sheet-ink">
-                {t.asphericParams}
+              <p className="sheet-rise delay-1 max-w-[58ch] text-[16px] leading-relaxed text-sheet-ink">
+                {t.asphericWorkbenchLead}
               </p>
             </div>
 
@@ -125,7 +125,7 @@ export function AsphericDesktopGrid() {
               </Tabs>
 
               <div className="order-first min-w-0 lg:order-none lg:sticky lg:top-0">
-                <div className="h-[52vh] min-h-[360px] lg:h-[calc(100dvh-8rem)]">
+                <div className="sheet-rise delay-2 h-[56vh] min-h-[440px] xl:h-[500px]">
                   <ErrorBoundary
                     fallback={
                       <div className="flex h-full items-center justify-center bg-sheet-panel p-6 text-[16px] text-sheet-ink">

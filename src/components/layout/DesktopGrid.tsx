@@ -84,7 +84,7 @@ export function DesktopGrid() {
         <ValidationAlerts lang={lang} />
 
         <ScrollArea className="min-h-0 flex-1">
-          <div className="flex flex-col gap-8 px-3 pb-12 pt-4 sm:px-4">
+          <div className="flex flex-col gap-12 px-3 pb-12 pt-4 sm:px-4">
             {/* The claim of the page, in two lines at most. */}
             <div className="flex flex-col gap-2 lg:max-w-[64ch]">
               <h1 className="sheet-rise text-[28px] font-medium leading-[1.15] tracking-[-0.025em] text-sheet-ink sm:text-[34px]">
