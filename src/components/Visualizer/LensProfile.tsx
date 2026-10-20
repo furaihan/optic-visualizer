@@ -16,8 +16,12 @@ interface LensProfileProps {
 
 /**
  * The lens in cross-section: front radius R1 on the left, back radius R2 on the
- * right, closed at the frame height. Filled with the prescription ink, or
- * hatched when it is the comparison material.
+ * right, closed at the frame height. Filled with the prescription ink, or drawn
+ * as a dashed outline when it is the comparison material.
+ *
+ * The comparison is never filled: at this scale the two outlines are a few
+ * pixels apart, and a fill on top would bury the one underneath. A dashed
+ * outline drawn above the primary's fill stays readable along its whole length.
  */
 export const LensProfile: React.FC<LensProfileProps> = ({
   result,
@@ -54,14 +58,16 @@ export const LensProfile: React.FC<LensProfileProps> = ({
       <path
         key={`${result.ct}-${result.et}-${result.s1}-${result.s2}`}
         d={lensPath}
-        fill={isCompare ? 'url(#section-hatch)' : 'currentColor'}
-        fillOpacity={isCompare ? 1 : active ? 0.26 : 0.16}
-        className={`${isCompare ? 'text-sheet-muted' : 'text-sheet-rx'} ${
+        fill={isCompare ? 'none' : 'currentColor'}
+        fillOpacity={isCompare ? 0 : active ? 0.26 : 0.16}
+        className={`${isCompare ? 'text-sheet-ink' : 'text-sheet-rx'} ${
           isCompare ? '' : 'section-redraw'
         }`}
         stroke="currentColor"
-        strokeWidth={isCompare ? 1.25 : active ? 2.4 : 1.9}
-        strokeOpacity={isCompare ? 0.85 : 1}
+        strokeWidth={isCompare ? 2 : active ? 2.4 : 1.9}
+        strokeOpacity={isCompare ? 0.9 : 1}
+        strokeDasharray={isCompare ? '7 4' : undefined}
+        strokeLinecap={isCompare ? 'round' : undefined}
       />
     </g>
   );

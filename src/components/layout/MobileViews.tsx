@@ -77,7 +77,13 @@ export function MobileViews() {
                 <p className="text-[16px] leading-relaxed text-sheet-ink">{t.workbenchLead}</p>
               </div>
 
-              <div className="h-[70vh] min-h-[440px] min-w-0">{board}</div>
+              <div
+                className={`min-w-0 ${
+                  compareMode ? 'h-[78vh] min-h-[520px]' : 'h-[74vh] min-h-[480px]'
+                }`}
+              >
+                {board}
+              </div>
 
               <JobTicket
                 lens={lens}

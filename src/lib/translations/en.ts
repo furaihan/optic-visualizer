@@ -214,6 +214,11 @@ export const translations_en: AppTranslations = {
   viewLabel: 'Drawing',
   edgeDetail: 'Edge detail',
   scaleNote: 'Not to scale',
+  delta: 'Δ',
+  compareSaves: 'saves',
+  compareSame: 'Both indices give the same edge.',
+  compareFrontNote: 'Compare Mode reads thickness in Side Profile and Top Down.',
+  compareEdgeNote: 'The hatched band is the material the comparison index saves.',
   invalidInput: 'These values are placeholders until the inputs are valid.',
 
   // Landing page

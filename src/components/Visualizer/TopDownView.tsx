@@ -54,6 +54,7 @@ export const TopDownView: React.FC<TopDownViewProps> = ({
   const accent = 'text-sheet-rx';
   const rimInk = 'text-sheet-frame';
   const muted = 'text-sheet-muted';
+  const ink = 'text-sheet-ink';
 
   const halfGap = (dbl / 2) * scale;
   const openingW = a * scale;
@@ -132,15 +133,19 @@ export const TopDownView: React.FC<TopDownViewProps> = ({
               strokeLinecap="round"
             />
 
-            {/* Comparison lens first, so the primary reads on top. */}
+            {/* Comparison lens first, so the primary reads on top. Outline only
+                and dashed, so the two sections separate even where they nearly
+                coincide. */}
             {compareResult && compareLens && comparePos && (
               <path
                 d={lensPath(compareResult, comparePos, side as 1 | -1)}
-                fill="url(#section-hatch)"
-                className={muted}
+                fill="none"
+                className={ink}
                 stroke="currentColor"
-                strokeWidth={1.2}
-                strokeOpacity={0.7}
+                strokeWidth={1.75}
+                strokeOpacity={0.85}
+                strokeDasharray="7 4"
+                strokeLinecap="round"
               />
             )}
             <path
@@ -173,7 +178,7 @@ export const TopDownView: React.FC<TopDownViewProps> = ({
         textAnchor="middle"
         className={muted}
         fill="currentColor"
-        fontSize={11}
+        fontSize={16}
       >
         {t.pd} {patient.pd}
       </text>

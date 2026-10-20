@@ -31,23 +31,25 @@ export const SheetDefs: React.FC = () => (
     </marker>
 
     {/* The comparison lens is hatched, so it reads as a second material
-        without introducing a second hue. */}
+        without introducing a second hue. The period is small on purpose: the
+        band it fills in compare mode is a fraction of a millimetre wide, and a
+        coarser hatch would not fit a single line inside it. */}
     <pattern
       id="section-hatch"
-      width="7"
-      height="7"
+      width="4"
+      height="4"
       patternTransform="rotate(45 0 0)"
       patternUnits="userSpaceOnUse"
     >
-      <rect width="7" height="7" fill="transparent" />
+      <rect width="4" height="4" fill="transparent" />
       <line
         x1="0"
         y1="0"
         x2="0"
-        y2="7"
+        y2="4"
         stroke="var(--sheet-muted)"
-        strokeWidth="1.6"
-        strokeOpacity="0.6"
+        strokeWidth="1.3"
+        strokeOpacity="0.9"
       />
     </pattern>
   </defs>
@@ -88,7 +90,7 @@ export const DimH: React.FC<{
           y={y - 6}
           textAnchor="middle"
           fill="currentColor"
-          fontSize={11.5}
+          fontSize={16}
           fontWeight={600}
           style={{ fontVariantNumeric: 'tabular-nums' }}
         >
@@ -132,7 +134,7 @@ export const DimV: React.FC<{
           textAnchor={side === 'left' ? 'end' : 'start'}
           dominantBaseline="middle"
           fill="currentColor"
-          fontSize={11.5}
+          fontSize={16}
           fontWeight={600}
           style={{ fontVariantNumeric: 'tabular-nums' }}
         >

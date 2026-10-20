@@ -161,7 +161,7 @@ export const FrontView: React.FC<FrontViewProps> = ({
         textAnchor="middle"
         className={tone('ed')}
         fill="currentColor"
-        fontSize={12.5}
+        fontSize={16}
         fontWeight={600}
         style={{ fontVariantNumeric: 'tabular-nums' }}
       >
@@ -174,7 +174,7 @@ export const FrontView: React.FC<FrontViewProps> = ({
         textAnchor="middle"
         className={muted}
         fill="currentColor"
-        fontSize={12.5}
+        fontSize={16}
       >
         {isMain ? t.frontView : ''}
       </text>

@@ -108,8 +108,22 @@ export function DesktopGrid() {
             />
 
             {/* The drawing gets the full width, so all three views and the
-                schedule fit without any one of them shrinking to a thumbnail. */}
-            <div className="sheet-rise delay-2 h-[50vh] min-h-[400px] xl:h-[430px]">{board}</div>
+                schedule fit without any one of them shrinking to a thumbnail.
+                The board is height-bound, not width-bound: the drawing uses
+                barely half the width available, and its type scales with the
+                height alone. So the height is set by legibility — enough for a
+                15-unit label to land above 11px — and compare mode gets more
+                still, because two outlines a fraction of a millimetre apart
+                need every pixel the board can spare. */}
+            <div
+              className={`sheet-rise delay-2 ${
+                compareMode
+                  ? 'h-[62vh] min-h-[500px] xl:h-[560px]'
+                  : 'h-[56vh] min-h-[440px] xl:h-[500px]'
+              }`}
+            >
+              {board}
+            </div>
 
             <Tabs value={mode} onValueChange={(v) => setMode(v as 'simple' | 'advanced')}>
               <TabsList className="h-9 gap-0 rounded-none bg-sheet-panel p-1">

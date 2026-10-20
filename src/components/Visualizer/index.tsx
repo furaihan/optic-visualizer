@@ -7,12 +7,14 @@ import { FrontView } from './FrontView';
 import { TopDownView } from './TopDownView';
 import { EdgeDetail } from './EdgeDetail';
 import { SheetDefs } from './SheetDefs';
+import { CompareLegend } from './CompareLegend';
 import { useMediaQuery } from '../../hooks/useMediaQuery';
 
 type CaliperRow = {
   id: Exclude<CaliperTarget, null>;
   name: string;
   value: string;
+  compareValue?: string;
   limit: string;
   ok: boolean;
   note: string;
@@ -63,13 +65,38 @@ export const Visualizer: React.FC<VisualizerProps> = React.memo(
 
     const mm = (v: number) => `${v.toFixed(2)} mm`;
 
+    // In compare mode each caliper also reports the comparison material, so the
+    // schedule under the drawing becomes the comparison table. The delta is
+    // stated next to it: the numbers are what the drawing cannot show at scale.
+    // The comparison value only: the delta is stated in the legend and again on
+    // the edge detail, and repeating it here made the value line wrap, which
+    // cost the drawing 25px of height.
+    const against = (compareValue: number) => compareValue.toFixed(2);
+
     const calipers: CaliperRow[] = [
-      { id: 'ct', name: t.center, value: mm(result.ct), limit: '≥ 1.00', ok: result.ct >= 1, note: t.caliperCt },
-      { id: 'et', name: t.edgeThick, value: mm(result.et), limit: '≤ 6.00', ok: result.et <= 6, note: t.caliperEt },
+      {
+        id: 'ct',
+        name: t.center,
+        value: mm(result.ct),
+        compareValue: compareResult ? against(compareResult.ct) : undefined,
+        limit: '≥ 1.00',
+        ok: result.ct >= 1,
+        note: t.caliperCt,
+      },
+      {
+        id: 'et',
+        name: t.edgeThick,
+        value: mm(result.et),
+        compareValue: compareResult ? against(compareResult.et) : undefined,
+        limit: '≤ 6.00',
+        ok: result.et <= 6,
+        note: t.caliperEt,
+      },
       {
         id: 'anterior',
         name: t.anteriorProt,
         value: mm(result.anteriorProtrusion),
+        compareValue: compareResult ? against(compareResult.anteriorProtrusion) : undefined,
         limit: '≤ 1.50',
         ok: result.anteriorProtrusion <= 1.5,
         note: t.caliperAnterior,
@@ -78,6 +105,7 @@ export const Visualizer: React.FC<VisualizerProps> = React.memo(
         id: 'posterior',
         name: t.posteriorProt,
         value: mm(result.posteriorProtrusion),
+        compareValue: compareResult ? against(compareResult.posteriorProtrusion) : undefined,
         limit: '≤ 2.00',
         ok: result.posteriorProtrusion <= 2,
         note: t.caliperPosterior,
@@ -101,8 +129,14 @@ export const Visualizer: React.FC<VisualizerProps> = React.memo(
 
     // Three drawings at three scales, as a lab sheet sets them: the section for
     // thickness, the edge magnified as a detail, the elevation for the frame.
+    // The detail is magnified further in compare mode, because that is where
+    // the difference between two indices is a shape and not just a number.
     const S = 6;
-    const detailZoom = 13;
+    const comparing = Boolean(compareResult);
+    // The detail is magnified until it is as tall as the section, and no
+    // further: the board is height-bound, so a taller detail would only shrink
+    // the whole sheet back down again.
+    const detailZoom = comparing ? 14 : 13;
     const frontScale = 2.6;
 
     const minX = -Math.max(result.anteriorProtrusion, compareResult?.anteriorProtrusion ?? 0);
@@ -112,24 +146,31 @@ export const Visualizer: React.FC<VisualizerProps> = React.memo(
       1,
     );
     const sectionW = (maxX - minX) * S;
-    const sectionH = (frame.b + 8) * S;
+    // The section's true drawn height: the lens spans B, and the rim is a 5mm
+    // band above and below it (FrameProfile draws it at 5 * scale each side).
+    // Declaring anything less lets the rim overflow the board; declaring more
+    // wastes the height the board is already short of.
+    const sectionH = (frame.b + 10) * S;
 
     const detailW = (maxX - minX) * detailZoom;
-    const detailH = 7.5 * detailZoom;
+    // The detail's real height: the rim band is drawn at 5 * zoom above and
+    // below the centre line, at 1.8 bands — not the nominal 7.5 the old figure
+    // assumed, which both over-declared the board and let the drawing overrun.
+    const detailH = 18 * detailZoom;
 
     const frontW = (frame.a * 2 + frame.dbl) * frontScale;
     const frontH = (frame.b + 8) * frontScale;
 
-    const PAD = 34;
-    const GAP = 54;
-    // The band under the drawing carries two things: the groove percentage,
-    // which the frame profile prints under the rim, and the view's own name.
-    // They are set 44px apart so the two labels never touch.
-    const LABEL_BAND = 76;
-    // The protrusions are dimensioned in their own band above the rim. The
-    // board has to carry that band, or the dimension is drawn above the sheet
-    // and is cut off by its own edge.
-    const DIM_BAND = 64;
+    const PAD = 24;
+    const GAP = 44;
+    // The bands above and below the drawing are sized to what is actually
+    // drawn in them, not rounded up. The board is height-bound — 486 units of
+    // canvas into ~350px — so every unit of slack here is taken straight out
+    // of the type size: 60 units of margin is 60 units of smaller labels.
+    // Above: the protrusion dimension and its value. Below: the groove
+    // percentage and the view's own name.
+    const DIM_BAND = 60;
+    const LABEL_BAND = 46;
 
     const BOARD_W = compact
       ? PAD + sectionW + 26 + detailW + PAD
@@ -157,7 +198,19 @@ export const Visualizer: React.FC<VisualizerProps> = React.memo(
       >
         <div className="flex shrink-0 flex-wrap items-baseline justify-between gap-x-4 gap-y-1 px-4 pt-3">
           <h2 className="text-[13px] font-medium text-sheet-ink">{viewTitle}</h2>
-          <p className="text-[13px] text-sheet-muted">{t.scaleNote}</p>
+          {compareResult && view !== 'front' ? (
+            <CompareLegend
+              lang={lang}
+              index={lens.index}
+              compareIndex={compareLens?.index ?? null}
+              result={result}
+              compareResult={compareResult}
+            />
+          ) : (
+            <p className="text-[13px] text-sheet-muted">
+              {compareResult && view === 'front' ? t.compareFrontNote : t.scaleNote}
+            </p>
+          )}
         </div>
 
         {/* The drawing strip. It keeps a floor of its own so the schedule
@@ -170,7 +223,12 @@ export const Visualizer: React.FC<VisualizerProps> = React.memo(
               view === 'side'
                 ? `0 0 ${BOARD_W} ${BOARD_H}`
                 : view === 'front'
-                  ? `0 0 ${(frame.a * 2 + frame.dbl) * S + 160} ${(frame.b + 10) * S + 120}`
+                  ? // The A dimension is drawn above the opening, and the rim
+                    // above that, so the view needs headroom the old box did not
+                    // allow: the label was clipped by the sheet's own edge. The
+                    // view's own name sits below the rim, which needs the same
+                    // allowance at the foot.
+                    `0 -44 ${(frame.a * 2 + frame.dbl) * S + 160} ${(frame.b + 10) * S + 210}`
                   : `0 0 ${(frame.a * 2 + frame.dbl) * S + 120} ${(frame.depth + 10) * S + 150}`
             }
             preserveAspectRatio="xMidYMid meet"
@@ -193,6 +251,20 @@ export const Visualizer: React.FC<VisualizerProps> = React.memo(
                   onSelectTarget={(next) => setTarget(next as CaliperTarget)}
                 />
 
+                <LensProfile
+                  result={result}
+                  pos={primaryPos}
+                  scale={S}
+                  originX={originX}
+                  originY={originY}
+                  frameB={frame.b}
+                  tone="primary"
+                  active={target === 'et' || target === 'ct'}
+                />
+
+                {/* The comparison is drawn above the primary: its outline is
+                    unfilled, so it stays legible wherever it crosses the
+                    primary's fill. Drawing it first would bury it. */}
                 {compareResult && compareLens && comparePos && (
                   <LensProfile
                     result={compareResult}
@@ -204,17 +276,6 @@ export const Visualizer: React.FC<VisualizerProps> = React.memo(
                     tone="compare"
                   />
                 )}
-
-                <LensProfile
-                  result={result}
-                  pos={primaryPos}
-                  scale={S}
-                  originX={originX}
-                  originY={originY}
-                  frameB={frame.b}
-                  tone="primary"
-                  active={target === 'et' || target === 'ct'}
-                />
 
                 {/* CT across the lens. */}
                 <g
@@ -238,7 +299,7 @@ export const Visualizer: React.FC<VisualizerProps> = React.memo(
                     y={originY - (frame.b / 2) * S * 0.55 - 8}
                     textAnchor="middle"
                     fill="currentColor"
-                    fontSize={12}
+                    fontSize={16}
                     fontWeight={600}
                     style={{ fontVariantNumeric: 'tabular-nums' }}
                   >
@@ -256,6 +317,8 @@ export const Visualizer: React.FC<VisualizerProps> = React.memo(
                   originY={originY}
                   activeTarget={target}
                   onSelectTarget={(next) => setTarget(next as CaliperTarget)}
+                  compareResult={compareResult}
+                  comparePos={comparePos}
                 />
                 {!compact && (
                   <FrontView
@@ -274,7 +337,7 @@ export const Visualizer: React.FC<VisualizerProps> = React.memo(
                     are clamped inside the board: a longer translation (the
                     Indonesian "Tampilan Potongan Melintang") would otherwise
                     run off the left edge of the sheet. */}
-                <g className="text-sheet-muted" fill="currentColor" fontSize={12}>
+                <g className="text-sheet-muted" fill="currentColor" fontSize={16}>
                   {[
                     { text: t.crossSection, x: originX },
                     { text: t.edgeDetail, x: detailOriginX + detailW / 2 },
@@ -298,7 +361,7 @@ export const Visualizer: React.FC<VisualizerProps> = React.memo(
                 lang={lang}
                 scale={S}
                 originX={PAD + (frame.a + frame.dbl) * S}
-                originY={PAD + (frame.b * S) / 2 + 20}
+                originY={PAD + DIM_BAND + (frame.b * S) / 2}
                 isMain
                 highlightedLimit={highlightedLimit}
               />
@@ -341,8 +404,16 @@ export const Visualizer: React.FC<VisualizerProps> = React.memo(
                   }`}
                 >
                   <span className="text-[13px] leading-tight text-sheet-muted">{row.name}</span>
-                  <span className="text-[20px] font-medium leading-tight text-sheet-ink tnum">
-                    {row.value}
+                  {/* The comparison value sits on the value's own line, not on a
+                      line of its own: every extra line in the schedule takes
+                      height straight out of the drawing above it. */}
+                  <span className="flex items-baseline gap-1.5 leading-tight">
+                    <span className="text-[20px] font-medium text-sheet-ink tnum">{row.value}</span>
+                    {row.compareValue && (
+                      <span className="text-[13px] text-sheet-muted tnum">
+                        → {row.compareValue}
+                      </span>
+                    )}
                   </span>
                   <span className={`text-[13px] leading-tight tnum ${row.ok ? 'text-sheet-muted' : 'text-sheet-warning'}`}>
                     {row.ok ? t.withinLimit : t.overLimit} · {row.limit} mm

@@ -120,7 +120,7 @@ export const FrameProfile: React.FC<FrameProfileProps> = ({
           y={bottom + 34}
           textAnchor="middle"
           fill="currentColor"
-          fontSize={12.5}
+          fontSize={16}
           style={{ fontVariantNumeric: 'tabular-nums' }}
         >
           {Math.round(frame.depth ? (grooveX / scale / frame.depth) * 100 : 0)}%
@@ -150,7 +150,7 @@ export const FrameProfile: React.FC<FrameProfileProps> = ({
             y={topBand - 8}
             textAnchor="middle"
             fill="currentColor"
-            fontSize={12.5}
+            fontSize={16}
             fontWeight={600}
             style={{ fontVariantNumeric: 'tabular-nums' }}
           >
@@ -182,7 +182,7 @@ export const FrameProfile: React.FC<FrameProfileProps> = ({
             y={topBand - 8}
             textAnchor="middle"
             fill="currentColor"
-            fontSize={12.5}
+            fontSize={16}
             fontWeight={600}
             style={{ fontVariantNumeric: 'tabular-nums' }}
           >

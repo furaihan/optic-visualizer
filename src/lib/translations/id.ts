@@ -214,6 +214,11 @@ export const translations_id: AppTranslations = {
   viewLabel: 'Gambar',
   edgeDetail: 'Detail tepi',
   scaleNote: 'Tidak berskala',
+  delta: 'Δ',
+  compareSaves: 'menghemat',
+  compareSame: 'Kedua indeks menghasilkan tepi yang sama.',
+  compareFrontNote: 'Mode Banding membaca ketebalan di Profil Samping dan Atas Bawah.',
+  compareEdgeNote: 'Pita berarsir adalah bahan yang dihemat oleh indeks pembanding.',
   invalidInput: 'Nilai ini sementara sampai input diperbaiki.',
 
   // Landing page

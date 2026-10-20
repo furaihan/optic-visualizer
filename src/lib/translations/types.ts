@@ -206,6 +206,11 @@ export interface AppTranslations {
   viewLabel: string;
   edgeDetail: string;
   scaleNote: string;
+  delta: string;
+  compareSaves: string;
+  compareSame: string;
+  compareFrontNote: string;
+  compareEdgeNote: string;
   invalidInput: string;
 
   // Landing page
