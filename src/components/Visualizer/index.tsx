@@ -57,6 +57,7 @@ export const Visualizer: React.FC<VisualizerProps> = React.memo(
     highlightedLimit = null,
     bevelPercent = 0.33,
     variant = 'classic',
+    frameType = 'full',
     onViewChange,
   }) => {
     const t = translations[lang];
@@ -69,8 +70,10 @@ export const Visualizer: React.FC<VisualizerProps> = React.memo(
       const etX_start = groovePosition - result.et / 2;
       const etX_end = groovePosition + result.et / 2;
       const grooveX = groovePosition;
-      const frontApexX = etX_start - result.s1;
-      const backApexX = frontApexX + result.ct;
+      // The vertices come from the engine's own section, so the centre
+      // thickness the drawing measures is the centre thickness in the table.
+      const frontApexX = result.section ? result.section.frontApexZ : etX_start - result.s1;
+      const backApexX = result.section ? result.section.backApexZ : frontApexX + result.ct;
       return { etX_start, etX_end, grooveX, frontApexX, backApexX };
     }, [result, frame.depth, bevelPercent]);
 
@@ -80,8 +83,12 @@ export const Visualizer: React.FC<VisualizerProps> = React.memo(
       const etX_start = groovePosition - compareResult.et / 2;
       const etX_end = groovePosition + compareResult.et / 2;
       const grooveX = groovePosition;
-      const frontApexX = etX_start - compareResult.s1;
-      const backApexX = frontApexX + compareResult.ct;
+      const frontApexX = compareResult.section
+        ? compareResult.section.frontApexZ
+        : etX_start - compareResult.s1;
+      const backApexX = compareResult.section
+        ? compareResult.section.backApexZ
+        : frontApexX + compareResult.ct;
       return { etX_start, etX_end, grooveX, frontApexX, backApexX };
     }, [compareResult, frame.depth, bevelPercent]);
 
@@ -347,6 +354,7 @@ export const Visualizer: React.FC<VisualizerProps> = React.memo(
                   originX={originX}
                   originY={originY}
                   lang={lang}
+                  frameType={frameType}
                   activeTarget={target}
                   onSelectTarget={(next) => setTarget(next as CaliperTarget)}
                 />
@@ -442,32 +450,48 @@ export const Visualizer: React.FC<VisualizerProps> = React.memo(
                     Indonesian "Tampilan Potongan Melintang") would otherwise
                     run off the left edge of the sheet. */}
                 <g className="text-sheet-muted" fill="currentColor" fontSize={16}>
-                  {[
-                    {
-                      text: variant === 'classic' ? t.crossSection : t.shortCrossSection,
-                      x: originX,
-                    },
-                    {
-                      text: variant === 'classic' ? t.edgeDetail : t.shortEdgeDetail,
-                      x: detailOriginX + detailW / 2,
-                    },
-                    ...(showFront
-                      ? [
-                          {
-                            text: t.frontView,
-                            x: frontOriginX + (frame.a * 2 + frame.dbl) * frontScale * 0.25,
-                          },
-                        ]
-                      : []),
-                  ].map((label) => {
-                    const half = (label.text.length * CHAR_WIDTH) / 2;
-                    const x = Math.min(Math.max(label.x, half + 4), BOARD_W - half - 4);
-                    return (
-                      <text key={label.text} x={x} y={BOARD_H - sheet.nameY} textAnchor="middle">
+                  {(() => {
+                    // The names of the views, clamped inside the board. On a
+                    // narrow board there is not room for all three, and a name
+                    // printed on top of another is worse than a name left out.
+                    const placed: { text: string; x: number; half: number }[] = [];
+                    for (const label of [
+                      {
+                        text: variant === 'classic' ? t.crossSection : t.shortCrossSection,
+                        x: originX,
+                      },
+                      {
+                        text: variant === 'classic' ? t.edgeDetail : t.shortEdgeDetail,
+                        x: detailOriginX + detailW / 2,
+                      },
+                      ...(showFront
+                        ? [
+                            {
+                              text: t.frontView,
+                              x: frontOriginX + (frame.a * 2 + frame.dbl) * frontScale * 0.25,
+                            },
+                          ]
+                        : []),
+                    ]) {
+                      const half = (label.text.length * CHAR_WIDTH) / 2;
+                      const x = Math.min(Math.max(label.x, half + 4), BOARD_W - half - 4);
+                      const clash = placed.some(
+                        (p) => Math.abs(p.x - x) < p.half + half + 10,
+                      );
+                      if (clash) continue;
+                      placed.push({ text: label.text, x, half });
+                    }
+                    return placed.map((label) => (
+                      <text
+                        key={label.text}
+                        x={label.x}
+                        y={BOARD_H - sheet.nameY}
+                        textAnchor="middle"
+                      >
                         {label.text}
                       </text>
-                    );
-                  })}
+                    ));
+                  })()}
                 </g>
               </>
             ) : view === 'front' ? (

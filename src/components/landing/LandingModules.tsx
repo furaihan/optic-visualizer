@@ -8,26 +8,78 @@ import { translations, type Language } from '@lib/translations';
  * prescription and a frame and answers in millimetres; the second works from
  * a surface and answers in coefficients.
  */
+import { calculateLens } from '@lib/optic-engine/optical';
+import { calculateAsphericLens } from '@lib/optic-engine/aspheric';
+import type { FrameParameters, LensIndex, PatientParameters } from '@lib/optic-engine/types';
+
+/**
+ * The lens the figures on the landing page are measured on: a minus four in a
+ * standard frame, the prescription most people bring in. The numbers come out
+ * of the engine, so the page and the instrument cannot drift apart.
+ */
+const REFERENCE_FRAME: FrameParameters = {
+  a: 52,
+  b: 40,
+  dbl: 18,
+  depth: 4.5,
+  ed: 54,
+};
+const REFERENCE_PATIENT: PatientParameters = { pd: 63, fittingHeight: 22 };
+
+/**
+ * The aspheric example: a conic front surface with a small polynomial on top.
+ *
+ * The polynomial terms are the even powers of the radius in millimetres, so
+ * the numbers are small: an A4 of 2e-7 moves the surface by a fifth of a
+ * millimetre at a 30 mm radius.
+ */
+const ASPHERIC_EXAMPLE = {
+  conic: -0.52,
+  A2: -1.8e-4,
+  A4: 2.1e-7,
+  A6: -4.0e-10,
+  A8: 8.0e-13,
+};
+
 export function LandingModules({ lang }: { lang: Language }) {
   const t = translations[lang];
 
+  const spherical = calculateLens(
+    { sph: -4, cyl: 0, axis: 180, index: 1.6 as LensIndex, baseCurve: 4 },
+    REFERENCE_FRAME,
+    REFERENCE_PATIENT,
+  );
+
+  const aspheric = calculateAsphericLens(
+    {
+      sph: -4,
+      cyl: 0,
+      axis: 180,
+      index: 1.6 as LensIndex,
+      baseCurve: 4,
+      asphericFront: { ...ASPHERIC_EXAMPLE, isActive: true },
+      asphericBack: { conic: 0, A2: 0, A4: 0, A6: 0, A8: 0, isActive: false },
+    },
+    REFERENCE_FRAME,
+    REFERENCE_PATIENT,
+  );
+
   const outputs = [
-    { key: t.edgeThick, value: '4.48 mm' },
-    { key: t.center, value: '1.00 mm' },
-    { key: t.anteriorProt, value: '4.00 mm' },
-    { key: t.posteriorProt, value: '0.00 mm' },
-    { key: t.lensWeight, value: '5.8 g' },
-    { key: t.minBlank, value: '64 mm' },
+    { key: t.edgeThick, value: `${spherical.et.toFixed(2)} mm` },
+    { key: t.center, value: `${spherical.ct.toFixed(2)} mm` },
+    { key: t.anteriorProt, value: `${spherical.anteriorProtrusion.toFixed(2)} mm` },
+    { key: t.posteriorProt, value: `${spherical.posteriorProtrusion.toFixed(2)} mm` },
+    { key: t.lensWeight, value: `${spherical.weight.toFixed(1)} g` },
+    { key: t.minBlank, value: `${(spherical.minBlank ?? 0).toFixed(0)} mm` },
   ];
 
   const surfaces = [
-    { key: t.conicConstant, value: '−0.52' },
-    { key: t.coeffA2, value: '−0.018' },
-    { key: t.coeffA4, value: '+0.0021' },
-    { key: t.coeffA6, value: '−0.0004' },
-    { key: t.coeffA8, value: '+0.00008' },
-    { key: t.sphAberration, value: '0.026' },
-    { key: t.coma, value: '0.004' },
+    { key: t.conicConstant, value: ASPHERIC_EXAMPLE.conic.toFixed(2) },
+    { key: t.coeffA2, value: ASPHERIC_EXAMPLE.A2.toExponential(1) },
+    { key: t.coeffA4, value: ASPHERIC_EXAMPLE.A4.toExponential(1) },
+    { key: t.coeffA6, value: ASPHERIC_EXAMPLE.A6.toExponential(1) },
+    { key: t.coeffA8, value: ASPHERIC_EXAMPLE.A8.toExponential(1) },
+    { key: t.asphericDeparture, value: `${(aspheric.departure ?? 0).toFixed(3)} mm` },
   ];
 
   return (

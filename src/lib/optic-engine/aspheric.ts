@@ -1,205 +1,473 @@
-import { MATERIALS_DB, FRAME_TYPE_OVERRIDES } from "../../data/materials";
+import { MATERIALS_DB } from "../../data/materials";
 import {
+  AsphericCalculationResult,
+  AsphericLensParameters,
   FrameParameters,
   PatientParameters,
-  AsphericLensParameters,
-  AsphericCalculationResult,
+  FrameType,
 } from "./types";
+import {
+  MIN_THICKNESS_MM,
+  SurfaceModel,
+  backRadius,
+  buildOpening,
+  buildSection,
+  conicSagitta,
+  frontRadius,
+  governingMeridian,
+  lensVolumeCm3,
+  protrusion,
+  rimRadius,
+  solveThickness,
+} from "./geometry";
+import { recommendMaterial } from "./recommend";
+
+/** The polynomial terms of an aspheric surface. */
+export interface AsphericCoefficients {
+  A2: number;
+  A4: number;
+  A6: number;
+  A8: number;
+}
+
 /**
- * Calculate aspheric sag: z(y) = (y²/R) / (1 + √(1 - (1+K)(y/R)²)) + polynomial
+ * The largest departure from a sphere, in millimetres, that a set of
+ * coefficients may produce at the edge of the frame before the surface stops
+ * being a lens anybody could wear.
+ */
+export const MAX_DEPARTURE_MM = 2.0;
+
+/**
+ * The polynomial part of an aspheric surface, at the semi-aperture y.
+ *
+ * The terms are the even powers of y in millimetres, so the numbers are
+ * small: an A4 of 1e-6 moves the surface by a millimetre at a 30 mm
+ * semi-aperture.
+ */
+export function polynomialTerm(y: number, coeffs: AsphericCoefficients): number {
+  const y2 = y * y;
+  const y4 = y2 * y2;
+  const y6 = y4 * y2;
+  const y8 = y4 * y4;
+  return coeffs.A2 * y2 + coeffs.A4 * y4 + coeffs.A6 * y6 + coeffs.A8 * y8;
+}
+
+/**
+ * The distance from the vertex of an aspheric surface to the surface at the
+ * semi-aperture y.
+ *
+ * The radius is signed and the conic constant follows the usual convention,
+ * so the same call gives the front surface and the back surface, and a
+ * convex back comes out with its rim in front of its vertex.
+ *
+ * Returns NaN when the conic has no real point at that aperture. The caller
+ * must report that as a lens that cannot be surfaced, not as a flat surface.
  */
 export function getAsphericSag(
   R: number,
   yVal: number,
   conic: number,
-  coeffs: { A2: number; A4: number; A6: number; A8: number },
+  coeffs: AsphericCoefficients,
 ): number {
-  if (R === Infinity || !Number.isFinite(R)) return 0;
-
-  const absR = Math.abs(R);
-  const yAbs = Math.abs(yVal);
-
-  // Spherical part
-  const yEffective = Math.min(yAbs, absR * 0.999);
-  const discriminant = absR * absR - (1 + conic) * yEffective * yEffective;
-
-  if (discriminant < 0) return 0;
-
-  const sphericalSag =
-    (yEffective * yEffective) /
-    absR /
-    (1 + Math.sqrt(discriminant / (absR * absR)));
-
-  // Polynomial aspheric terms
-  const y2 = yVal * yVal;
-  const y4 = y2 * y2;
-  const y6 = y4 * y2;
-  const y8 = y4 * y4;
-
-  const asphericTerms =
-    coeffs.A2 * y2 + coeffs.A4 * y4 + coeffs.A6 * y6 + coeffs.A8 * y8;
-
-  return sphericalSag + asphericTerms;
+  if (!Number.isFinite(R)) return 0;
+  const conicPart = conicSagitta(R, conic, Math.abs(yVal));
+  if (!Number.isFinite(conicPart)) return NaN;
+  return conicPart + polynomialTerm(yVal, coeffs);
 }
 
 /**
- * Main aspheric lens calculation
+ * How far an aspheric surface departs from the sphere of the same radius, at
+ * the semi-aperture y.
+ *
+ * This is the number that says what the aspheric surface actually does, as
+ * opposed to a figure derived from the conic constant on its own.
+ */
+export function departureFromSphere(
+  R: number,
+  y: number,
+  conic: number,
+  coeffs: AsphericCoefficients,
+): number {
+  if (!Number.isFinite(R)) return 0;
+  const sphere = conicSagitta(R, 0, Math.abs(y));
+  const shaped = getAsphericSag(R, y, conic, coeffs);
+  if (!Number.isFinite(sphere) || !Number.isFinite(shaped)) return NaN;
+  return shaped - sphere;
+}
+
+/**
+ * The surface model the shared solver works with.
+ *
+ * The aspheric engine carries a conic constant and a polynomial on each
+ * surface. The A2 term adds curvature, so it changes the power of the
+ * surface it sits on, and the radii below have to be worked out with that
+ * in mind: the base curve the user typed is the power of the front surface
+ * before the A2 term is added to it.
+ */
+function buildSurfaceModel(
+  index: number,
+  baseCurve: number,
+  sph: number,
+  cyl: number,
+  axis: number,
+  front: { conic: number; A2: number; A4: number; A6: number; A8: number },
+  back: { conic: number; A2: number; A4: number; A6: number; A8: number },
+): {
+  model: SurfaceModel;
+  /** The front radius of the base conic. */
+  r1: number;
+  /** The back power of the base conic, in the horizontal meridian. */
+  backPower: number;
+  /** How far the A2 terms move the realised power, in dioptres. */
+  powerShift: number;
+} {
+  const indexFactor = 1000 * (index - 1);
+
+  // A2 y^2 adds 2 * A2 to the curvature of the surface it sits on, and the
+  // power of a surface is (n - 1) times its curvature.
+  const frontShift = 2 * front.A2 * indexFactor;
+  const backShift = 2 * back.A2 * indexFactor;
+
+  // The power the front surface carries once its A2 term is counted in.
+  const frontPower = baseCurve + frontShift;
+
+  // The back surface has to make up the rest of the prescription, less its
+  // own A2 term, so that the lens comes out with the power that was asked
+  // for.
+  const horizontal = Math.sin(((0 - axis) * Math.PI) / 180) ** 2;
+  const backPowerHorizontal = sph + cyl * horizontal - frontPower - backShift;
+
+  const r1 = frontRadius(index, baseCurve);
+
+  const model: SurfaceModel = {
+    frontConic: front.conic,
+    backConic: back.conic,
+    frontPoly: (y) => polynomialTerm(y, front),
+    backPoly: (y) => polynomialTerm(y, back),
+  };
+
+  return {
+    model,
+    r1,
+    backPower: backPowerHorizontal,
+    powerShift: frontShift + backShift,
+  };
+}
+
+/**
+ * The main aspheric lens calculation.
+ *
+ * The geometry is the same model the spherical engine uses: the frame
+ * opening, the optical centre at the pupil, the power in every meridian, and
+ * the thickness that follows. The aspheric surface only changes the shape of
+ * the two surfaces, not the way the lens is measured.
  */
 export function calculateAsphericLens(
   lens: AsphericLensParameters,
   frame: FrameParameters,
   patient: PatientParameters,
-  minThickness: number = 1.0,
+  minThickness: number = MIN_THICKNESS_MM,
   bevelPercent: number = 0.33,
-  frameType: string = "full",
+  frameType: FrameType = "full",
 ): AsphericCalculationResult {
-  const { sph, cyl, index, baseCurve, asphericFront, asphericBack } = lens;
-  const { a, dbl, ed, depth } = frame;
-  const { pd, fittingHeight } = patient;
+  const { sph, cyl, axis, index, baseCurve, asphericFront, asphericBack } = lens;
 
-  // Decentration (same as spherical)
-  const framePD = a + dbl;
-  const decentration = Math.abs(framePD - pd) / 2;
-  const decentrationH = (framePD - pd) / 2;
-  const decentrationV = Math.abs(fittingHeight - frame.b / 2);
-  const decentrationCombined = Math.sqrt(
-    decentration * decentration + decentrationV * decentrationV,
+  const front = asphericFront.isActive
+    ? asphericFront
+    : { conic: 0, A2: 0, A4: 0, A6: 0, A8: 0 };
+  const back = asphericBack.isActive
+    ? asphericBack
+    : { conic: 0, A2: 0, A4: 0, A6: 0, A8: 0 };
+
+  const opening = buildOpening(frame, patient);
+  const { model, r1, powerShift } = buildSurfaceModel(
+    index,
+    baseCurve,
+    sph,
+    cyl,
+    axis,
+    front,
+    back,
   );
-  const y = ed / 2 + decentrationCombined;
 
-  // Powers
-  const totalPower = sph + (cyl < 0 ? 0 : cyl);
-  const minPower = sph + (cyl < 0 ? cyl : 0);
+  // The back radius of the base conic depends on the meridian, because the
+  // power does. The shared solver works that out for every direction.
+  const backRadiusFor = (power: number) => {
+    const frontPower = baseCurve + 2 * front.A2 * 1000 * (index - 1);
+    const backPower = power - frontPower - 2 * back.A2 * 1000 * (index - 1);
+    return backRadius(index, backPower);
+  };
 
-  let calculationPower = sph;
-  if (Math.abs(sph + cyl) > Math.abs(sph)) {
-    calculationPower = sph + cyl;
+  // The shared solver works with a surface model, and the radius of the back
+  // surface changes with the meridian, so the model is rebuilt per meridian
+  // through a small shim.
+  const perMeridianModel = (power: number): SurfaceModel => ({
+    frontConic: model.frontConic,
+    backConic: model.backConic,
+    frontPoly: model.frontPoly,
+    backPoly: model.backPoly,
+  });
+
+  const solved = solveThicknessWithRadii(
+    opening,
+    index,
+    baseCurve,
+    sph,
+    cyl,
+    axis,
+    model,
+    minThickness,
+    backRadiusFor,
+    perMeridianModel,
+  );
+
+  if (solved.error) {
+    return invalidAsphericResult(
+      solved.error === "rim"
+        ? "The frame opening and the optical centre do not meet: the lens cannot be edged to this shape."
+        : "The aspheric surface has no real point at the edge of this frame.",
+    );
   }
 
-  // Radii
-  const r1 = (1000 * (index - 1)) / baseCurve;
-  const backPower = calculationPower - baseCurve;
-  const r2 =
-    backPower === 0 ? Infinity : (1000 * (index - 1)) / Math.abs(backPower);
+  const meridians = solved.meridians;
+  const worst = governingMeridian(meridians);
 
-  // ASPHERIC SAGITTA - use getAsphericSag if active, else fallback to sphere
-  const s1 = asphericFront.isActive
-    ? getAsphericSag(r1, y, asphericFront.conic, {
-        A2: asphericFront.A2,
-        A4: asphericFront.A4,
-        A6: asphericFront.A6,
-        A8: asphericFront.A8,
-      })
-    : r1 === Infinity
-      ? 0
-      : Math.abs(r1) - Math.sqrt(Math.max(0, Math.abs(r1) * Math.abs(r1) - Math.min(Math.abs(y), Math.abs(r1) * 0.999) ** 2));
+  // The section is the vertical meridian through the optical centre, and the
+  // lens is placed in the bevel groove by the meridian that carries the
+  // thickest edge.
+  const section = buildSection({
+    opening,
+    meridians,
+    centerThickness: solved.centerThickness,
+    r1,
+    frameDepth: frame.depth,
+    bevelPercent,
+  });
 
-  const s2 = asphericBack.isActive
-    ? getAsphericSag(r2, y, asphericBack.conic, {
-        A2: asphericBack.A2,
-        A4: asphericBack.A4,
-        A6: asphericBack.A6,
-        A8: asphericBack.A8,
-      })
-    : r2 === Infinity
-      ? 0
-      : Math.abs(r2) - Math.sqrt(Math.max(0, Math.abs(r2) * Math.abs(r2) - Math.min(Math.abs(y), Math.abs(r2) * 0.999) ** 2));
+  const maxBackOffset = Math.max(...meridians.map((m) => m.backOffset));
+  const { anterior, posterior } = protrusion({
+    frameDepth: frame.depth,
+    frontApexZ: section.frontApexZ,
+    backApexZ: section.backApexZ,
+    maxBackOffset,
+  });
 
-  // Thickness (same logic as spherical for now - dapat di-refine)
-  let ct: number, et: number;
-
-  if (calculationPower >= 0) {
-    et = minThickness;
-    if (backPower <= 0) {
-      ct = et + Math.abs(s1) - Math.abs(s2);
-    } else {
-      ct = et + Math.abs(s1) + Math.abs(s2);
+  // How far the aspheric surface leaves the sphere it started from. This is
+  // what the aspheric form actually buys, in millimetres.
+  let departure = 0;
+  for (const m of meridians) {
+    const frontDeparture = departureFromSphere(r1, m.radius, front.conic, front);
+    const backDeparture = departureFromSphere(m.backRadius, m.radius, back.conic, back);
+    for (const d of [frontDeparture, backDeparture]) {
+      if (!Number.isFinite(d)) continue;
+      if (Math.abs(d) > Math.abs(departure)) departure = d;
     }
-  } else {
-    ct = minThickness;
-    if (backPower <= 0) {
-      et = ct + Math.abs(s2 - s1);
-    } else {
-      et = ct + Math.abs(s1) + Math.abs(s2);
-    }
   }
 
-  ct = Math.max(ct, minThickness);
-  et = Math.max(et, minThickness);
+  // A set of coefficients that throws the surface out by more than a couple
+  // of millimetres is not a lens, and the engine says so rather than
+  // reporting a number nobody can order.
+  if (Math.abs(departure) > MAX_DEPARTURE_MM) {
+    return invalidAsphericResult(
+      `The aspheric coefficients throw the surface ${Math.abs(departure).toFixed(2)} mm out of shape at the edge of the frame. Check the scale of the coefficients.`,
+    );
+  }
 
-  if (isNaN(ct) || !isFinite(ct)) ct = minThickness;
-  if (isNaN(et) || !isFinite(et)) et = minThickness;
+  const totalDecentration = Math.abs(frame.a + frame.dbl - patient.pd);
+  const minBlank = frame.ed + totalDecentration + 2;
 
-  // Protrusion
-  const groovePosition = depth * bevelPercent;
-  const etX_start = groovePosition - et / 2;
-  const etX_end = groovePosition + et / 2;
-  const frontMostX = etX_start - s1;
-  const backMostX = etX_end;
-
-  const anteriorProtrusion = Math.max(0, -frontMostX);
-  const posteriorProtrusion = Math.max(0, backMostX - depth);
-
-  // Material recommendation
-  const se = Math.abs(sph + cyl / 2);
-  let bestMatch = MATERIALS_DB.find(
-    (m) => se >= m.seRange.min && se < m.seRange.max,
+  const density = densityOf(index);
+  const volume = lensVolumeCm3(
+    opening,
+    solved.centerThickness,
+    index,
+    baseCurve,
+    sph,
+    cyl,
+    axis,
+    model,
   );
-  if (!bestMatch) {
-    bestMatch = MATERIALS_DB[0];
-  }
+  const weight = volume * density;
 
-  let recIndex = bestMatch.index;
-  let recMaterial = bestMatch.name;
-  let thinness = bestMatch.thinness;
-  let abbe = bestMatch.abbe;
-  let recReason = "Aspheric lens optimized for aberration correction.";
+  const edgeAt = (candidate: number): number => {
+    const alt = solveThicknessWithRadii(
+      opening,
+      candidate,
+      baseCurve,
+      sph,
+      cyl,
+      axis,
+      model,
+      minThickness,
+      (power) => {
+        const frontPower = baseCurve + 2 * front.A2 * 1000 * (candidate - 1);
+        const backPower = power - frontPower - 2 * back.A2 * 1000 * (candidate - 1);
+        return backRadius(candidate, backPower);
+      },
+      perMeridianModel,
+    );
+    if (alt.error) return worst.edge;
+    return governingMeridian(alt.meridians).edge;
+  };
 
-  // Density
-  let density = 1.32;
-  const indexMatch = MATERIALS_DB.find(
-    (m) => Math.abs(m.index - index) < 0.015,
-  );
-  if (indexMatch) {
-    density = indexMatch.density;
-  }
-
-  // Weight
-  const areaMm2 = Math.PI * (a / 2) * (frame.b / 2);
-  const avgThickMm = (ct + et) / 2;
-  const volumeCm3 = (areaMm2 * avgThickMm) / 1000;
-  const weight = volumeCm3 * density;
-
-  // Simplified aberration metrics
-  const sa0 =
-    asphericFront.conic !== 0 ? Math.abs(asphericFront.conic * 0.05) : 0;
-  const comaX = 0; // Placeholder
+  const recommendation = recommendMaterial({
+    sph,
+    cyl,
+    frameType,
+    eyeSize: frame.a,
+    isMinus: worst.power < 0,
+    currentIndex: index,
+    edgeAt,
+  });
 
   return {
-    ct,
-    et,
-    anteriorProtrusion,
-    posteriorProtrusion,
+    ct: solved.centerThickness,
+    et: worst.edge,
+    etMin: Math.min(...meridians.map((m) => m.edge)),
+    anteriorProtrusion: anterior,
+    posteriorProtrusion: posterior,
     r1,
-    r2,
-    backPower,
-    s1,
-    s2,
-    decentration,
-    decentrationH,
-    y,
+    r2: Math.abs(worst.backRadius),
+    backPower: worst.backPower,
+    s1: worst.frontOffset,
+    s2: Math.abs(worst.backOffset),
+    decentration: totalDecentration / 2,
+    decentrationH: (frame.a + frame.dbl - patient.pd) / 2,
+    decentrationV: patient.fittingHeight - frame.b / 2,
+    y: Math.max(...meridians.map((m) => m.radius)),
+    minBlank,
     weight,
     density,
-    sa0,
-    comaX,
+    section,
+    departure,
+    conic: front.conic,
     recommendation: {
-      index: recIndex,
-      material: recMaterial,
-      reason: recReason,
-      thinness,
-      abbe,
+      index: recommendation.index,
+      material: recommendation.material,
+      reason: recommendation.reason,
+      thinness: `${recommendation.savingPercent.toFixed(0)}%`,
+      abbe: recommendation.abbe,
+      edgeThickness: recommendation.edgeThickness,
+      currentEdgeThickness: recommendation.currentEdgeThickness,
+      saving: recommendation.saving,
+      savingPercent: recommendation.savingPercent,
+      referenceSavingPercent: recommendation.referenceSavingPercent,
     },
   };
 }
 
-export const ASPHERIC_ENGINE_VERSION = "AMP_ASPH_V1.0.0";
+/**
+ * The thickness solver with a back radius that depends on the meridian.
+ *
+ * The spherical engine can use the shared solver as it stands; the aspheric
+ * one has to hand in a radius of its own, because the A2 terms move the
+ * power of the surfaces they sit on.
+ */
+function solveThicknessWithRadii(
+  opening: ReturnType<typeof buildOpening>,
+  index: number,
+  baseCurve: number,
+  sph: number,
+  cyl: number,
+  axis: number,
+  surfaces: SurfaceModel,
+  minThickness: number,
+  backRadiusFor: (power: number) => number,
+  perMeridianModel: (power: number) => SurfaceModel,
+) {
+  const r1 = frontRadius(index, baseCurve);
+  const meridians = [];
+  const samples = 72;
+
+  for (let i = 0; i < samples; i += 1) {
+    const theta = (360 * i) / samples;
+    const radius = rimRadius(opening, theta);
+    if (!Number.isFinite(radius)) {
+      return { meridians, centerThickness: minThickness, error: "rim" as const };
+    }
+
+    const d = ((theta - axis) * Math.PI) / 180;
+    const power = sph + cyl * Math.sin(d) ** 2;
+    const r2 = backRadiusFor(power);
+    const model = perMeridianModel(power);
+
+    const frontOffset =
+      conicSagitta(r1, model.frontConic, radius) + model.frontPoly(radius);
+    const backOffset =
+      conicSagitta(r2, model.backConic, radius) + model.backPoly(radius);
+
+    if (!Number.isFinite(frontOffset) || !Number.isFinite(backOffset)) {
+      return { meridians, centerThickness: minThickness, error: "surface" as const };
+    }
+
+    meridians.push({
+      theta,
+      radius,
+      power,
+      backPower: power - baseCurve,
+      backRadius: r2,
+      frontOffset,
+      backOffset,
+      edge: minThickness,
+    });
+  }
+
+  let tightest = 0;
+  for (const m of meridians) {
+    const slack = m.frontOffset - m.backOffset;
+    if (slack > tightest) tightest = slack;
+  }
+
+  const centerThickness = minThickness + tightest;
+  for (const m of meridians) {
+    m.edge = m.backOffset - m.frontOffset + centerThickness;
+  }
+
+  return { meridians, centerThickness, error: undefined as undefined };
+}
+
+/**
+ * The density of the material of the given index, in grams per cubic
+ * centimetre.
+ */
+export function densityOf(index: number): number {
+  const match = MATERIALS_DB.find((m) => Math.abs(m.index - index) < 0.02);
+  return match?.density ?? 1.32;
+}
+
+/**
+ * The result of a prescription that cannot be surfaced: the numbers are
+ * placeholders and the error says so.
+ */
+export function invalidAsphericResult(message: string): AsphericCalculationResult {
+  return {
+    error: true,
+    errorMessage: message,
+    ct: 2.0,
+    et: 2.0,
+    anteriorProtrusion: 0,
+    posteriorProtrusion: 0,
+    r1: 0,
+    r2: 0,
+    backPower: 0,
+    s1: 0,
+    s2: 0,
+    decentration: 0,
+    decentrationH: 0,
+    decentrationV: 0,
+    y: 0,
+    minBlank: 0,
+    weight: 0,
+    density: 1.32,
+    departure: 0,
+    recommendation: {
+      index: 1.5,
+      material: "CR-39",
+      reason: "simErrorDesc",
+      thinness: "0%",
+      abbe: 58,
+    },
+  };
+}
+
+export const ASPHERIC_ENGINE_VERSION = "AMP_ASPH_V2.0.0";

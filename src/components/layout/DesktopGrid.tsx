@@ -38,6 +38,10 @@ export function DesktopGrid() {
     compareResult,
     validation,
     resetSession,
+    undo,
+    redo,
+    canUndo,
+    canRedo,
   } = useOpticalContext();
 
   const compareLens = compareMode ? { ...lens, index: compareIndex } : undefined;
@@ -110,11 +114,15 @@ export function DesktopGrid() {
       inspector={<Sidebar lang={lang} />}
       order={labOrderLines(lens, frame, patient, result, frameType, bevelPercent, t)}
       onReset={resetSession}
+      onUndo={undo}
+      onRedo={redo}
+      canUndo={canUndo}
+      canRedo={canRedo}
       errors={validation.errors}
       figures={{
         framePd: frame.a + frame.dbl,
         decentration: result.decentration,
-        minBlank: result.y * 2 + 2,
+        minBlank: (result.minBlank ?? result.y * 2 + 2),
       }}
     />
   );

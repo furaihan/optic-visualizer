@@ -34,6 +34,10 @@ export function AsphericDesktopGrid() {
     result,
     validation,
     resetSession,
+    undo,
+    redo,
+    canUndo,
+    canRedo,
   } = useAsphericContext();
 
   const lensForSheet = {
@@ -116,11 +120,15 @@ export function AsphericDesktopGrid() {
       inspector={<AsphericSidebar lang={lang} />}
       order={labOrderLines(lensForSheet, frame, patient, result as any, frameType, bevelPercent, t)}
       onReset={resetSession}
+      onUndo={undo}
+      onRedo={redo}
+      canUndo={canUndo}
+      canRedo={canRedo}
       errors={validation.errors}
       figures={{
         framePd: frame.a + frame.dbl,
         decentration: result.decentration,
-        minBlank: result.y * 2 + 2,
+        minBlank: result.minBlank ?? result.y * 2 + 2,
       }}
     />
   );

@@ -22,9 +22,14 @@ export const RecommendationRow: React.FC<RecommendationRowProps> = ({
   const rec = result.recommendation;
   if (!rec) return null;
 
-  // The volume figure belongs to the index being recommended, not to the one
-  // currently in the frame: the block is about the advice, so the number is too.
-  const volumeReductionPercent = Math.max(0, Math.round((1 - 0.5 / (rec.index - 1)) * 100));
+  // The figure belongs to the index being recommended, and it is measured on
+  // this lens: the edge thickness the recommended index gives, against the
+  // edge the standard CR-39 would give for the same lens. The engine works
+  // both out, so the number cannot drift from the tool.
+  const volumeReductionPercent = Math.max(
+    0,
+    Math.round(rec.referenceSavingPercent ?? 0),
+  );
 
   return (
     <section data-ui className="flex flex-col gap-4 rounded-sm bg-sheet-panel p-5">

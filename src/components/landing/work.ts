@@ -25,7 +25,10 @@ export const EXAMPLE_FRAME: FrameParameters = {
   a: 52,
   b: 40,
   dbl: 18,
-  depth: 4.5,
+  // The same frame the simulator opens with: a modern rim is around six
+  // millimetres deep, and a shallower one cannot take the back of a minus
+  // lens.
+  depth: 6.0,
   ed: 54,
 };
 

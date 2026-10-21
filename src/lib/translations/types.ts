@@ -166,11 +166,9 @@ export interface AppTranslations {
   coeffA4: string;
   coeffA6: string;
   coeffA8: string;
-  sphAberration: string;
-  coma: string;
+  asphericDeparture: string;
   asphericDetailK: string;
-  asphericDetailSa: string;
-  asphericDetailComa: string;
+  asphericDetailDeparture: string;
   asphericNav: string;
   asphericParams: string;
   asphericWorkbenchTitle: string;

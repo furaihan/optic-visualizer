@@ -2,6 +2,7 @@ import React from 'react';
 import { Link } from '@tanstack/react-router';
 import { ArrowRightIcon } from 'lucide-react';
 import { translations, type Language } from '@lib/translations';
+import { OPTICAL_ENGINE_VERSION } from '@lib/optic-engine/optical';
 
 /**
  * The footer as a board of tiles: what this is, where it lives, who made it,
@@ -77,7 +78,7 @@ export function LandingFooter({ lang }: { lang: Language }) {
           search={{ lang, activeTab: 'visualizer', view: 'side' }}
           className="group flex min-h-[220px] flex-col justify-between rounded-sm bg-sheet-accent p-6 text-sheet-accent-ink focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-sheet-accent lg:col-span-4"
         >
-          <span className="text-[13px] opacity-80">{t.landHeroEngine}</span>
+          <span className="text-[13px] opacity-80">{t.landHeroEngine.replace('{version}', OPTICAL_ENGINE_VERSION)}</span>
           <span className="flex items-end justify-between gap-4">
             <span className="max-w-[16ch] text-[22px] font-medium leading-[1.1] tracking-[-0.02em]">
               {t.landHeroAction}

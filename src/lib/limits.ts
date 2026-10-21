@@ -47,10 +47,12 @@ export function measureRows(
 ): MeasuredRow[] {
   const totalPower = lens ? lens.sph + (lens.cyl < 0 ? 0 : lens.cyl) : 0;
   const inducedPrism = lens ? Math.abs(totalPower) * (result.decentration / 10) : 0;
+  // A decentration is only worth flagging when it comes with a power that
+  // turns it into a real prismatic effect at the pupil.
   const highDecentration = lens
     ? result.decentration > 3 && (Math.abs(lens.sph) >= 4 || Math.abs(totalPower) >= 4)
     : false;
-  const blank = result.y * 2 + 2;
+  const blank = result.minBlank ?? result.y * 2 + 2;
 
   const rows: MeasuredRow[] = [
     {
@@ -108,9 +110,13 @@ export function measureRows(
       value: inducedPrism,
       limit: 1,
       direction: 'max',
-      ok: !highDecentration,
+      // The row is out when the prism itself is over the limit, or when a
+      // decentration and a strong power together put the lens off the pupil.
+      // A prism inside the limit is not a fault just because the lens is
+      // decentred.
+      ok: inducedPrism <= 1 && !highDecentration,
       over: Math.max(0, inducedPrism - 1),
-      compound: highDecentration,
+      compound: highDecentration && inducedPrism <= 1,
       unit: 'Δ',
       decimals: 2,
     },

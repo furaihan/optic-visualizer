@@ -1,5 +1,5 @@
 import React from 'react';
-import { CalculationResult, FrameParameters } from '../../lib/optic-engine/types';
+import { CalculationResult, FrameParameters, FrameType } from '../../lib/optic-engine/types';
 import { translations, Language } from '../../lib/translations';
 import { LensPosition } from './types';
 import { ExtLine } from './SheetDefs';
@@ -13,6 +13,8 @@ interface FrameProfileProps {
   originX: number;
   originY: number;
   lang: Language;
+  /** How the frame holds the lens: full rim, half rim, or rimless. */
+  frameType?: FrameType;
   activeTarget?: string | null;
   onSelectTarget?: (target: string | null) => void;
 }
@@ -35,6 +37,7 @@ export const FrameProfile: React.FC<FrameProfileProps> = ({
   originX,
   originY,
   lang,
+  frameType = 'full',
   activeTarget = null,
   onSelectTarget,
 }) => {
@@ -47,6 +50,12 @@ export const FrameProfile: React.FC<FrameProfileProps> = ({
   const top = originY - halfB - rim;
   const bottom = originY + halfB + rim;
 
+  // How the frame holds the lens decides what is drawn around it: a full rim
+  // has material above and below, a half rim only below with a cord above,
+  // and a rimless frame has no rim at all.
+  const hasTopRim = frameType === 'full';
+  const hasBottomRim = frameType === 'full' || frameType === 'half';
+
   const anterior = result.anteriorProtrusion;
   const posterior = result.posteriorProtrusion;
   // Two dimension bands above the rim: protrusion (measured off the rim faces)
@@ -57,46 +66,69 @@ export const FrameProfile: React.FC<FrameProfileProps> = ({
     <g transform={`translate(${originX}, 0)`}>
       {/* Rim band, top and bottom: the slot the lens edge sits in. The rim is
           drawn as a band that meets the lens edge, so the section reads as one
-          object rather than a lens floating between two slabs. */}
-      <rect
-        x={0}
-        y={top}
-        width={depth}
-        height={rim + 0.5}
-        className="text-sheet-frame"
-        fill="currentColor"
-        fillOpacity={0.3}
-      />
-      <rect
-        x={0}
-        y={bottom - rim - 0.5}
-        width={depth}
-        height={rim + 0.5}
-        className="text-sheet-frame"
-        fill="currentColor"
-        fillOpacity={0.3}
-      />
-      {/* The slot line: where the rim meets the lens, drawn once. */}
-      <line
-        x1={0}
-        y1={top + rim}
-        x2={depth}
-        y2={top + rim}
-        className="text-sheet-frame"
-        stroke="currentColor"
-        strokeWidth={1}
-        strokeOpacity={0.35}
-      />
-      <line
-        x1={0}
-        y1={bottom - rim}
-        x2={depth}
-        y2={bottom - rim}
-        className="text-sheet-frame"
-        stroke="currentColor"
-        strokeWidth={1}
-        strokeOpacity={0.35}
-      />
+          object rather than a lens floating between two slabs. A half rim has
+          material only at the bottom, with a cord above it; a rimless frame
+          has nothing around the lens at all. */}
+      {hasTopRim && (
+        <>
+          <rect
+            x={0}
+            y={top}
+            width={depth}
+            height={rim + 0.5}
+            className="text-sheet-frame"
+            fill="currentColor"
+            fillOpacity={0.3}
+          />
+          {/* The slot line: where the rim meets the lens, drawn once. */}
+          <line
+            x1={0}
+            y1={top + rim}
+            x2={depth}
+            y2={top + rim}
+            className="text-sheet-frame"
+            stroke="currentColor"
+            strokeWidth={1}
+            strokeOpacity={0.35}
+          />
+        </>
+      )}
+      {frameType === 'half' && (
+        <line
+          x1={0}
+          y1={top + rim * 0.5}
+          x2={depth}
+          y2={top + rim * 0.5}
+          className="text-sheet-frame"
+          stroke="currentColor"
+          strokeWidth={1.5}
+          strokeOpacity={0.5}
+          strokeDasharray="5 4"
+        />
+      )}
+      {hasBottomRim && (
+        <>
+          <rect
+            x={0}
+            y={bottom - rim - 0.5}
+            width={depth}
+            height={rim + 0.5}
+            className="text-sheet-frame"
+            fill="currentColor"
+            fillOpacity={0.3}
+          />
+          <line
+            x1={0}
+            y1={bottom - rim}
+            x2={depth}
+            y2={bottom - rim}
+            className="text-sheet-frame"
+            stroke="currentColor"
+            strokeWidth={1}
+            strokeOpacity={0.35}
+          />
+        </>
+      )}
 
       {/* Bevel groove. */}
       <g
@@ -116,7 +148,7 @@ export const FrameProfile: React.FC<FrameProfileProps> = ({
           strokeDasharray="6 5"
         />
         <text
-          x={grooveX}
+          x={grooveX * scale}
           y={bottom + 34}
           textAnchor="middle"
           fill="currentColor"

@@ -4,6 +4,13 @@ import {
   PatientParameters,
 } from "./types";
 import { ERGONOMIC_LIMITS } from "../../data/materials";
+import {
+  backRadius,
+  buildOpening,
+  frontRadius,
+  powerInMeridian,
+  rimRadius,
+} from "./geometry";
 
 export interface ValidationError {
   field: string;
@@ -102,7 +109,7 @@ export function validateOpticalParams(
     errors.push({
       field: "pd",
       messageId: `Pupil Distance (PD) di luar batas klinis (${ERGONOMIC_LIMITS.pd.min}-${ERGONOMIC_LIMITS.pd.max}mm).`,
-      messageEn: `Pupillary Distance (PD) is fuera of regular clinical range (${ERGONOMIC_LIMITS.pd.min}-${ERGONOMIC_LIMITS.pd.max}mm).`,
+      messageEn: `Pupillary Distance (PD) is outside regular clinical range (${ERGONOMIC_LIMITS.pd.min}-${ERGONOMIC_LIMITS.pd.max}mm).`,
       isFatal: false,
     });
   }
@@ -110,8 +117,8 @@ export function validateOpticalParams(
   if (patient.fittingHeight > frame.b - 2) {
     errors.push({
       field: "fittingHeight",
-      messageId: "Tinggi pasang melebihi batas anatomis bingkai.",
-      messageEn: "Fitting height is too high for the chosen frame depth.",
+      messageId: "Tinggi pasang melebihi tinggi bingkai yang dipilih.",
+      messageEn: "Fitting height is too high for the chosen frame height (B).",
       isFatal: false,
     });
   }
@@ -128,11 +135,10 @@ export function validateOpticalParams(
   // 4. Decentration and blank calculation validation
   const framePD = frame.a + frame.dbl;
   const decentration = Math.abs(framePD - patient.pd) / 2;
-  const decentrationV = Math.abs(patient.fittingHeight - frame.b / 2);
-  const decentrationCombined = Math.sqrt(
-    decentration * decentration + decentrationV * decentrationV,
-  );
-  const requiredBlank = frame.ed + 2 * decentrationCombined + 2;
+  // The blank has to hold the shape with the optical centre at the pupil, so
+  // it is the shape's own diameter plus the total decentration plus the two
+  // millimetres of edging allowance. The same rule the engine uses.
+  const requiredBlank = frame.ed + Math.abs(framePD - patient.pd) + 2;
 
   if (requiredBlank > 85) {
     errors.push({
@@ -145,22 +151,29 @@ export function validateOpticalParams(
     });
   }
 
-  // Sagitta physical real-world checks (prevent root of negative numbers)
-  const totalPower = lens.sph + lens.cyl;
+  // Sagitta physical real-world checks (prevent root of negative numbers).
+  // The aperture is the frame opening, and the back surface is a different
+  // curve in every meridian, so each direction is checked on its own.
   const index = lens.index;
   const baseCurve = lens.baseCurve;
+  const r1 = frontRadius(index, baseCurve);
+  const opening = buildOpening(frame, patient);
 
-  const r1 = (1000 * (index - 1)) / baseCurve;
-  const calculationPower =
-    Math.abs(lens.sph + lens.cyl) > Math.abs(lens.sph)
-      ? lens.sph + lens.cyl
-      : lens.sph;
-  const backPower = calculationPower - baseCurve;
-  const r2 =
-    backPower === 0 ? Infinity : (1000 * (index - 1)) / Math.abs(backPower);
-  const y = frame.ed / 2 + decentrationCombined;
+  let impossible = false;
+  for (let i = 0; i < 36 && !impossible; i += 1) {
+    const theta = i * 10;
+    const radius = rimRadius(opening, theta);
+    const power = powerInMeridian(theta, lens.sph, lens.cyl, lens.axis);
+    const r2 = backRadius(index, power - baseCurve);
+    if (
+      radius >= Math.abs(r1) ||
+      (r2 !== Infinity && radius >= Math.abs(r2))
+    ) {
+      impossible = true;
+    }
+  }
 
-  if (y >= Math.abs(r1) || (r2 !== Infinity && y >= Math.abs(r2))) {
+  if (impossible) {
     errors.push({
       field: "baseCurve",
       messageId:

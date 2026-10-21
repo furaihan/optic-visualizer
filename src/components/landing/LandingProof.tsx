@@ -2,6 +2,27 @@ import React from 'react';
 import { translations, type Language } from '@lib/translations';
 import { MATERIALS_DB } from '@data/materials';
 import { MATERIAL_FOR } from './work';
+import { calculateLens } from '@lib/optic-engine/optical';
+import type { FrameParameters, LensIndex, PatientParameters } from '@lib/optic-engine/types';
+
+/**
+ * The lens the reduction figures on the landing page are measured on: a
+ * minus four in a standard frame, the prescription most people bring in.
+ */
+const REFERENCE_LENS = {
+  sph: -4,
+  cyl: 0,
+  axis: 180,
+  baseCurve: 4,
+};
+const REFERENCE_FRAME: FrameParameters = {
+  a: 52,
+  b: 40,
+  dbl: 18,
+  depth: 4.5,
+  ed: 54,
+};
+const REFERENCE_PATIENT: PatientParameters = { pd: 63, fittingHeight: 22 };
 
 /**
  * The standards the instrument holds to: the materials it recommends, and the
@@ -10,13 +31,28 @@ import { MATERIAL_FOR } from './work';
 export function LandingProof({ lang }: { lang: Language }) {
   const t = translations[lang];
 
+  // The edge thickness each index gives for the reference lens, measured by
+  // the engine rather than quoted from a table, so the landing page and the
+  // tool cannot disagree.
+  const referenceEdge = calculateLens(
+    { ...REFERENCE_LENS, index: 1.5 as LensIndex },
+    REFERENCE_FRAME,
+    REFERENCE_PATIENT,
+  ).et;
+
   const ladder = [1.5, 1.56, 1.6, 1.67, 1.74].map((index) => {
     const entry = MATERIALS_DB.find((material) => Math.abs(material.index - index) < 0.02);
+    const edge = calculateLens(
+      { ...REFERENCE_LENS, index: index as LensIndex },
+      REFERENCE_FRAME,
+      REFERENCE_PATIENT,
+    ).et;
+    const reduction = referenceEdge > 0 ? Math.max(0, (1 - edge / referenceEdge) * 100) : 0;
     return {
       index,
       name: MATERIAL_FOR[index],
       abbe: entry?.abbe ?? 0,
-      thinness: entry?.thinness ?? '0%',
+      reduction: Math.round(reduction),
     };
   });
 
@@ -56,7 +92,7 @@ export function LandingProof({ lang }: { lang: Language }) {
                 </span>
                 <span>
                   {t.landProofVolume}:{' '}
-                  {material.thinness === '0%' ? '0%' : `−${material.thinness}`}
+                  {material.reduction === 0 ? '0%' : `−${material.reduction}%`}
                 </span>
               </dd>
             </div>

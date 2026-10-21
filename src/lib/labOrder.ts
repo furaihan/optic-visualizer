@@ -31,7 +31,7 @@ export function labOrderLines(
     `${t.fittingLine}: PD ${patient.pd}  ${t.fittingHeight} ${patient.fittingHeight}  ${t.bevelPos} ${Math.round(bevelPercent * 100)}%`,
     `${t.edgeThick} ${result.et.toFixed(2)} mm  |  ${t.center} ${result.ct.toFixed(2)} mm`,
     `${t.anteriorProt} ${result.anteriorProtrusion.toFixed(2)} mm  |  ${t.posteriorProt} ${result.posteriorProtrusion.toFixed(2)} mm`,
-    `${t.lensWeight} ${result.weight.toFixed(1)} g  |  ${t.minBlank} ${(result.y * 2 + 2).toFixed(0)} mm`,
+    `${t.lensWeight} ${result.weight.toFixed(1)} g  |  ${t.minBlank} ${((result.minBlank ?? result.y * 2 + 2)).toFixed(0)} mm`,
     `${t.frameType}: ${frameType}`,
   ];
 }

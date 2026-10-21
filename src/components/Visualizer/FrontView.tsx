@@ -55,7 +55,7 @@ export const FrontView: React.FC<FrontViewProps> = ({
   const tone = (field: 'a' | 'b' | 'dbl' | 'ed') =>
     highlightedLimit === field ? warn : ink;
 
-  const opening = (x: number, primary: boolean) => (
+  const opening = (x: number, primary: boolean, mirrored: boolean) => (
     <g key={x}>
       {/* Lens opening: a flat tint of the prescription ink, so the rim reads as
           a band of frame ink around it. */}
@@ -93,9 +93,14 @@ export const FrontView: React.FC<FrontViewProps> = ({
         strokeOpacity={primary && highlightedLimit === 'ed' ? 1 : 0.45}
       />
       {/* Pupil and PD crosshair, in the fitting ink: this mark is the one thing
-          on the drawing that comes from the fitting group, not from the frame. */}
+          on the drawing that comes from the fitting group, not from the frame.
+
+          The pupil sits towards the nose of each opening, so on the left lens
+          it is the other way along: the two eyes are mirror images of each
+          other, and a crosshair drawn on the same side of both is wrong on
+          one of them. */}
       <g
-        transform={`translate(${x + (frame.a / 2 - (result.decentrationH ?? result.decentration)) * scale}, ${
+        transform={`translate(${x + openingW / 2 + (mirrored ? 1 : -1) * (result.decentrationH ?? result.decentration) * scale}, ${
           originY + (frame.b / 2 - patient.fittingHeight) * scale
         })`}
         className="text-sheet-fit"
@@ -109,8 +114,8 @@ export const FrontView: React.FC<FrontViewProps> = ({
 
   return (
     <g>
-      {opening(leftX, false)}
-      {opening(rightX, true)}
+      {opening(leftX, false, true)}
+      {opening(rightX, true, false)}
 
       {/* A: horizontal opening, above the right lens, above the ED circle. */}
       <g className={tone('a')}>

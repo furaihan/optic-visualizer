@@ -24,7 +24,7 @@ export function LandingFeatures({ lang }: { lang: Language }) {
     { id: 'bc', group: 'rx', label: t.baseCurve, value: '4.00', unit: 'D' },
     { id: 'eye', group: 'frame', label: `${t.aSize} / ${t.bSize}`, value: '52 / 40', unit: 'mm' },
     { id: 'bridge', group: 'frame', label: `${t.dbl} / ${t.ed}`, value: '18 / 54', unit: 'mm' },
-    { id: 'depth', group: 'frame', label: t.frameDepth, value: '4.5', unit: 'mm' },
+    { id: 'depth', group: 'frame', label: t.frameDepth, value: '6.0', unit: 'mm' },
     { id: 'pd', group: 'fit', label: `${t.pd} / ${t.fittingHeight}`, value: '63 / 22', unit: 'mm' },
     { id: 'bevel', group: 'fit', label: t.bevelPos, value: '33', unit: '%' },
   ];

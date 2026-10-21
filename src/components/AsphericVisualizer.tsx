@@ -51,32 +51,50 @@ interface AsphericVisualizerProps {
  * always shows what the engine actually computed.
  */
 function asphericPath(
-  etX: number,
-  halfHeight: number,
-  R: number,
-  conic: number,
-  coeffs: { A2: number; A4: number; A6: number; A8: number },
+  r1: number,
+  r2: number,
+  radiusTop: number,
+  radiusBottom: number,
+  ocY: number,
+  front: { conic: number; A2: number; A4: number; A6: number; A8: number },
+  back: { conic: number; A2: number; A4: number; A6: number; A8: number },
   scale: number,
-  fromTop: boolean,
-  direction: number,
+  frontApexX: number,
+  backApexX: number,
 ): string {
-  if (!Number.isFinite(R)) return '';
   const steps = 48;
-  const startY = fromTop ? -halfHeight : halfHeight;
-  const endY = fromTop ? halfHeight : -halfHeight;
-  const step = (endY - startY) / steps;
-  const points: string[] = [];
+  const frontPoints: string[] = [];
+  const backPoints: string[] = [];
+
   for (let i = 0; i <= steps; i++) {
-    const y = startY + step * i;
-    const sag = getAsphericSag(R, Math.abs(y), conic, coeffs);
-    points.push(`${(etX - direction * sag) * scale} ${y * scale}`);
+    const y = -radiusTop + (radiusTop + radiusBottom) * (i / steps);
+    const frontSag = asphericSag(r1, y, front.conic, front);
+    const backSag = asphericSag(r2, y, back.conic, back);
+    const sy = (-ocY + y) * scale;
+    frontPoints.push(`${(frontApexX + frontSag) * scale} ${sy}`);
+    backPoints.push(`${(backApexX + backSag) * scale} ${sy}`);
   }
-  return points.join(' L ');
+
+  // The front surface from the top of the opening down, then the back surface
+  // from the bottom back up, closed by the two edge faces.
+  return `M ${frontPoints.join(' L ')} L ${backPoints.reverse().join(' L ')} Z`;
 }
 
-function sphericalArc(etX: number, y: number, R: number, scale: number, sweep: number): string {
-  if (!Number.isFinite(R)) return '';
-  return `A ${Math.abs(R) * scale} ${Math.abs(R) * scale} 0 0 ${sweep} ${etX * scale} ${y * scale}`;
+/**
+ * The surface offset of an aspheric surface at the radius y.
+ *
+ * The radius is signed, so the surface stands behind its vertex when the
+ * radius is positive and in front of it when the radius is negative, which
+ * is what puts the rim of a convex back surface in the right place.
+ */
+function asphericSag(
+  R: number,
+  y: number,
+  conic: number,
+  coeffs: { A2: number; A4: number; A6: number; A8: number },
+): number {
+  if (!Number.isFinite(R)) return 0;
+  return getAsphericSag(R, y, conic, coeffs);
 }
 
 /**
@@ -105,13 +123,14 @@ export const AsphericVisualizer: React.FC<AsphericVisualizerProps> = React.memo(
     const [target, setTarget] = useState<string | null>(null);
 
     const primaryPos = useMemo<LensPosition>(() => {
-      const etX_start = -result.anteriorProtrusion + result.s1;
-      const etX_end = etX_start + result.et;
-      // The groove sits where the rim grips the edge, the same place it sits
-      // on the spherical sheet.
+      // The lens sits in the bevel groove, exactly as it does on the
+      // spherical sheet: the groove is at the same place on both boards, and
+      // the edge is centred on it.
       const grooveX = frame.depth * bevelPercent;
-      const frontApexX = -result.anteriorProtrusion;
-      const backApexX = frontApexX + result.ct;
+      const etX_start = grooveX - result.et / 2;
+      const etX_end = grooveX + result.et / 2;
+      const frontApexX = result.section ? result.section.frontApexZ : etX_start - result.s1;
+      const backApexX = result.section ? result.section.backApexZ : frontApexX + result.ct;
       return { etX_start, etX_end, grooveX, frontApexX, backApexX };
     }, [result, frame.depth, bevelPercent]);
 
@@ -159,37 +178,34 @@ export const AsphericVisualizer: React.FC<AsphericVisualizerProps> = React.memo(
     const frontOriginY = originY;
 
     const { etX_start, etX_end } = primaryPos;
-    const frontDir = -1;
-    const backDir = result.backPower < 0 ? 1 : -1;
-    const sweepBack = result.backPower >= 0 ? 0 : 1;
 
-    const frontPath = lens.asphericFront.isActive
-      ? `M ${etX_start * S} ${-halfHeight} L ${asphericPath(
-          etX_start,
-          frame.b / 2,
-          result.r1,
-          lens.asphericFront.conic,
-          lens.asphericFront,
-          S,
-          true,
-          frontDir,
-        )}`
-      : `M ${etX_start * S} ${-halfHeight} ${sphericalArc(etX_start, frame.b / 2, result.r1, S, 0)}`;
+    // The section is the vertical meridian through the optical centre, drawn
+    // from the engine's own geometry so that the shape on the board and the
+    // numbers in the schedule are the same measurement.
+    const section = result.section;
+    const radiusTop = section ? section.radiusTop : frame.b / 2;
+    const radiusBottom = section ? section.radiusBottom : frame.b / 2;
+    const ocY = section ? section.ocY : patient.fittingHeight - frame.b / 2;
 
-    const backPath = lens.asphericBack.isActive
-      ? `L ${asphericPath(
-          etX_end,
-          frame.b / 2,
-          result.r2,
-          lens.asphericBack.conic,
-          lens.asphericBack,
-          S,
-          false,
-          backDir,
-        )}`
-      : `L ${sphericalArc(etX_end, -frame.b / 2, result.r2, S, sweepBack)}`;
+    const frontSurface = lens.asphericFront.isActive
+      ? lens.asphericFront
+      : { conic: 0, A2: 0, A4: 0, A6: 0, A8: 0 };
+    const backSurface = lens.asphericBack.isActive
+      ? lens.asphericBack
+      : { conic: 0, A2: 0, A4: 0, A6: 0, A8: 0 };
 
-    const lensPath = `${frontPath} L ${etX_end * S} ${halfHeight} ${backPath} Z`;
+    const lensPath = asphericPath(
+      result.r1,
+      section ? section.r2 : result.r2,
+      radiusTop,
+      radiusBottom,
+      ocY,
+      frontSurface,
+      backSurface,
+      S,
+      primaryPos.frontApexX,
+      primaryPos.backApexX,
+    );
 
     const viewTitle =
       view === 'side' ? t.crossSection : view === 'top' ? t.topDown : t.frontView;
@@ -484,32 +500,48 @@ export const AsphericVisualizer: React.FC<AsphericVisualizerProps> = React.memo(
                 )}
 
                 <g className="text-sheet-muted" fill="currentColor" fontSize={16}>
-                  {[
-                    {
-                      text: variant === 'classic' ? t.crossSection : t.shortCrossSection,
-                      x: originX,
-                    },
-                    {
-                      text: variant === 'classic' ? t.edgeDetail : t.shortEdgeDetail,
-                      x: detailOriginX + detailW / 2,
-                    },
-                    ...(showFront
-                      ? [
-                          {
-                            text: t.frontView,
-                            x: frontOriginX + (frame.a * 2 + frame.dbl) * frontScale * 0.25,
-                          },
-                        ]
-                      : []),
-                  ].map((label) => {
-                    const half = (label.text.length * CHAR_WIDTH) / 2;
-                    const x = Math.min(Math.max(label.x, half + 4), BOARD_W - half - 4);
-                    return (
-                      <text key={label.text} x={x} y={BOARD_H - sheet.nameY} textAnchor="middle">
+                  {(() => {
+                    // The names of the views, clamped inside the board. On a
+                    // narrow board there is not room for all three, and a name
+                    // printed on top of another is worse than a name left out.
+                    const placed: { text: string; x: number; half: number }[] = [];
+                    for (const label of [
+                      {
+                        text: variant === 'classic' ? t.crossSection : t.shortCrossSection,
+                        x: originX,
+                      },
+                      {
+                        text: variant === 'classic' ? t.edgeDetail : t.shortEdgeDetail,
+                        x: detailOriginX + detailW / 2,
+                      },
+                      ...(showFront
+                        ? [
+                            {
+                              text: t.frontView,
+                              x: frontOriginX + (frame.a * 2 + frame.dbl) * frontScale * 0.25,
+                            },
+                          ]
+                        : []),
+                    ]) {
+                      const half = (label.text.length * CHAR_WIDTH) / 2;
+                      const x = Math.min(Math.max(label.x, half + 4), BOARD_W - half - 4);
+                      const clash = placed.some(
+                        (p) => Math.abs(p.x - x) < p.half + half + 10,
+                      );
+                      if (clash) continue;
+                      placed.push({ text: label.text, x, half });
+                    }
+                    return placed.map((label) => (
+                      <text
+                        key={label.text}
+                        x={label.x}
+                        y={BOARD_H - sheet.nameY}
+                        textAnchor="middle"
+                      >
                         {label.text}
                       </text>
-                    );
-                  })}
+                    ));
+                  })()}
                 </g>
               </>
             ) : view === 'front' ? (

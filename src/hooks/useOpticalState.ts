@@ -34,7 +34,10 @@ const DEFAULT_STATE: OpticalParametersState = {
     a: 52,
     b: 40,
     dbl: 18,
-    depth: 4.5,
+    // A modern rim is around six millimetres deep. A shallower one cannot
+    // take the back of a minus lens, and the tool would rightly say so — but
+    // the case the tool opens with should be a lens that fits.
+    depth: 6.0,
     ed: 54,
   },
   patient: {
@@ -47,25 +50,43 @@ const DEFAULT_STATE: OpticalParametersState = {
 
 const STORAGE_KEY = 'amp_optical_session';
 
-export function useOpticalState() {
-  const [state, setState] = useState<OpticalParametersState>(() => {
-    try {
-      const stored = localStorage.getItem(STORAGE_KEY);
-      if (stored) {
-        const parsed = JSON.parse(stored);
-        if (parsed && typeof parsed === 'object' && parsed.lens && parsed.frame) {
-          if (parsed.version !== CURRENT_SCHEMA_VERSION) {
-            console.log(`Schema version mismatch (found ${parsed.version}, expected ${CURRENT_SCHEMA_VERSION}). Migrating or dropping old data.`);
-            return DEFAULT_STATE;
-          }
-          return { ...DEFAULT_STATE, ...parsed };
+/**
+ * The session the tool opens with: what was left on the last visit, or the
+ * defaults when there is nothing to recover.
+ */
+function loadStoredState(): OpticalParametersState {
+  try {
+    const stored = localStorage.getItem(STORAGE_KEY);
+    if (stored) {
+      const parsed = JSON.parse(stored);
+      if (parsed && typeof parsed === 'object' && parsed.lens && parsed.frame) {
+        if (parsed.version !== CURRENT_SCHEMA_VERSION) {
+          console.log(`Schema version mismatch (found ${parsed.version}, expected ${CURRENT_SCHEMA_VERSION}). Migrating or dropping old data.`);
+          return DEFAULT_STATE;
         }
+        return { ...DEFAULT_STATE, ...parsed };
       }
-    } catch (e) {
-      console.warn('Failed to recover stored optic session. Using defaults.', e);
     }
-    return DEFAULT_STATE;
-  });
+  } catch (e) {
+    console.warn('Failed to recover stored optic session. Using defaults.', e);
+  }
+  return DEFAULT_STATE;
+}
+
+export function useOpticalState() {
+  // The session carries its own history: the states the optician has been
+  // through, so a value typed in by mistake can be taken back.
+  const [session, setSession] = useState<{
+    present: OpticalParametersState;
+    past: OpticalParametersState[];
+    future: OpticalParametersState[];
+  }>(() => ({
+    present: loadStoredState(),
+    past: [],
+    future: [],
+  }));
+
+  const state = session.present;
 
   // Compare mode states (does not need undo/redo tracking)
   const [compareMode, setCompareMode] = useState<boolean>(false);
@@ -82,8 +103,53 @@ export function useOpticalState() {
   }, [state]);
 
   const updateState = useCallback((updater: (prev: OpticalParametersState) => OpticalParametersState) => {
-    setState(updater);
+    setSession((s) => ({
+      present: updater(s.present),
+      past: [...s.past.slice(-49), s.present],
+      future: [],
+    }));
   }, []);
+
+  /** Steps back through the history. */
+  const undo = useCallback(() => {
+    setSession((s) => {
+      if (s.past.length === 0) return s;
+      return {
+        present: s.past[s.past.length - 1],
+        past: s.past.slice(0, -1),
+        future: [s.present, ...s.future],
+      };
+    });
+  }, []);
+
+  /** Steps forward again. */
+  const redo = useCallback(() => {
+    setSession((s) => {
+      if (s.future.length === 0) return s;
+      return {
+        present: s.future[0],
+        past: [...s.past, s.present],
+        future: s.future.slice(1),
+      };
+    });
+  }, []);
+
+  // The keyboard shortcuts the tool offers: Ctrl+Z and Ctrl+Y.
+  useEffect(() => {
+    const onKey = (event: KeyboardEvent) => {
+      if (!(event.ctrlKey || event.metaKey)) return;
+      const key = event.key.toLowerCase();
+      if (key === 'z' && !event.shiftKey) {
+        event.preventDefault();
+        undo();
+      } else if (key === 'y' || (key === 'z' && event.shiftKey)) {
+        event.preventDefault();
+        redo();
+      }
+    };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [undo, redo]);
 
   // Action methods to change specific parameter groups
   const setLens = useCallback((updatedLens: LensParameters | ((p: LensParameters) => LensParameters)) => {
@@ -123,7 +189,11 @@ export function useOpticalState() {
 
   // Reset helper
   const resetSession = useCallback(() => {
-    setState(DEFAULT_STATE);
+    setSession((s) => ({
+      present: DEFAULT_STATE,
+      past: [...s.past.slice(-49), s.present],
+      future: [],
+    }));
     setCompareMode(false);
     setCompareIndex(1.74);
   }, []);
@@ -211,6 +281,10 @@ export function useOpticalState() {
 
     // Session Control
     resetSession,
+    undo,
+    redo,
+    canUndo: session.past.length > 0,
+    canRedo: session.future.length > 0,
 
     highlightedLimit,
     setHighlightedLimit

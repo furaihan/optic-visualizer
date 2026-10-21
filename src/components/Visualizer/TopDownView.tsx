@@ -81,6 +81,11 @@ export const TopDownView: React.FC<TopDownViewProps> = ({
             Z`;
   };
 
+  // The rim in plan is two walls, the front one and the back one, with the
+  // lens sitting between them. Filling the whole opening with frame ink hid
+  // the lens and read as a solid slab.
+  const wallPx = Math.max(2, 1.2 * scale);
+
   return (
     <g>
       {/* Bridge: a single drawn arc, the way a plan view shows it. */}
@@ -100,16 +105,25 @@ export const TopDownView: React.FC<TopDownViewProps> = ({
         const x = centerX + (side === 1 ? halfGap : -halfGap - openingW);
         return (
           <g key={side}>
-            {/* Rim block in plan. */}
+            {/* Rim in plan: the front wall and the back wall, with the lens
+                between them. */}
             <rect
               x={x}
               y={centerY}
               width={openingW}
-              height={depthPx}
+              height={wallPx}
               className={highlightedLimit === 'a' ? warn : rimInk}
               fill="currentColor"
               fillOpacity={highlightedLimit === 'a' ? 0.24 : 0.16}
-              rx={1.5}
+            />
+            <rect
+              x={x}
+              y={centerY + depthPx - wallPx}
+              width={openingW}
+              height={wallPx}
+              className={highlightedLimit === 'a' ? warn : rimInk}
+              fill="currentColor"
+              fillOpacity={highlightedLimit === 'a' ? 0.24 : 0.16}
             />
 
             {/* Temple arm, drawn once per side as a thin curve. */}
@@ -171,17 +185,18 @@ export const TopDownView: React.FC<TopDownViewProps> = ({
         />
       </g>
 
-      {/* PD, the one number that belongs to the patient rather than the frame. */}
-      <text
-        x={centerX - halfGap - openingW / 2}
-        y={centerY + depthPx + 44}
-        textAnchor="middle"
-        className={muted}
-        fill="currentColor"
-        fontSize={16}
-      >
-        {t.pd} {patient.pd}
-      </text>
+      {/* PD, the one number that belongs to the patient rather than the
+          frame: dimensioned between the two pupils, which is where it is
+          measured. */}
+      <g className={muted}>
+        <DimH
+          x1={centerX - patient.pd / 2 * scale}
+          x2={centerX + (patient.pd / 2) * scale}
+          y={centerY + depthPx + 44}
+          label={`${t.pd} ${patient.pd}`}
+          tone="muted"
+        />
+      </g>
     </g>
   );
 };

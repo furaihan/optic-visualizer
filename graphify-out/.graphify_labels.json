@@ -1,5 +1,4 @@
 {
-  "0": "Sidebar Controls & UI Primitives",
   "3": "Landing Page & Home",
   "5": "README Domain Concepts",
   "7": "TypeScript Path Aliases",
@@ -8,7 +7,6 @@
   "10": "Navigation & Theme Menus",
   "12": "Runtime Dependencies",
   "14": "Trial Lens Set (bench photo)",
-  "15": "Select Component Family",
   "16": "Dev Dependencies",
   "17": "Trial Frame Fitting (bench photo)",
   "18": "Vite Build Config",
@@ -17,6 +15,5 @@
   "21": "Navy Eye Exam Bench Photo",
   "22": "Near-Vision Reading (bench photo)",
   "23": "Intent Skills Sync Script",
-  "24": "Resizable Panel Components",
   "25": "Global CSS Type Shim"
 }

@@ -5,7 +5,7 @@ import { ValidationAlerts } from './ValidationAlerts';
 import { AppFooter, type FooterFigures } from './AppFooter';
 import { MobileTabManager } from './MobileTabManager';
 import { CopyOrderButton } from './CopyOrderButton';
-import { ResetButton } from './ResetButton';
+import { SessionControls } from './ResetButton';
 import { ScrollArea } from '../ui/scroll-area';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '../ui/tabs';
 import { translations } from '../../lib/translations';
@@ -29,6 +29,11 @@ type MobileWorkbenchProps = {
   parameters: ReactNode;
   order: string[];
   onReset: () => void;
+  /** The session's history: take a change back, or put it forward again. */
+  onUndo?: () => void;
+  onRedo?: () => void;
+  canUndo?: boolean;
+  canRedo?: boolean;
   errors: ValidationError[];
   figures: FooterFigures;
 };
@@ -53,6 +58,10 @@ export function MobileWorkbench({
   parameters,
   order,
   onReset,
+  onUndo,
+  onRedo,
+  canUndo = false,
+  canRedo = false,
   errors,
   figures,
 }: MobileWorkbenchProps) {
@@ -83,7 +92,14 @@ export function MobileWorkbench({
             activeTab={activeTab}
             onTabChange={onTabChange}
           >
-            <ResetButton lang={lang} onReset={onReset} />
+            <SessionControls
+              lang={lang}
+              onReset={onReset}
+              onUndo={onUndo}
+              onRedo={onRedo}
+              canUndo={canUndo}
+              canRedo={canRedo}
+            />
             <CopyOrderButton lang={lang} order={order} />
           </MobileTabManager>
         </div>

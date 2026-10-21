@@ -23,6 +23,21 @@ import { GroupMarker } from "./Sidebar/GroupMarker";
 import { useAsphericContext } from "../contexts/AsphericContext";
 import { INPUT_SPECS } from "../lib/optic-engine/validation";
 
+/**
+ * The step of each polynomial term.
+ *
+ * The terms are the even powers of the radius in millimetres, so the numbers
+ * are small and each power needs a step of its own: an A4 of a couple of
+ * parts in a million is a fifth of a millimetre of surface at the edge of
+ * the frame.
+ */
+const COEFFICIENT_STEP: Record<'A2' | 'A4' | 'A6' | 'A8', number> = {
+  A2: 0.00001,
+  A4: 0.0000001,
+  A6: 0.000000001,
+  A8: 0.00000000001,
+};
+
 interface AsphericSidebarProps {
   lang: Language;
   isMobile?: boolean;
@@ -99,7 +114,8 @@ function AsphericSurfacePanel({
                     <span className="text-[13px] text-sheet-muted">{coeff}</span>
                     <input
                       type="number"
-                      step={0.0001}
+                      step={COEFFICIENT_STEP[coeff]}
+                      title="The even powers of the radius in millimetres. An A4 of 2e-7 moves the surface about a fifth of a millimetre at a 30 mm radius."
                       value={config[coeff]}
                       onChange={(e) => {
                         const v = parseFloat(e.target.value);
@@ -140,7 +156,7 @@ export const AsphericSidebar: React.FC<AsphericSidebarProps> = ({ lang, isMobile
 
   const t = translations[lang];
   const indices: LensIndex[] = [1.5, 1.56, 1.6, 1.67, 1.74];
-  const requiredBlank = result.y * 2 + 2;
+  const requiredBlank = (result.minBlank ?? result.y * 2 + 2);
 
   const [openGroup, setOpenGroup] = useState<Record<string, boolean>>({
     lens: true,

@@ -37,6 +37,10 @@ export function MobileViews() {
     compareResult,
     validation,
     resetSession,
+    undo,
+    redo,
+    canUndo,
+    canRedo,
   } = useOpticalContext();
 
   const compareLens = compareMode ? { ...lens, index: compareIndex } : undefined;
@@ -110,6 +114,10 @@ export function MobileViews() {
       parameters={<Sidebar lang={lang} isMobile />}
       order={labOrderLines(lens, frame, patient, result, frameType, bevelPercent, t)}
       onReset={resetSession}
+      onUndo={undo}
+      onRedo={redo}
+      canUndo={canUndo}
+      canRedo={canRedo}
       errors={validation.errors}
       figures={{
         framePd: frame.a + frame.dbl,

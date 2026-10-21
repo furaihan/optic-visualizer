@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { CalculationResult, FrameParameters, LensParameters } from '../../lib/optic-engine/types';
 import { translations, Language } from '../../lib/translations';
+import { measureRows } from '../../lib/limits';
 
 interface MeasurementSheetProps {
   result: CalculationResult;
@@ -44,16 +45,22 @@ export const MeasurementSheet: React.FC<MeasurementSheetProps> = ({
 
   const mm = (v: number) => `${v.toFixed(2)} mm`;
 
-  const etOk = result.et <= 6;
-  const ctOk = result.ct >= 1;
-  const antOk = result.anteriorProtrusion <= 1.5;
-  const postOk = result.posteriorProtrusion <= 2;
-  const weightOk = result.weight <= 15;
-  const blankOk = result.y * 2 + 2 <= 85;
+  // The limits live in one place, so the table under the sheet and the
+  // verdict line above it can never disagree about what is out of bounds.
+  const measured = measureRows(result, lens);
+  const row = (id: string) => measured.find((r) => r.id === id)!;
+
+  const etOk = row('et').ok;
+  const ctOk = row('ct').ok;
+  const antOk = row('anterior').ok;
+  const postOk = row('posterior').ok;
+  const weightOk = row('weight').ok;
+  const prismOk = row('prism').ok;
+  const blankOk = row('blank').ok;
 
   const totalPower = lens ? (lens.sph + (lens.cyl < 0 ? 0 : lens.cyl)) : 0;
   const inducedPrism = lens ? Math.abs(totalPower) * (result.decentration / 10) : 0;
-  const highDecentration = lens ? result.decentration > 3 && (Math.abs(lens.sph) >= 4 || Math.abs(totalPower) >= 4) : false;
+  const blank = result.minBlank ?? result.y * 2 + 2;
 
   const rows: Row[] = [
     {
@@ -127,7 +134,7 @@ export const MeasurementSheet: React.FC<MeasurementSheetProps> = ({
         value: mm(result.s1),
         limit: 'No limit',
         ok: true,
-        detail: 's = R − √(R² − y²), evaluated at the effective radius y.',
+        detail: 's = R − √(R² − y²), at the rim of the thickest edge.',
       },
       {
         id: 's2',
@@ -135,14 +142,14 @@ export const MeasurementSheet: React.FC<MeasurementSheetProps> = ({
         value: mm(result.s2),
         limit: 'No limit',
         ok: true,
-        detail: 's = R − √(R² − y²), evaluated at the effective radius y.',
+        detail: 's = R − √(R² − y²), at the rim of the thickest edge.',
       },
       {
         id: 'prism',
         label: t.inducedPrism,
         value: `${inducedPrism.toFixed(2)} Δ`,
         limit: '≤ 1.00 Δ',
-        ok: !highDecentration,
+        ok: prismOk,
         detail: t.decentrationWarning
           .replace('{decentration}', result.decentration.toFixed(1))
           .replace('{prism}', inducedPrism.toFixed(1)),
@@ -150,10 +157,10 @@ export const MeasurementSheet: React.FC<MeasurementSheetProps> = ({
       {
         id: 'blank',
         label: t.minBlank,
-        value: `${(result.y * 2 + 2).toFixed(0)} mm`,
+        value: `${blank.toFixed(0)} mm`,
         limit: '≤ 85 mm',
         ok: blankOk,
-        detail: t.limitWarningA(frame?.a ?? 0, Number((result.y * 2 + 2).toFixed(0))),
+        detail: t.limitWarningA(frame?.a ?? 0, Number(blank.toFixed(0))),
       },
     );
 
@@ -161,11 +168,10 @@ export const MeasurementSheet: React.FC<MeasurementSheetProps> = ({
     // detail, so they belong with the rest of it — and a figure the engine does
     // not compute is never printed as a zero.
     const aspheric = result as unknown as {
-      sa0?: number;
-      comaX?: number;
+      departure?: number;
       conic?: number;
     };
-    if (typeof aspheric.sa0 === 'number') {
+    if (typeof aspheric.departure === 'number') {
       rows.push(
         {
           id: 'k',
@@ -176,20 +182,12 @@ export const MeasurementSheet: React.FC<MeasurementSheetProps> = ({
           detail: t.asphericDetailK,
         },
         {
-          id: 'sa',
-          label: t.sphAberration,
-          value: aspheric.sa0.toFixed(3),
+          id: 'departure',
+          label: t.asphericDeparture,
+          value: `${aspheric.departure.toFixed(3)} mm`,
           limit: 'No limit',
           ok: true,
-          detail: t.asphericDetailSa,
-        },
-        {
-          id: 'coma',
-          label: t.coma,
-          value: '—',
-          limit: 'No limit',
-          ok: true,
-          detail: t.asphericDetailComa,
+          detail: t.asphericDetailDeparture,
         },
       );
     }

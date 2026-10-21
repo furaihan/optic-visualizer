@@ -6,6 +6,7 @@ import { MATERIALS_DB } from '@data/materials';
 import { buttonVariants } from '@components/ui/button';
 import { Visualizer } from '@components/Visualizer';
 import type { LensIndex } from '@lib/optic-engine/types';
+import { OPTICAL_ENGINE_VERSION } from '@lib/optic-engine/optical';
 import {
   EXAMPLE_BEVEL,
   EXAMPLE_FRAME,
@@ -94,7 +95,7 @@ export function LandingHero({ lang }: { lang: Language }) {
           </div>
           <p className="mt-4 flex flex-wrap items-baseline justify-between gap-x-6 gap-y-1 text-[13px] text-sheet-muted">
             <span>{t.landHeroReadout}</span>
-            <span className="tnum">{t.landHeroEngine}</span>
+            <span className="tnum">{t.landHeroEngine.replace('{version}', OPTICAL_ENGINE_VERSION)}</span>
           </p>
         </div>
 

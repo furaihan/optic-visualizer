@@ -30,6 +30,11 @@ type WorkbenchLayoutProps = {
   /** The order the copy button puts on the clipboard. */
   order: string[];
   onReset: () => void;
+  /** The session's history: take a change back, or put it forward again. */
+  onUndo?: () => void;
+  onRedo?: () => void;
+  canUndo?: boolean;
+  canRedo?: boolean;
   errors: ValidationError[];
   figures: FooterFigures;
 };
@@ -60,6 +65,10 @@ export function WorkbenchLayout({
   inspector,
   order,
   onReset,
+  onUndo,
+  onRedo,
+  canUndo = false,
+  canRedo = false,
   errors,
   figures,
 }: WorkbenchLayoutProps) {
@@ -115,6 +124,10 @@ export function WorkbenchLayout({
             activeTab="visualizer"
             onViewChange={onViewChange}
             onReset={onReset}
+            onUndo={onUndo}
+            onRedo={onRedo}
+            canUndo={canUndo}
+            canRedo={canRedo}
             order={order}
             onToggleInspector={() => setDrawerOpen((open) => !open)}
             inspectorOpen={drawerOpen}

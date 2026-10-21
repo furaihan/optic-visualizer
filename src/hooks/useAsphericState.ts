@@ -47,7 +47,7 @@ const DEFAULT_STATE: AsphericParametersState = {
     a: 52,
     b: 40,
     dbl: 18,
-    depth: 4.5,
+    depth: 6.0,
     ed: 54,
   },
   patient: {
@@ -60,24 +60,42 @@ const DEFAULT_STATE: AsphericParametersState = {
 
 const STORAGE_KEY = 'amp_aspheric_session';
 
-export function useAsphericState() {
-  const [state, setState] = useState<AsphericParametersState>(() => {
-    try {
-      const stored = localStorage.getItem(STORAGE_KEY);
-      if (stored) {
-        const parsed = JSON.parse(stored);
-        if (parsed && typeof parsed === 'object' && parsed.lens && parsed.frame) {
-          if (parsed.version !== CURRENT_SCHEMA_VERSION) {
-            return DEFAULT_STATE;
-          }
-          return { ...DEFAULT_STATE, ...parsed, lens: { ...DEFAULT_STATE.lens, ...parsed.lens } };
+/**
+ * The session the aspheric tool opens with: what was left on the last visit,
+ * or the defaults when there is nothing to recover.
+ */
+function loadStoredState(): AsphericParametersState {
+  try {
+    const stored = localStorage.getItem(STORAGE_KEY);
+    if (stored) {
+      const parsed = JSON.parse(stored);
+      if (parsed && typeof parsed === 'object' && parsed.lens && parsed.frame) {
+        if (parsed.version !== CURRENT_SCHEMA_VERSION) {
+          return DEFAULT_STATE;
         }
+        return { ...DEFAULT_STATE, ...parsed, lens: { ...DEFAULT_STATE.lens, ...parsed.lens } };
       }
-    } catch (e) {
-      console.warn('Failed to recover stored aspheric session. Using defaults.', e);
     }
-    return DEFAULT_STATE;
-  });
+  } catch (e) {
+    console.warn('Failed to recover stored aspheric session. Using defaults.', e);
+  }
+  return DEFAULT_STATE;
+}
+
+export function useAsphericState() {
+  // The session carries its own history, so a coefficient typed in by mistake
+  // can be taken back.
+  const [session, setSession] = useState<{
+    present: AsphericParametersState;
+    past: AsphericParametersState[];
+    future: AsphericParametersState[];
+  }>(() => ({
+    present: loadStoredState(),
+    past: [],
+    future: [],
+  }));
+
+  const state = session.present;
 
   const [highlightedLimit, setHighlightedLimit] = useState<'a' | 'b' | 'dbl' | 'ed' | null>(null);
 
@@ -90,8 +108,53 @@ export function useAsphericState() {
   }, [state]);
 
   const updateState = useCallback((updater: (prev: AsphericParametersState) => AsphericParametersState) => {
-    setState(updater);
+    setSession((s) => ({
+      present: updater(s.present),
+      past: [...s.past.slice(-49), s.present],
+      future: [],
+    }));
   }, []);
+
+  /** Steps back through the history. */
+  const undo = useCallback(() => {
+    setSession((s) => {
+      if (s.past.length === 0) return s;
+      return {
+        present: s.past[s.past.length - 1],
+        past: s.past.slice(0, -1),
+        future: [s.present, ...s.future],
+      };
+    });
+  }, []);
+
+  /** Steps forward again. */
+  const redo = useCallback(() => {
+    setSession((s) => {
+      if (s.future.length === 0) return s;
+      return {
+        present: s.future[0],
+        past: [...s.past, s.present],
+        future: s.future.slice(1),
+      };
+    });
+  }, []);
+
+  // The keyboard shortcuts the tool offers: Ctrl+Z and Ctrl+Y.
+  useEffect(() => {
+    const onKey = (event: KeyboardEvent) => {
+      if (!(event.ctrlKey || event.metaKey)) return;
+      const key = event.key.toLowerCase();
+      if (key === 'z' && !event.shiftKey) {
+        event.preventDefault();
+        undo();
+      } else if (key === 'y' || (key === 'z' && event.shiftKey)) {
+        event.preventDefault();
+        redo();
+      }
+    };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [undo, redo]);
 
   const setLens = useCallback((updated: AsphericLensParameters | ((p: AsphericLensParameters) => AsphericLensParameters)) => {
     updateState(prev => ({
@@ -149,7 +212,11 @@ export function useAsphericState() {
   }, [updateState]);
 
   const resetSession = useCallback(() => {
-    setState(DEFAULT_STATE);
+    setSession((s) => ({
+      present: DEFAULT_STATE,
+      past: [...s.past.slice(-49), s.present],
+      future: [],
+    }));
   }, []);
 
   const validation: ValidationResult = useMemo(() => {
@@ -185,8 +252,7 @@ export function useAsphericState() {
         y: 0,
         weight: 0,
         density: 1.32,
-        sa0: 0,
-        comaX: 0,
+        departure: 0,
         recommendation: {
           index: 1.5,
           material: "CR-39",
@@ -224,6 +290,10 @@ export function useAsphericState() {
     validation,
 
     resetSession,
+    undo,
+    redo,
+    canUndo: session.past.length > 0,
+    canRedo: session.future.length > 0,
     highlightedLimit,
     setHighlightedLimit,
   };

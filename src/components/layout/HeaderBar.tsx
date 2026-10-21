@@ -4,7 +4,7 @@ import { SlidersIcon } from 'lucide-react';
 import { Button } from '../ui/button';
 import { Tabs, TabsList, TabsTrigger } from '../ui/tabs';
 import { CopyOrderButton } from './CopyOrderButton';
-import { ResetButton } from './ResetButton';
+import { SessionControls } from './ResetButton';
 
 type HeaderBarProps = {
   lang: Language;
@@ -13,6 +13,11 @@ type HeaderBarProps = {
   onViewChange: (view: View) => void;
   /** The session's reset, from the page that owns the state. */
   onReset: () => void;
+  /** The session's history: take a change back, or put it forward again. */
+  onUndo?: () => void;
+  onRedo?: () => void;
+  canUndo?: boolean;
+  canRedo?: boolean;
   /** The lab order, already written as plain text lines. */
   order: string[];
   /** The drawing switcher. The phone carries it on the drawing itself. */
@@ -31,6 +36,10 @@ export function HeaderBar({
   view,
   onViewChange,
   onReset,
+  onUndo,
+  onRedo,
+  canUndo = false,
+  canRedo = false,
   order,
   showViews = true,
   onToggleInspector,
@@ -84,7 +93,14 @@ export function HeaderBar({
       )}
 
       <div className="order-3 ml-auto flex shrink-0 items-center gap-1 sm:gap-2">
-        <ResetButton lang={lang} onReset={onReset} />
+        <SessionControls
+          lang={lang}
+          onReset={onReset}
+          onUndo={onUndo}
+          onRedo={onRedo}
+          canUndo={canUndo}
+          canRedo={canRedo}
+        />
         <CopyOrderButton lang={lang} order={order} />
       </div>
     </header>
