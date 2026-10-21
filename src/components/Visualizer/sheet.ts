@@ -81,6 +81,37 @@ type SheetInput = {
 };
 
 /**
+ * The box the front elevation is drawn in, on its own.
+ *
+ * Sized to what is actually drawn: the two openings and the rim, the A
+ * dimension above them, the B dimension beside them, the DBL and the effective
+ * diameter below, and the view's own name. A box padded past that shrinks the
+ * drawing for no reason, and the drawing is what the sheet is for.
+ */
+export function frontViewBox(
+  frame: { a: number; b: number; dbl: number },
+  scale: number,
+  pad: number,
+  dimBand: number
+) {
+  const originX = pad + (frame.a + frame.dbl) * scale;
+  const originY = pad + dimBand + (frame.b * scale) / 2;
+  const halfH = (frame.b * scale) / 2;
+
+  const left = originX - (frame.a + frame.dbl) * scale - 1.25 * scale;
+  const right = originX + frame.a * scale + 82;
+  const top = originY - halfH - 60;
+  const bottom = originY + halfH + 64;
+
+  return {
+    x: left - 6,
+    y: top - 4,
+    width: right - left + 12,
+    height: bottom - top + 8,
+  };
+}
+
+/**
  * The sheet's box.
  *
  * One calculation for both workbenches, so the spherical sheet and the

@@ -198,6 +198,7 @@ export const translations_id: AppTranslations = {
   findingPrism: 'Prisma yang terbentuk',
   findingBlank: 'Blank minimum',
   sheetScaleNote: 'Potongan {s}× · Depan {f}×',
+  sheetScaleSingle: 'Digambar pada {s}×',
   scaleBarLabel: '10 mm',
   inspectorLabel: 'Panel input',
   shortIndex: 'Indeks',

@@ -192,6 +192,8 @@ export interface AppTranslations {
   findingBlank: string;
   /** The scale the sheet's two views are drawn at. */
   sheetScaleNote: string;
+  /** The scale a sheet with one view is drawn at. */
+  sheetScaleSingle: string;
   scaleBarLabel: string;
   inspectorLabel: string;
   shortIndex: string;

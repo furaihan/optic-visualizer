@@ -13,7 +13,7 @@ import { FrontView } from './Visualizer/FrontView';
 import { TopDownView } from './Visualizer/TopDownView';
 import { EdgeDetail } from './Visualizer/EdgeDetail';
 import { SheetDefs } from './Visualizer/SheetDefs';
-import { sheetGeometry, SHEET, CHAR_WIDTH } from './Visualizer/sheet';
+import { sheetGeometry, SHEET, CHAR_WIDTH, frontViewBox } from './Visualizer/sheet';
 import { useMediaQuery } from '../hooks/useMediaQuery';
 import { useElementSize } from '../hooks/useElementWidth';
 import { Tabs, TabsList, TabsTrigger } from './ui/tabs';
@@ -283,7 +283,7 @@ export const AsphericVisualizer: React.FC<AsphericVisualizerProps> = React.memo(
             drawing itself. On the workbench it is only there when there is
             something to say — every row it takes is a row the drawing does
             not get. */}
-        {(variant === 'classic' || onViewChange) && (
+        {(variant === 'classic' || onViewChange || view !== 'side') && (
           <div
             className={`flex shrink-0 flex-wrap items-center justify-between gap-x-4 gap-y-1 ${
               compact ? 'px-3 py-1' : 'px-4 pt-3'
@@ -337,7 +337,10 @@ export const AsphericVisualizer: React.FC<AsphericVisualizerProps> = React.memo(
               view === 'side'
                 ? `0 0 ${BOARD_W} ${BOARD_H}`
                 : view === 'front'
-                  ? `0 0 ${(frame.a * 2 + frame.dbl) * S + 160} ${(frame.b + 10) * S + 120}`
+                  ? (() => {
+                      const box = frontViewBox(frame, S, PAD, DIM_BAND);
+                      return `${box.x} ${box.y} ${box.width} ${box.height}`;
+                    })()
                   : `0 0 ${(frame.a * 2 + frame.dbl) * S + 120} ${(frame.depth + 10) * S + 150}`
             }
             preserveAspectRatio="xMidYMid meet"
@@ -482,8 +485,14 @@ export const AsphericVisualizer: React.FC<AsphericVisualizerProps> = React.memo(
 
                 <g className="text-sheet-muted" fill="currentColor" fontSize={16}>
                   {[
-                    { text: compact ? t.shortCrossSection : t.crossSection, x: originX },
-                    { text: compact ? t.shortEdgeDetail : t.edgeDetail, x: detailOriginX + detailW / 2 },
+                    {
+                      text: variant === 'classic' ? t.crossSection : t.shortCrossSection,
+                      x: originX,
+                    },
+                    {
+                      text: variant === 'classic' ? t.edgeDetail : t.shortEdgeDetail,
+                      x: detailOriginX + detailW / 2,
+                    },
                     ...(showFront
                       ? [
                           {
@@ -610,7 +619,11 @@ export const AsphericVisualizer: React.FC<AsphericVisualizerProps> = React.memo(
             </p>
             {variant === 'workbench' && !compact && (
               <p className="shrink-0 whitespace-nowrap text-[13px] text-sheet-muted">
-                {t.sheetScaleNote.replace('{s}', String(S)).replace('{f}', String(frontScale))}
+                {view === 'side'
+                  ? t.sheetScaleNote
+                      .replace('{s}', String(S))
+                      .replace('{f}', String(frontScale))
+                  : t.sheetScaleSingle.replace('{s}', String(S))}
               </p>
             )}
           </div>

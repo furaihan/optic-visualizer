@@ -198,6 +198,7 @@ export const translations_en: AppTranslations = {
   findingPrism: 'Induced prism',
   findingBlank: 'Minimum blank',
   sheetScaleNote: 'Section {s}× · Front {f}×',
+  sheetScaleSingle: 'Drawn at {s}×',
   scaleBarLabel: '10 mm',
   inspectorLabel: 'Inspector',
   shortIndex: 'Index',

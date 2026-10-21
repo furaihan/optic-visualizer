@@ -1,7 +1,13 @@
 {
-  "2": "@tanstack/react-router",
-  "4": "AsphericSidebar.tsx",
+  "1": "Language",
+  "2": "AsphericVisualizer.tsx",
+  "4": "item.tsx",
   "6": "optic-engine/types.ts",
   "11": "MobileWorkbench.tsx",
-  "13": "index.css (global stylesheet)"
+  "13": "index.css (global stylesheet)",
+  "26": "class-variance-authority",
+  "27": "playwright",
+  "28": "popover.tsx",
+  "29": "alert.tsx",
+  "30": "@base-ui/react"
 }

@@ -10,7 +10,7 @@ import { SheetDefs } from './SheetDefs';
 import { CompareLegend } from './CompareLegend';
 import { useMediaQuery } from '../../hooks/useMediaQuery';
 import { useElementSize } from '../../hooks/useElementWidth';
-import { sheetGeometry, SHEET, CHAR_WIDTH } from './sheet';
+import { sheetGeometry, SHEET, CHAR_WIDTH, frontViewBox } from './sheet';
 import { Tabs, TabsList, TabsTrigger } from '../ui/tabs';
 
 type CaliperRow = {
@@ -253,7 +253,7 @@ export const Visualizer: React.FC<VisualizerProps> = React.memo(
             view's own name. On the workbench it is only there when there is
             something to say — every row it takes is a row the drawing does
             not get. */}
-        {(variant === 'classic' || onViewChange || (compareResult && view !== 'front')) && (
+        {(variant === 'classic' || onViewChange || view !== 'side') && (
           <div
             className={`flex shrink-0 flex-wrap items-center justify-between gap-x-4 gap-y-1 ${
               compact ? 'px-3 py-1' : 'px-4 pt-3'
@@ -293,7 +293,7 @@ export const Visualizer: React.FC<VisualizerProps> = React.memo(
               <h2 className="text-[13px] font-medium text-sheet-ink">{viewTitle}</h2>
             )}
 
-            {compareResult && view !== 'front' ? (
+            {compareResult && view !== 'front' && variant === 'classic' && (
               <CompareLegend
                 lang={lang}
                 index={lens.index}
@@ -301,11 +301,12 @@ export const Visualizer: React.FC<VisualizerProps> = React.memo(
                 result={result}
                 compareResult={compareResult}
               />
-            ) : variant === 'classic' ? (
+            )}
+            {variant === 'classic' && !(compareResult && view !== 'front') && (
               <p className="text-[13px] text-sheet-muted">
                 {compareResult && view === 'front' ? t.compareFrontNote : t.scaleNote}
               </p>
-            ) : null}
+            )}
           </div>
         )}
 
@@ -324,7 +325,10 @@ export const Visualizer: React.FC<VisualizerProps> = React.memo(
                     // allow: the label was clipped by the sheet's own edge. The
                     // view's own name sits below the rim, which needs the same
                     // allowance at the foot.
-                    `0 -44 ${(frame.a * 2 + frame.dbl) * S + 160} ${(frame.b + 10) * S + 210}`
+                    (() => {
+                      const box = frontViewBox(frame, S, PAD, DIM_BAND);
+                      return `${box.x} ${box.y} ${box.width} ${box.height}`;
+                    })()
                   : `0 0 ${(frame.a * 2 + frame.dbl) * S + 120} ${(frame.depth + 10) * S + 150}`
             }
             preserveAspectRatio="xMidYMid meet"
@@ -439,8 +443,14 @@ export const Visualizer: React.FC<VisualizerProps> = React.memo(
                     run off the left edge of the sheet. */}
                 <g className="text-sheet-muted" fill="currentColor" fontSize={16}>
                   {[
-                    { text: compact ? t.shortCrossSection : t.crossSection, x: originX },
-                    { text: compact ? t.shortEdgeDetail : t.edgeDetail, x: detailOriginX + detailW / 2 },
+                    {
+                      text: variant === 'classic' ? t.crossSection : t.shortCrossSection,
+                      x: originX,
+                    },
+                    {
+                      text: variant === 'classic' ? t.edgeDetail : t.shortEdgeDetail,
+                      x: detailOriginX + detailW / 2,
+                    },
                     ...(showFront
                       ? [
                           {
@@ -592,11 +602,23 @@ export const Visualizer: React.FC<VisualizerProps> = React.memo(
               >
                 {active ? active.note : t.caliperHint}
               </p>
-              {!compact && !(compareResult && view !== 'front') && (
+              {compareResult && view !== 'front' ? (
+                <CompareLegend
+                  lang={lang}
+                  index={lens.index}
+                  compareIndex={compareLens?.index ?? null}
+                  result={result}
+                  compareResult={compareResult}
+                />
+              ) : !compact ? (
                 <p className="shrink-0 whitespace-nowrap text-[13px] text-sheet-muted">
-                  {t.sheetScaleNote.replace('{s}', String(S)).replace('{f}', String(frontScale))}
+                  {view === 'side'
+                    ? t.sheetScaleNote
+                        .replace('{s}', String(S))
+                        .replace('{f}', String(frontScale))
+                    : t.sheetScaleSingle.replace('{s}', String(S))}
                 </p>
-              )}
+              ) : null}
             </div>
           )}
         </div>
