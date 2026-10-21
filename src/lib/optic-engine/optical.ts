@@ -16,6 +16,7 @@ import {
   buildOpening,
   buildSection,
   conicSagitta,
+  farthestRimDistance,
   frontRadius,
   lensVolumeCm3,
   powerInMeridian,
@@ -40,6 +41,13 @@ export function isValidIndex(value: unknown): value is LensIndex {
  * distance between the two surfaces there. The cylinder's axis decides which
  * meridian carries which power, so a prescription that is round in one
  * direction and steep in the other is surfaced as the lens it really is.
+ *
+ * The lens is placed in the bevel groove by the vertical meridian through the
+ * optical centre: the edge at the top of the opening is the one centred on
+ * the groove. Everything measured against the frame — how far the lens
+ * stands in front of it or behind it — is measured in that same meridian.
+ * The frame is a flat plane, with no base curve of its own, so the rim the
+ * lens sits in is a straight band and the numbers say what they measure.
  */
 export function calculateLens(
   lens: LensParameters,
@@ -76,8 +84,9 @@ export function calculateLens(
   const frontR = frontRadius(index, baseCurve);
 
   // The section is the vertical meridian through the optical centre, and the
-  // lens is placed in the bevel groove by the meridian that carries the
-  // thickest edge.
+  // lens is placed in the bevel groove by that meridian: the edge at the top
+  // of the opening is the one centred on the groove, and the two vertices
+  // follow from there.
   const section = buildSection({
     opening,
     meridians,
@@ -87,8 +96,11 @@ export function calculateLens(
     bevelPercent,
   });
 
-  // How far the lens reaches out of the frame.
-  const maxBackOffset = Math.max(...meridians.map((m) => m.backOffset));
+  // How far the lens reaches out of the frame. The lens is placed by the
+  // vertical meridian, so the protrusion is measured in that same plane: the
+  // deepest point of the back surface in the section, not somewhere else
+  // around the rim where the lens is not held.
+  const maxBackOffset = Math.max(section.backOffsetTop, section.backOffsetBottom);
   const { anterior, posterior } = protrusion({
     frameDepth: frame.depth,
     frontApexZ: section.frontApexZ,
@@ -97,10 +109,11 @@ export function calculateLens(
   });
 
   // The lens blank has to hold the shape with the optical centre where the
-  // pupil is, so it is the shape's own diameter plus the total decentration
-  // plus the two millimetres of edging allowance.
+  // pupil is, and the optical centre does not sit at the boxing centre: the
+  // shape reaches further from the pupil than its own diameter. The blank is
+  // twice that reach, plus the two millimetres of edging allowance.
   const totalDecentration = Math.abs(frame.a + frame.dbl - patient.pd);
-  const minBlank = frame.ed + totalDecentration + 2;
+  const minBlank = 2 * farthestRimDistance(opening) + 2;
 
   const density = densityOf(index);
   const volume = lensVolumeCm3(
@@ -149,6 +162,10 @@ export function calculateLens(
     r1: frontR,
     r2: Math.abs(worst.backRadius),
     backPower: worst.backPower,
+    /** The back vertex power of the thickest-edge meridian, in dioptres. */
+    vertexPower: solved.vertexPower,
+    /** How far the vertex power is from the prescribed power, in dioptres. */
+    vertexPowerError: solved.vertexError,
     s1: worst.frontOffset,
     s2: Math.abs(worst.backOffset),
     decentration: totalDecentration / 2,

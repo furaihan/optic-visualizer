@@ -148,6 +148,8 @@ export const AsphericSidebar: React.FC<AsphericSidebarProps> = ({ lang, isMobile
     setBevelPercent,
     frameType,
     setFrameType,
+    minThickness,
+    setMinThickness,
     highlightedLimit,
     setHighlightedLimit,
     result,
@@ -181,6 +183,8 @@ export const AsphericSidebar: React.FC<AsphericSidebarProps> = ({ lang, isMobile
           baseCurve: lens.baseCurve,
         }}
         onLensChange={(l) => setLens({ ...lens, ...l })}
+        minThickness={minThickness}
+        onMinThicknessChange={setMinThickness}
         lang={lang}
         indices={indices}
         isOpen={openGroup.lens}

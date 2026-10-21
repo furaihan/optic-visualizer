@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
 import { CalculationResult, FrameParameters, LensParameters } from '../../lib/optic-engine/types';
 import { translations, Language } from '../../lib/translations';
-import { measureRows } from '../../lib/limits';
+import { measureRows, prismReference } from '../../lib/limits';
+import { limitLabel } from '../../data/limits';
 
 interface MeasurementSheetProps {
   result: CalculationResult;
@@ -22,6 +23,8 @@ type Row = {
   ok: boolean;
   detail: string;
   compareValue?: string;
+  /** A reference figure: reported, but never a fault. */
+  reference?: boolean;
 };
 
 /**
@@ -58,16 +61,19 @@ export const MeasurementSheet: React.FC<MeasurementSheetProps> = ({
   const prismOk = row('prism').ok;
   const blankOk = row('blank').ok;
 
-  const totalPower = lens ? (lens.sph + (lens.cyl < 0 ? 0 : lens.cyl)) : 0;
-  const inducedPrism = lens ? Math.abs(totalPower) * (result.decentration / 10) : 0;
-  const blank = result.minBlank ?? result.y * 2 + 2;
+  // The prism is a reference figure, not a limit: the optical centre is
+  // placed on the pupil, so the prism at the pupil is zero whatever the
+  // frame is. The row reports the prism the lens would carry at the centre
+  // of the frame if it were not decentred onto the pupil.
+  const prism = prismReference(result, lens);
+  const blank = row('blank').value;
 
   const rows: Row[] = [
     {
       id: 'et',
       label: t.edgeThick,
       value: mm(result.et),
-      limit: '≤ 6.00 mm',
+      limit: limitLabel('et'),
       ok: etOk,
       detail: t.guideEtDesc,
       compareValue: compareResult ? mm(compareResult.et) : undefined,
@@ -76,7 +82,7 @@ export const MeasurementSheet: React.FC<MeasurementSheetProps> = ({
       id: 'ct',
       label: t.center,
       value: mm(result.ct),
-      limit: '≥ 1.00 mm',
+      limit: limitLabel('ct'),
       ok: ctOk,
       detail: t.guideCtDesc,
       compareValue: compareResult ? mm(compareResult.ct) : undefined,
@@ -85,7 +91,7 @@ export const MeasurementSheet: React.FC<MeasurementSheetProps> = ({
       id: 'anterior',
       label: t.anteriorProt,
       value: mm(result.anteriorProtrusion),
-      limit: '≤ 1.50 mm',
+      limit: limitLabel('anterior'),
       ok: antOk,
       detail: t.guideProtDesc,
       compareValue: compareResult ? mm(compareResult.anteriorProtrusion) : undefined,
@@ -94,7 +100,7 @@ export const MeasurementSheet: React.FC<MeasurementSheetProps> = ({
       id: 'posterior',
       label: t.posteriorProt,
       value: mm(result.posteriorProtrusion),
-      limit: '≤ 2.00 mm',
+      limit: limitLabel('posterior'),
       ok: postOk,
       detail: t.guideProtDesc,
       compareValue: compareResult ? mm(compareResult.posteriorProtrusion) : undefined,
@@ -103,7 +109,7 @@ export const MeasurementSheet: React.FC<MeasurementSheetProps> = ({
       id: 'weight',
       label: t.lensWeight,
       value: `${result.weight.toFixed(1)} g`,
-      limit: `≤ 15.0 g · ${t.weightComfort} < 10 g`,
+      limit: `${limitLabel('weight')} · ${t.weightComfort} < 10 g`,
       ok: weightOk,
       detail: t.guideWeightDesc,
       compareValue: compareResult ? `${compareResult.weight.toFixed(1)} g` : undefined,
@@ -126,7 +132,11 @@ export const MeasurementSheet: React.FC<MeasurementSheetProps> = ({
         value: Number.isFinite(result.r2) ? mm(result.r2) : 'PLANO',
         limit: 'No limit',
         ok: true,
-        detail: `${t.curvatureSpecs}: back power ${result.backPower.toFixed(2)} D.`,
+        detail: `${t.curvatureSpecs}: back power ${result.backPower.toFixed(2)} D. ${
+          typeof result.vertexPower === 'number'
+            ? t.vertexPowerDesc.replace('{power}', result.vertexPower.toFixed(2))
+            : ''
+        }`,
       },
       {
         id: 's1',
@@ -146,19 +156,31 @@ export const MeasurementSheet: React.FC<MeasurementSheetProps> = ({
       },
       {
         id: 'prism',
-        label: t.inducedPrism,
-        value: `${inducedPrism.toFixed(2)} Δ`,
-        limit: '≤ 1.00 Δ',
+        label: t.prismReference,
+        value: `${prism.value.toFixed(2)} Δ`,
+        limit: limitLabel('prism'),
         ok: prismOk,
-        detail: t.decentrationWarning
-          .replace('{decentration}', result.decentration.toFixed(1))
-          .replace('{prism}', inducedPrism.toFixed(1)),
+        reference: true,
+        detail: [
+          t.prismReferenceDesc(
+            prism.horizontal.toFixed(2),
+            prism.vertical.toFixed(2),
+            result.decentration.toFixed(1),
+          ),
+          prism.highDecentration
+            ? t.decentrationWarning
+                .replace('{decentration}', result.decentration.toFixed(1))
+                .replace('{prism}', prism.value.toFixed(1))
+            : '',
+        ]
+          .filter(Boolean)
+          .join(' '),
       },
       {
         id: 'blank',
         label: t.minBlank,
         value: `${blank.toFixed(0)} mm`,
-        limit: '≤ 85 mm',
+        limit: limitLabel('blank'),
         ok: blankOk,
         detail: t.limitWarningA(frame?.a ?? 0, Number(blank.toFixed(0))),
       },
@@ -215,6 +237,19 @@ export const MeasurementSheet: React.FC<MeasurementSheetProps> = ({
         </p>
       )}
 
+      {/* The vertex power is the power the patient wears. The engine re-solves
+          the back power for it, but it says so when the geometry will not let
+          it land on the prescription. */}
+      {typeof result.vertexPowerError === 'number' &&
+        Math.abs(result.vertexPowerError) > 0.12 && (
+          <p className="bg-sheet-alert p-3 text-[16px] leading-snug text-sheet-ink">
+            {t.vertexPowerWarning.replace(
+              '{error}',
+              result.vertexPowerError.toFixed(2),
+            )}
+          </p>
+        )}
+
       <table className="w-full border-collapse text-left">
         <thead>
           <tr className="text-[13px] text-sheet-muted">
@@ -262,12 +297,14 @@ export const MeasurementSheet: React.FC<MeasurementSheetProps> = ({
                   <td className="py-3 pl-4 pr-3 text-right">
                     <span
                       className={`inline-block whitespace-nowrap px-2 py-1 text-[13px] leading-none ${
-                        row.ok
-                          ? 'bg-sheet-stage text-sheet-ink'
-                          : 'bg-sheet-warning text-sheet-warning-ink'
+                        row.reference
+                          ? 'bg-sheet-panel text-sheet-muted'
+                          : row.ok
+                            ? 'bg-sheet-stage text-sheet-ink'
+                            : 'bg-sheet-warning text-sheet-warning-ink'
                       }`}
                     >
-                      {row.ok ? t.withinLimit : t.overLimit}
+                      {row.reference ? t.reference : row.ok ? t.withinLimit : t.overLimit}
                     </span>
                   </td>
                 </tr>
@@ -292,6 +329,13 @@ export const MeasurementSheet: React.FC<MeasurementSheetProps> = ({
       {flagged.length === 0 && (
         <p className="text-[13px] text-sheet-muted">{t.rowOpenHint}</p>
       )}
+
+      {/* What the model assumes, stated where the numbers are read: a frame
+          without a base curve of its own, so the lens is placed by the
+          vertical meridian and the protrusion is measured in that plane. */}
+      <p className="max-w-[68ch] border-t border-sheet-panel pt-3 text-[13px] leading-relaxed text-sheet-muted">
+        {t.flatFrameNote}
+      </p>
     </section>
   );
 };

@@ -12,6 +12,11 @@ export const translations_id: AppTranslations = {
   future: 'Segera',
   labOrder: 'PESANAN LAB',
   curvatureSpecs: 'Spek Kelengkungan',
+  /** The vertex power: the power the patient actually wears. */
+  vertexPowerDesc:
+    'Vertex power {power} D: daya yang dipakai pasien, yang bukan jumlah dari dua daya permukaan pada lensa yang tidak tipis. Daya permukaan belakang dihitung ulang hingga sesuai dengan resep.',
+  vertexPowerWarning:
+    'Vertex power masih {error} D dari resep setelah daya permukaan belakang dihitung ulang. Lensa diasah dengan kelengkungan belakang yang diizinkan geometri.',
   r1Front: 'R1 Radius Depan',
   r2Back: 'R2 Radius Belakang',
   s1Sag: 'S1 Sagitta Depan',
@@ -30,6 +35,9 @@ export const translations_id: AppTranslations = {
 
   // Sidebar
   baseCurve: 'Tingkat Kelengkungan (BC)',
+  minThickness: 'Ketebalan Min.',
+  tipMinThickness:
+    'Ketebalan paling tipis yang boleh dimiliki lensa di bagian mana pun: di pusat untuk lensa minus, atau di tepi untuk lensa plus. Lensa yang lebih tipis dari ini tidak memiliki kekuatan anymore.',
   lensParams: 'Parameter Lensa',
   sphere: 'Ukuran (SPH)',
   cylinder: 'Silinder (CYL)',
@@ -148,7 +156,7 @@ export const translations_id: AppTranslations = {
   etDescTop: 'Ketebalan tepi terluar lensa',
   guideTitle: 'Panduan Referensi Klinis & Kosmetis',
   guideEtLabel: 'Ketebalan Tepi (ET)',
-  guideEtDesc: 'Bahan tebal paling di tepi rims lensa. Idealnya ≤ 4.0 mm agar pas rapi dalam bingkai. Nilai > 6.0 mm akan memproyeksikan keluar bingkai dan meningkatkan berat secara signifikan.',
+  guideEtDesc: 'Bahan paling tebal di seluruh rims lensa. Batasnya 6.0 mm: di bawah 4.0 mm tepi duduk nyaman di alur bevel yang dangkal, dan di atas 6.0 mm tepi menonjol keluar bingkai serta menambah berat. Potongan pada gambar adalah meridian vertikal, yang tepinya lebih tipis.',
   guideProtLabel: 'Tonjolan Lensa (Ant / Post)',
   guideProtDesc: 'Sejauh mana lensa menonjol melebihi bingkai depan/belakang. Toleransi ≤ 0.5 mm dianggap rata (flush). > 2.0 mm berisiko mengenai bulu mata saat berkedip.',
   guideCtLabel: 'Ketebalan Tengah (CT)',
@@ -235,12 +243,17 @@ export const translations_id: AppTranslations = {
   frameLine: 'Bingkai',
   fittingLine: 'Fitting',
   inducedPrism: 'Prisma terinduksi',
+  /** The prism row: a reference figure, never a fault. */
+  prismReference: 'Prisma jika tidak didesentrasi (referensi)',
+  prismReferenceDesc: (horizontal, vertical, decentration) =>
+    `Prisma yang akan dibawa lensa di tengah bingkai bila tidak didesentrasi ke titik pupil: ${horizontal} Δ horizontal dan ${vertical} Δ vertikal, dari desentrasi ${decentration} mm. Di pupil itu sendiri prisma nol, karena titik optis ditempatkan pada pupil.`,
+  reference: 'Referensi',
   sagittaFront: 'Sagitta depan',
   sagittaBack: 'Sagitta belakang',
   rulerMm: 'mm',
   caliperHint: 'Arahkan kursor ke ukuran pada gambar untuk membaca artinya.',
   caliperCt: 'Ketebalan tengah: bahan lensa di titik optis.',
-  caliperEt: 'Ketebalan tepi: bahan paling tebal di sekeliling rims lensa. Itulah tepi yang harus tertahan di kusen.',
+  caliperEt: 'Ketebalan tepi: bahan paling tebal di sekeliling rims lensa. Itulah tepi yang harus tertahan di kusen. Potongan di sebelahnya adalah meridian vertikal melalui titik optis, yang tepinya lebih tipis.',
   caliperGroove: 'Alur bevel: tempat rim mencengkeram tepi lensa, dihitung dari kedalaman bingkai.',
   caliperAnterior: 'Tonjolan depan: seberapa jauh permukaan depan keluar dari rim.',
   caliperPosterior: 'Tonjolan belakang: seberapa jauh permukaan belakang keluar dari rim.',
@@ -257,6 +270,9 @@ export const translations_id: AppTranslations = {
   compareFrontNote: 'Mode Banding membaca ketebalan di Profil Samping dan Atas Bawah.',
   compareEdgeNote: 'Pita berarsir adalah bahan yang dihemat oleh indeks pembanding.',
   invalidInput: 'Nilai ini sementara sampai input diperbaiki.',
+  /** The model the numbers come from, stated where the numbers are read. */
+  flatFrameNote:
+    'Model ini mengasumsikan bidang bingkai datar: bingkai tidak memiliki base curve sendiri, sehingga lensa diletakkan di alur bevel melalui meridian vertikal melalui titik optis, dan tonjolan diukur pada bidang yang sama. Ketebalan tepi adalah bahan paling tebal di seluruh circumference rims.',
 
   // Landing page
   landNavLabel: 'Bagian halaman depan',

@@ -12,6 +12,11 @@ export const translations_en: AppTranslations = {
   future: 'Future',
   labOrder: 'LAB ORDER',
   curvatureSpecs: 'Curvature Specs',
+  /** The vertex power: the power the patient actually wears. */
+  vertexPowerDesc:
+    'Vertex power {power} D: the power the patient wears, which is not the sum of the two surface powers of a lens that is not thin. The back power is re-solved until it matches the prescription.',
+  vertexPowerWarning:
+    'The vertex power is still {error} D from the prescription after the back power has been re-solved. The lens is surfaced to the back curve the geometry allows.',
   r1Front: 'R1 Front Radius',
   r2Back: 'R2 Back Radius',
   s1Sag: 'S1 Front Sag',
@@ -30,6 +35,9 @@ export const translations_en: AppTranslations = {
 
   // Sidebar
   baseCurve: 'Base Curve (BC)',
+  minThickness: 'Min. Thickness',
+  tipMinThickness:
+    'The thinnest the lens is allowed to be anywhere: the centre of a minus lens, or the rim of a plus lens. A lens thinner than this has no strength left in it.',
   lensParams: 'Lens Parameters',
   sphere: 'Sphere (SPH)',
   cylinder: 'Cylinder (CYL)',
@@ -148,7 +156,7 @@ export const translations_en: AppTranslations = {
   etDescTop: 'Thickness at lens outer boundary',
   guideTitle: 'Clinical & Cosmetic Reference Guide',
   guideEtLabel: 'Edge Thickness (ET)',
-  guideEtDesc: 'The thickest material around the rim of the lens. Ideally ≤ 4.0 mm for a clean fit within frame bevels. Values > 6.0 mm spill outward and increase weight.',
+  guideEtDesc: 'The thickest material around the rim of the lens. The limit is 6.0 mm: under 4.0 mm the edge sits comfortably in a shallow bevel groove, and over 6.0 mm it spills out of the frame and adds weight. The section on the drawing is the vertical meridian, whose rim is thinner.',
   guideProtLabel: 'Lens Protrusion (Ant / Post)',
   guideProtDesc: 'How much the lens projects beyond the frame front or back. Tolerance ≤ 0.5 mm is flush. Protrusion > 2.0 mm may touch lashes during blinking.',
   guideCtLabel: 'Center Thickness (CT)',
@@ -235,12 +243,17 @@ export const translations_en: AppTranslations = {
   frameLine: 'Frame',
   fittingLine: 'Fitting',
   inducedPrism: 'Induced prism',
+  /** The prism row: a reference figure, never a fault. */
+  prismReference: 'Prism if not decentred (reference)',
+  prismReferenceDesc: (horizontal, vertical, decentration) =>
+    `The prism the lens would carry at the centre of the frame if it were not decentred onto the pupil: ${horizontal} Δ horizontally and ${vertical} Δ vertically, from a decentration of ${decentration} mm. At the pupil itself the prism is zero, because the optical centre is placed on the pupil.`,
+  reference: 'Reference',
   sagittaFront: 'Front sagitta',
   sagittaBack: 'Back sagitta',
   rulerMm: 'mm',
   caliperHint: 'Point at a dimension on the drawing to read what it measures.',
   caliperCt: 'Center thickness: the material at the optical center.',
-  caliperEt: 'Edge thickness: the thickest material around the rim of the lens. That is the edge the groove has to swallow.',
+  caliperEt: 'Edge thickness: the thickest material around the rim of the lens. That is the edge the groove has to swallow. The section beside it is the vertical meridian through the optical centre, whose rim is thinner.',
   caliperGroove: 'Bevel groove: where the rim grips the edge, set as a share of the frame depth.',
   caliperAnterior: 'Anterior protrusion: how far the front surface stands proud of the rim.',
   caliperPosterior: 'Posterior protrusion: how far the back surface stands behind the rim.',
@@ -257,6 +270,9 @@ export const translations_en: AppTranslations = {
   compareFrontNote: 'Compare Mode reads thickness in Side Profile and Top Down.',
   compareEdgeNote: 'The hatched band is the material the comparison index saves.',
   invalidInput: 'These values are placeholders until the inputs are valid.',
+  /** The model the numbers come from, stated where the numbers are read. */
+  flatFrameNote:
+    'The model assumes a flat frame plane: the frame carries no base curve of its own, so the lens is placed in the bevel groove by the vertical meridian through the optical centre, and the protrusion is measured in that same plane. The edge thickness is the thickest material around the whole rim.',
 
   // Landing page
   landNavLabel: 'Landing page sections',

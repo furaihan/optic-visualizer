@@ -10,6 +10,7 @@ import { SheetDefs } from './SheetDefs';
 import { CompareLegend } from './CompareLegend';
 import { useMediaQuery } from '../../hooks/useMediaQuery';
 import { useElementSize } from '../../hooks/useElementWidth';
+import { LIMITS, limitLabel } from '../../data/limits';
 import { sheetGeometry, SHEET, CHAR_WIDTH, frontViewBox } from './sheet';
 import { Tabs, TabsList, TabsTrigger } from '../ui/tabs';
 
@@ -102,6 +103,8 @@ export const Visualizer: React.FC<VisualizerProps> = React.memo(
     // cost the drawing 25px of height.
     const against = (compareValue: number) => compareValue.toFixed(2);
 
+    // The thresholds come from the limits file, so the schedule under the
+    // drawing and the table below it can never disagree about them.
     const calipers: CaliperRow[] = [
       {
         id: 'ct',
@@ -110,9 +113,9 @@ export const Visualizer: React.FC<VisualizerProps> = React.memo(
         value: mm(result.ct),
         number: result.ct.toFixed(2),
         compareValue: compareResult ? against(compareResult.ct) : undefined,
-        limit: '≥ 1.00 mm',
+        limit: limitLabel('ct'),
         limitShort: '≥1.00',
-        ok: result.ct >= 1,
+        ok: result.ct >= LIMITS.ct.value,
         note: t.caliperCt,
       },
       {
@@ -122,9 +125,9 @@ export const Visualizer: React.FC<VisualizerProps> = React.memo(
         value: mm(result.et),
         number: result.et.toFixed(2),
         compareValue: compareResult ? against(compareResult.et) : undefined,
-        limit: '≤ 6.00 mm',
+        limit: limitLabel('et'),
         limitShort: '≤6.00',
-        ok: result.et <= 6,
+        ok: result.et <= LIMITS.et.value,
         note: t.caliperEt,
       },
       {
@@ -134,9 +137,9 @@ export const Visualizer: React.FC<VisualizerProps> = React.memo(
         value: mm(result.anteriorProtrusion),
         number: result.anteriorProtrusion.toFixed(2),
         compareValue: compareResult ? against(compareResult.anteriorProtrusion) : undefined,
-        limit: '≤ 1.50 mm',
+        limit: limitLabel('anterior'),
         limitShort: '≤1.50',
-        ok: result.anteriorProtrusion <= 1.5,
+        ok: result.anteriorProtrusion <= LIMITS.anterior.value,
         note: t.caliperAnterior,
       },
       {
@@ -146,9 +149,9 @@ export const Visualizer: React.FC<VisualizerProps> = React.memo(
         value: mm(result.posteriorProtrusion),
         number: result.posteriorProtrusion.toFixed(2),
         compareValue: compareResult ? against(compareResult.posteriorProtrusion) : undefined,
-        limit: '≤ 2.00 mm',
+        limit: limitLabel('posterior'),
         limitShort: '≤2.00',
-        ok: result.posteriorProtrusion <= 2,
+        ok: result.posteriorProtrusion <= LIMITS.posterior.value,
         note: t.caliperPosterior,
       },
       {

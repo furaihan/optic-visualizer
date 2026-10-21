@@ -40,7 +40,7 @@ export const MATERIALS_DB: OpticalMaterial[] = [
     id: 'mr8',
     name: 'High-Index (MR-8)',
     index: 1.6,
-    abbe: 42,
+    abbe: 41,
     density: 1.3,
     seRange: { min: 3.0, max: 5.0 },
     reasonEn:
@@ -52,7 +52,7 @@ export const MATERIALS_DB: OpticalMaterial[] = [
     id: 'mr10',
     name: 'Ultra High-Index (MR-10)',
     index: 1.67,
-    abbe: 32,
+    abbe: 31,
     density: 1.35,
     seRange: { min: 5.0, max: 8.0 },
     reasonEn:
@@ -64,7 +64,7 @@ export const MATERIALS_DB: OpticalMaterial[] = [
     id: 'mr174',
     name: 'Premium Index (MR-174)',
     index: 1.74,
-    abbe: 33,
+    abbe: 32,
     density: 1.47,
     seRange: { min: 8.0, max: Infinity },
     reasonEn:

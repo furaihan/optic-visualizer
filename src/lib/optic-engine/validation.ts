@@ -7,6 +7,7 @@ import { ERGONOMIC_LIMITS } from "../../data/materials";
 import {
   backRadius,
   buildOpening,
+  farthestRimDistance,
   frontRadius,
   powerInMeridian,
   rimRadius,
@@ -29,6 +30,7 @@ export const INPUT_SPECS = {
   cyl: { step: 0.25, min: -10, max: 0, label: "CYL" },
   axis: { step: 1, min: 0, max: 180, label: "AXIS" },
   baseCurve: { step: 0.25, min: 0.25, max: 12, label: "BC" },
+  minThickness: { step: 0.05, min: 0.5, max: 3, label: "MIN_THICKNESS" },
   pd: { step: 0.5, min: 40, max: 80, label: "PD" },
   fittingHeight: { step: 0.5, min: 5, max: 40, label: "FH" },
   a: { step: 1, min: 35, max: 65, label: "A_SIZE" },
@@ -92,6 +94,20 @@ export function validateOpticalParams(
     });
   }
 
+  // The shape of the lens is the A x B box with its corners cut back to the
+  // circle of diameter ED. A circle wider than the diagonal of the box cuts
+  // nothing off at all, so the ED is no longer describing the lens.
+  if (frame.ed > Math.hypot(frame.a, frame.b)) {
+    errors.push({
+      field: "ed",
+      messageId:
+        "ED lebih besar dari diagonal bingkai (A × B), sehingga ED tidak lagi menentukan bentuk lensanya.",
+      messageEn:
+        "ED is larger than the frame's diagonal (A x B), so it no longer describes the shape of the lens.",
+      isFatal: false,
+    });
+  }
+
   // 3. Ergonomic / Out-of-bounds Warnings
   if (!Number.isFinite(lens.axis) || lens.axis < 0 || lens.axis > 180) {
     errors.push({
@@ -135,10 +151,11 @@ export function validateOpticalParams(
   // 4. Decentration and blank calculation validation
   const framePD = frame.a + frame.dbl;
   const decentration = Math.abs(framePD - patient.pd) / 2;
-  // The blank has to hold the shape with the optical centre at the pupil, so
-  // it is the shape's own diameter plus the total decentration plus the two
-  // millimetres of edging allowance. The same rule the engine uses.
-  const requiredBlank = frame.ed + Math.abs(framePD - patient.pd) + 2;
+  const opening = buildOpening(frame, patient);
+  // The blank has to hold the shape around the optical centre, so it is twice
+  // the farthest the rim reaches from the pupil, plus the two millimetres of
+  // edging allowance. The same rule the engine uses.
+  const requiredBlank = 2 * farthestRimDistance(opening) + 2;
 
   if (requiredBlank > 85) {
     errors.push({
@@ -157,7 +174,6 @@ export function validateOpticalParams(
   const index = lens.index;
   const baseCurve = lens.baseCurve;
   const r1 = frontRadius(index, baseCurve);
-  const opening = buildOpening(frame, patient);
 
   let impossible = false;
   for (let i = 0; i < 36 && !impossible; i += 1) {

@@ -17,6 +17,9 @@ import { GroupMarker } from "./GroupMarker";
 interface LensParametersSectionProps {
   lens: LensParameters;
   onLensChange: (lens: LensParameters) => void;
+  /** The thinnest the lens is allowed to be anywhere, in millimetres. */
+  minThickness: number;
+  onMinThicknessChange: (value: number) => void;
   lang: Language;
   indices: LensIndex[];
   isOpen: boolean;
@@ -26,6 +29,8 @@ interface LensParametersSectionProps {
 export const LensParametersSection: React.FC<LensParametersSectionProps> = ({
   lens,
   onLensChange,
+  minThickness,
+  onMinThicknessChange,
   lang,
   indices,
   isOpen,
@@ -107,6 +112,17 @@ export const LensParametersSection: React.FC<LensParametersSectionProps> = ({
             step={INPUT_SPECS.baseCurve.step}
             value={lens.baseCurve}
             onChange={(v) => onLensChange({ ...lens, baseCurve: v })}
+            lang={lang}
+          />
+
+          <Control
+            label={t.minThickness}
+            unit="mm"
+            min={INPUT_SPECS.minThickness.min}
+            max={INPUT_SPECS.minThickness.max}
+            step={INPUT_SPECS.minThickness.step}
+            value={minThickness}
+            onChange={onMinThicknessChange}
             lang={lang}
           />
         </FieldGroup>

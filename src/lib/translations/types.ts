@@ -12,6 +12,9 @@ export interface AppTranslations {
   future: string;
   labOrder: string;
   curvatureSpecs: string;
+  /** The vertex power: the power the patient actually wears. */
+  vertexPowerDesc: string;
+  vertexPowerWarning: string;
   r1Front: string;
   r2Back: string;
   s1Sag: string;
@@ -27,6 +30,8 @@ export interface AppTranslations {
   engine: string;
   labs: string;
   baseCurve: string;
+  minThickness: string;
+  tipMinThickness: string;
   lensParams: string;
   sphere: string;
   cylinder: string;
@@ -231,6 +236,10 @@ export interface AppTranslations {
   frameLine: string;
   fittingLine: string;
   inducedPrism: string;
+  /** The prism row: a reference figure, never a fault. */
+  prismReference: string;
+  prismReferenceDesc: (horizontal: string, vertical: string, decentration: string) => string;
+  reference: string;
   sagittaFront: string;
   sagittaBack: string;
   rulerMm: string;
@@ -253,6 +262,8 @@ export interface AppTranslations {
   compareFrontNote: string;
   compareEdgeNote: string;
   invalidInput: string;
+  /** The model the numbers come from, stated where the numbers are read. */
+  flatFrameNote: string;
 
   // Landing page
   landNavLabel: string;

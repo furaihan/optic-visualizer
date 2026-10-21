@@ -17,6 +17,7 @@ export const getTooltipByLabel = (label: string, lang: Language): string => {
   if (normalized === (t.axis || '').toLowerCase()) return t.tipAxis || '';
   if (normalized === (t.refractiveIndex || '').toLowerCase()) return t.tipRefractiveIndex || '';
   if (normalized === (t.baseCurve || '').toLowerCase()) return t.tipBaseCurve || '';
+  if (normalized === (t.minThickness || '').toLowerCase()) return t.tipMinThickness || '';
   if (normalized === (t.aSize || '').toLowerCase()) return t.tipASize || '';
   if (normalized === (t.bSize || '').toLowerCase()) return t.tipBSize || '';
   if (normalized === 'dbl' || normalized === (t.dbl || '').toLowerCase()) return t.tipDbl || '';
@@ -43,6 +44,9 @@ export const getTooltipByLabel = (label: string, lang: Language): string => {
   }
   if (normalized.includes('kelengkungan') || normalized.includes('curve') || normalized.includes('bc')) {
     return t.tipBaseCurve || '';
+  }
+  if (normalized.includes('ketebalan min') || normalized.includes('min. thickness') || normalized.includes('min thickness')) {
+    return t.tipMinThickness || '';
   }
   if (normalized.includes('a-size') || normalized.includes('ukuran a')) {
     return t.tipASize || '';

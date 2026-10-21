@@ -45,6 +45,8 @@ export const Sidebar: React.FC<SidebarProps> = ({ lang, isMobile = false }) => {
     setBevelPercent,
     frameType,
     setFrameType,
+    minThickness,
+    setMinThickness,
     highlightedLimit,
     setHighlightedLimit,
     result,
@@ -53,7 +55,9 @@ export const Sidebar: React.FC<SidebarProps> = ({ lang, isMobile = false }) => {
 
   const t = translations[lang];
   const indices: LensIndex[] = [1.5, 1.56, 1.6, 1.67, 1.74];
-  const requiredBlank = result.y * 2 + 2;
+  // The blank the engine measures: the shape around the optical centre, plus
+  // the edging allowance. The same number the sheet and the footer show.
+  const requiredBlank = result.minBlank ?? 2 * result.y + 2;
 
   const [openGroup, setOpenGroup] = useState<Record<string, boolean>>({
     lens: true,
@@ -70,6 +74,8 @@ export const Sidebar: React.FC<SidebarProps> = ({ lang, isMobile = false }) => {
       <LensParametersSection
         lens={lens}
         onLensChange={setLens}
+        minThickness={minThickness}
+        onMinThicknessChange={setMinThickness}
         lang={lang}
         indices={indices}
         isOpen={openGroup.lens}

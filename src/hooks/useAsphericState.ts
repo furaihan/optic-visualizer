@@ -11,6 +11,7 @@ import {
 } from '../lib/optic-engine/types';
 import { calculateAsphericLens } from '../lib/optic-engine/aspheric';
 import { validateOpticalParams, ValidationResult } from '../lib/optic-engine/validation';
+import { MIN_THICKNESS_MM } from '../lib/optic-engine/geometry';
 
 export interface AsphericParametersState {
   version?: number;
@@ -19,6 +20,8 @@ export interface AsphericParametersState {
   patient: PatientParameters;
   bevelPercent: number;
   frameType: FrameType;
+  /** The thinnest the lens is allowed to be anywhere, in millimetres. */
+  minThickness: number;
 }
 
 const CURRENT_SCHEMA_VERSION = 1;
@@ -56,6 +59,9 @@ const DEFAULT_STATE: AsphericParametersState = {
   },
   bevelPercent: 0.33,
   frameType: "full" as FrameType,
+  // A lens that is thinner than a millimetre anywhere has no strength left
+  // in it, so that is the floor the engine works to.
+  minThickness: MIN_THICKNESS_MM,
 };
 
 const STORAGE_KEY = 'amp_aspheric_session';
@@ -191,6 +197,13 @@ export function useAsphericState() {
     }));
   }, [updateState]);
 
+  const setMinThickness = useCallback((val: number | ((p: number) => number)) => {
+    updateState(prev => ({
+      ...prev,
+      minThickness: typeof val === 'function' ? val(prev.minThickness) : val,
+    }));
+  }, [updateState]);
+
   const setAsphericFront = useCallback((config: AsphericSurfaceConfig | ((p: AsphericSurfaceConfig) => AsphericSurfaceConfig)) => {
     updateState(prev => ({
       ...prev,
@@ -266,11 +279,11 @@ export function useAsphericState() {
       state.lens,
       state.frame,
       state.patient,
-      1.0,
+      state.minThickness,
       state.bevelPercent,
       state.frameType,
     );
-  }, [state.lens, state.frame, state.patient, state.bevelPercent, state.frameType, validation.isValid]);
+  }, [state.lens, state.frame, state.patient, state.minThickness, state.bevelPercent, state.frameType, validation.isValid]);
 
   return {
     lens: state.lens,
@@ -278,11 +291,13 @@ export function useAsphericState() {
     patient: state.patient,
     bevelPercent: state.bevelPercent,
     frameType: state.frameType,
+    minThickness: state.minThickness,
     setLens,
     setFrame,
     setPatient,
     setBevelPercent,
     setFrameType,
+    setMinThickness,
     setAsphericFront,
     setAsphericBack,
 

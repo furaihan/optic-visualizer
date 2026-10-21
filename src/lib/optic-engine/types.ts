@@ -78,6 +78,10 @@ export interface CalculationResult {
   r1: number; // Radius front
   r2: number; // Radius back
   backPower: number; // Power of the back surface
+  /** The back vertex power of the thickest-edge meridian, in dioptres. */
+  vertexPower?: number;
+  /** How far the vertex power is from the prescribed power, in dioptres. */
+  vertexPowerError?: number;
   s1: number; // Sagitta front
   s2: number; // Sagitta back
   decentration: number; // Horizontal decentration per lens, in millimetres
@@ -104,6 +108,10 @@ export interface AsphericCalculationResult {
   r1: number;
   r2: number;
   backPower: number;
+  /** The back vertex power of the thickest-edge meridian, in dioptres. */
+  vertexPower?: number;
+  /** How far the vertex power is from the prescribed power, in dioptres. */
+  vertexPowerError?: number;
   s1: number;
   s2: number;
   decentration: number;

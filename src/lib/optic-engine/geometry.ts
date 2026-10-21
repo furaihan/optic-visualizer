@@ -14,6 +14,13 @@
  * thickness of the material at a point of the rim is the distance between the
  * front and the back surface there.
  *
+ * The lens is placed in the bevel groove by the vertical meridian through the
+ * optical centre: the edge at the top of the opening is centred on the
+ * groove, and how far the lens stands in front of the frame or behind it is
+ * measured in that same meridian. The frame itself is a flat plane, with no
+ * base curve of its own, so the rim that holds the lens is a straight band
+ * and every number says which plane it was measured in.
+ *
  * Sign convention
  * ---------------
  * The axis runs from the front of the lens to the back, and z is measured
@@ -210,6 +217,124 @@ export function rimRadius(opening: OpeningGeometry, theta: number): number {
 }
 
 /**
+ * A point in the frame's own coordinates, in millimetres.
+ */
+export interface Point {
+  x: number;
+  y: number;
+}
+
+/**
+ * The points where the rim of the opening changes direction.
+ *
+ * The shape is the A x B box with its corners cut back to the ED circle, so
+ * its boundary turns at three kinds of place: the corners of the box that
+ * survive the circle, the points where the circle crosses the box, and the
+ * point of the circle that lies opposite the optical centre.
+ *
+ * These are the only places where the distance from the optical centre to
+ * the rim can be at its extreme, so they are the points the solver samples
+ * and the points the blank is measured from.
+ */
+export function shapeVertices(opening: OpeningGeometry): Point[] {
+  const { halfWidth, halfHeight, shapeRadius, ocX, ocY } = opening;
+  const points: Point[] = [];
+
+  const insideBox = (x: number, y: number) =>
+    Math.abs(x) <= halfWidth + 1e-9 && Math.abs(y) <= halfHeight + 1e-9;
+  const insideCircle = (x: number, y: number) =>
+    shapeRadius <= 0 || x * x + y * y <= shapeRadius * shapeRadius + 1e-9;
+
+  // The corners of the box, where the circle has not cut them off.
+  for (const x of [-halfWidth, halfWidth]) {
+    for (const y of [-halfHeight, halfHeight]) {
+      if (insideCircle(x, y)) points.push({ x, y });
+    }
+  }
+
+  if (shapeRadius > 0) {
+    // Where the circle crosses the four sides of the box.
+    for (const x of [-halfWidth, halfWidth]) {
+      const dy2 = shapeRadius * shapeRadius - x * x;
+      if (dy2 < 0) continue;
+      const dy = Math.sqrt(dy2);
+      for (const y of [dy, -dy]) {
+        if (insideBox(x, y)) points.push({ x, y });
+      }
+    }
+    for (const y of [-halfHeight, halfHeight]) {
+      const dx2 = shapeRadius * shapeRadius - y * y;
+      if (dx2 < 0) continue;
+      const dx = Math.sqrt(dx2);
+      for (const x of [dx, -dx]) {
+        if (insideBox(x, y)) points.push({ x, y });
+      }
+    }
+
+    // The point of the circle opposite the optical centre: the farthest the
+    // circle itself reaches from it. It is only on the rim of the shape when
+    // the box leaves it alone.
+    const d = Math.hypot(ocX, ocY);
+    if (d > 1e-9) {
+      const x = (-shapeRadius * ocX) / d;
+      const y = (-shapeRadius * ocY) / d;
+      if (insideBox(x, y)) points.push({ x, y });
+    }
+  }
+
+  return points;
+}
+
+/**
+ * The farthest the rim of the opening reaches from the optical centre.
+ *
+ * The optical centre does not sit at the boxing centre, so the shape reaches
+ * further on one side than the other, and how far depends on the vertical
+ * offset as much as on the horizontal decentration. The blank has to hold the
+ * shape around the optical centre, so it is twice this distance.
+ */
+export function farthestRimDistance(opening: OpeningGeometry): number {
+  const { shapeRadius, ocX, ocY } = opening;
+  let best = 0;
+
+  for (const p of shapeVertices(opening)) {
+    const d = Math.hypot(p.x - ocX, p.y - ocY);
+    if (d > best) best = d;
+  }
+
+  // The optical centre at the boxing centre: every point of the circle is the
+  // same distance away, so the circle itself is the answer.
+  if (shapeRadius > 0 && Math.hypot(ocX, ocY) <= 1e-9) {
+    best = Math.max(best, shapeRadius);
+  }
+
+  return best;
+}
+
+/**
+ * The directions the solver looks at: the uniform samples around the rim,
+ * plus the exact directions of the shape's own corners and intersections.
+ *
+ * The rim of the opening is not a circle, so uniform samples alone can walk
+ * past the point where the shape reaches furthest from the optical centre:
+ * the corner of a frame is a corner, and a sample that misses it misses the
+ * thickest edge of the lens.
+ */
+export function sampleAngles(opening: OpeningGeometry, samples = 72): number[] {
+  const angles: number[] = [];
+  for (let i = 0; i < samples; i += 1) {
+    angles.push((360 * i) / samples);
+  }
+  for (const p of shapeVertices(opening)) {
+    const dx = p.x - opening.ocX;
+    const dy = p.y - opening.ocY;
+    if (Math.hypot(dx, dy) <= 1e-9) continue;
+    angles.push((Math.atan2(dy, dx) / DEG + 360) % 360);
+  }
+  return angles;
+}
+
+/**
  * One meridian of the lens, worked out completely.
  */
 export interface Meridian {
@@ -256,12 +381,84 @@ export const SPHERICAL: SurfaceModel = {
 };
 
 /**
+ * The back vertex power of a lens of a given thickness.
+ *
+ * A lens is not thin, so its back vertex power — the power the patient
+ * actually wears — is not the sum of its two surface powers:
+ *
+ *     Fv = F1 / (1 - (t / n) F1) + F2
+ *
+ * The front power is in dioptres and the thickness in millimetres, so the
+ * product carries the factor that turns one into the other.
+ */
+export function vertexPower(
+  frontPower: number,
+  backPower: number,
+  centerThickness: number,
+  index: number,
+): number {
+  const d = (centerThickness / index) * frontPower * 0.001;
+  return frontPower / (1 - d) + backPower;
+}
+
+/**
+ * How the solver is told about a lens that is not a plain sphere.
+ */
+export interface ThicknessOptions {
+  /**
+   * The back surface power of a meridian, as the engine realises it.
+   *
+   * The spherical engine uses the thin-lens rule, so the back surface makes
+   * up whatever the front surface did not. The aspheric engine hands in the
+   * power its own A2 terms have already taken from the back surface.
+   */
+  backPowerFor?: (meridianPower: number) => number;
+  /**
+   * The power of the front surface, as the engine realises it. The spherical
+   * engine's front surface is the base curve.
+   */
+  frontPower?: number;
+  /**
+   * How far the realised back surface power sits from the power of its base
+   * conic.
+   *
+   * The aspheric engine's A2 term takes that much power away from the back
+   * surface's conic, so the vertex power is that much stronger than the
+   * conic's. The spherical engine's shift is nothing.
+   */
+  realisedBackShift?: number;
+  /** How many uniform samples to take around the rim. */
+  samples?: number;
+  /** How many times the back power may be re-solved for the vertex power. */
+  maxVertexIterations?: number;
+}
+
+/**
+ * What the solver worked out.
+ */
+export interface ThicknessSolution {
+  meridians: Meridian[];
+  centerThickness: number;
+  /** The back vertex power of the governing meridian, in dioptres. */
+  vertexPower: number;
+  /** How far the vertex power is from the prescribed power, in dioptres. */
+  vertexError: number;
+  error?: "rim" | "surface";
+}
+
+/**
  * Works out the lens in every meridian and settles the thickness.
  *
  * The centre thickness is the smallest thickness the lens may have, and the
  * edge follows from it: the material is thinnest either at the centre (a
  * minus lens) or at the outer rim (a plus lens), so the centre thickness is
  * whatever makes the thinnest point of the whole lens the minimum.
+ *
+ * The back power is then re-solved for the thickness the lens has come out
+ * at, because a lens that is not thin does not carry the sum of its two
+ * surface powers: the patient wears the vertex power, and that is the power
+ * the prescription asks for. The correction is the same in every meridian,
+ * so a cylinder stays a cylinder.
  *
  * Returns the meridians and the thickness they imply, or an error when the
  * geometry cannot be surfaced at all.
@@ -275,58 +472,118 @@ export function solveThickness(
   axis: number,
   surfaces: SurfaceModel,
   minThickness: number,
-  samples = 72,
-): { meridians: Meridian[]; centerThickness: number; error?: "rim" | "surface" } {
+  options: ThicknessOptions = {},
+): ThicknessSolution {
   const r1 = frontRadius(index, baseCurve);
-  const meridians: Meridian[] = [];
+  const front = options.frontPower ?? baseCurve;
+  const baseBackPower = options.backPowerFor ?? ((power: number) => power - baseCurve);
+  const samples = options.samples ?? 72;
+  const maxIterations = options.maxVertexIterations ?? 5;
 
-  for (let i = 0; i < samples; i += 1) {
-    const theta = (360 * i) / samples;
-    const radius = rimRadius(opening, theta);
-    if (!Number.isFinite(radius)) {
-      return { meridians, centerThickness: minThickness, error: "rim" };
+  const run = (offset: number) => {
+    const meridians: Meridian[] = [];
+
+    // The uniform samples, plus the corners of the shape: the farthest point
+    // of the rim is often a corner, and a sample that misses it would report
+    // a thinner lens than the frame actually asks for.
+    for (const theta of sampleAngles(opening, samples)) {
+      const radius = rimRadius(opening, theta);
+      if (!Number.isFinite(radius)) {
+        return { meridians, centerThickness: minThickness, error: "rim" as const };
+      }
+
+      const power = powerInMeridian(theta, sph, cyl, axis);
+      const backPower = baseBackPower(power) + offset;
+      const r2 = backRadius(index, backPower);
+
+      const frontOffset =
+        conicSagitta(r1, surfaces.frontConic, radius) + surfaces.frontPoly(radius);
+      const backOffset =
+        conicSagitta(r2, surfaces.backConic, radius) + surfaces.backPoly(radius);
+
+      if (!Number.isFinite(frontOffset) || !Number.isFinite(backOffset)) {
+        return { meridians, centerThickness: minThickness, error: "surface" as const };
+      }
+
+      meridians.push({
+        theta,
+        radius,
+        power,
+        backPower,
+        backRadius: r2,
+        frontOffset,
+        backOffset,
+        edge: minThickness,
+      });
     }
 
-    const power = powerInMeridian(theta, sph, cyl, axis);
-    const backPower = power - baseCurve;
-    const r2 = backRadius(index, backPower);
-
-    const frontOffset =
-      conicSagitta(r1, surfaces.frontConic, radius) + surfaces.frontPoly(radius);
-    const backOffset =
-      conicSagitta(r2, surfaces.backConic, radius) + surfaces.backPoly(radius);
-
-    if (!Number.isFinite(frontOffset) || !Number.isFinite(backOffset)) {
-      return { meridians, centerThickness: minThickness, error: "surface" };
+    // The centre thickness has to make the thinnest point of the lens the
+    // minimum thickness: where the surfaces close in the most, the material
+    // between the two vertices is least.
+    let tightest = 0;
+    for (const m of meridians) {
+      const slack = m.frontOffset - m.backOffset;
+      if (slack > tightest) tightest = slack;
     }
 
-    meridians.push({
-      theta,
-      radius,
-      power,
-      backPower,
-      backRadius: r2,
-      frontOffset,
-      backOffset,
-      edge: minThickness,
-    });
+    const centerThickness = minThickness + tightest;
+    for (const m of meridians) {
+      m.edge = m.backOffset - m.frontOffset + centerThickness;
+    }
+
+    return { meridians, centerThickness, error: undefined as undefined };
+  };
+
+  // The vertex power of the meridian that carries the thickest edge: that is
+  // the meridian the schedule quotes the back power of.
+  const governing = (meridians: Meridian[]) => {
+    let worst = meridians[0];
+    for (const m of meridians) {
+      if (m.edge > worst.edge) worst = m;
+    }
+    return worst;
+  };
+
+  const measure = (centerThickness: number, meridians: Meridian[]) => {
+    const m = governing(meridians);
+    // The vertex power is the power of the surfaces as they are, not of the
+    // base conic the back surface is cut from.
+    const power = vertexPower(
+      front,
+      m.backPower + (options.realisedBackShift ?? 0),
+      centerThickness,
+      index,
+    );
+    return { power, error: power - m.power };
+  };
+
+  let offset = 0;
+  let solved = run(offset);
+  if (solved.error) {
+    return { ...solved, vertexPower: 0, vertexError: 0 };
   }
 
-  // The centre thickness has to make the thinnest point of the lens the
-  // minimum thickness: where the surfaces close in the most, the material
-  // between the two vertices is least.
-  let tightest = 0;
-  for (const m of meridians) {
-    const slack = m.frontOffset - m.backOffset;
-    if (slack > tightest) tightest = slack;
+  let measured = measure(solved.centerThickness, solved.meridians);
+
+  // Re-solve the back power until the vertex power is the power that was
+  // prescribed. The back power shifts by the same amount in every meridian,
+  // so the cylinder is untouched.
+  for (let i = 0; i < maxIterations && Math.abs(measured.error) >= 0.01; i += 1) {
+    const d = (solved.centerThickness / index) * front * 0.001;
+    offset = front - front / (1 - d);
+    solved = run(offset);
+    if (solved.error) {
+      return { ...solved, vertexPower: measured.power, vertexError: measured.error };
+    }
+    measured = measure(solved.centerThickness, solved.meridians);
   }
 
-  const centerThickness = minThickness + tightest;
-  for (const m of meridians) {
-    m.edge = m.backOffset - m.frontOffset + centerThickness;
-  }
-
-  return { meridians, centerThickness };
+  return {
+    meridians: solved.meridians,
+    centerThickness: solved.centerThickness,
+    vertexPower: measured.power,
+    vertexError: measured.error,
+  };
 }
 
 /**
@@ -351,7 +608,8 @@ export function governingMeridian(meridians: Meridian[]): Meridian {
  * deepest point of it.
  *
  * Both are measured from the frame's faces: the front face at zero and the
- * back face at the frame's depth.
+ * back face at the frame's depth. The offsets handed in are the ones of the
+ * section, because the section is the meridian the lens is placed by.
  */
 export function protrusion(args: {
   frameDepth: number;
@@ -359,7 +617,7 @@ export function protrusion(args: {
   frontApexZ: number;
   /** Where the back vertex sits, measured back from the front face of the rim. */
   backApexZ: number;
-  /** The largest back surface offset around the rim. */
+  /** The largest back surface offset in the section. */
   maxBackOffset: number;
 }): { anterior: number; posterior: number } {
   const anterior = Math.max(0, -args.frontApexZ);
@@ -420,8 +678,11 @@ export interface SectionGeometry {
  * centre may sit above or below the middle of the opening, which is why the
  * two ends are not the same distance from the axis.
  *
- * The lens sits in the bevel groove, so the edge at the top of the opening is
- * centred on it and the two vertices follow from there.
+ * This is the meridian that places the lens. The lens sits in the bevel
+ * groove, so the edge at the top of the opening is the one centred on the
+ * groove, and the two vertices follow from there. Every measurement of how
+ * far the lens stands out of the frame is taken in this plane, because this
+ * is the plane the lens is held in.
  */
 export function buildSection(args: {
   opening: OpeningGeometry;
@@ -495,7 +756,10 @@ export function lensVolumeCm3(
 ): number {
   const r1 = frontRadius(index, baseCurve);
   const { halfWidth, halfHeight, shapeRadius, ocX, ocY } = opening;
-  const outer = Math.hypot(halfWidth, halfHeight);
+  // The rings are centred on the optical centre, so the outer ring has to
+  // reach as far as the shape does from there: the corner of a frame is
+  // further from the pupil than the diagonal of the box is from its centre.
+  const outer = farthestRimDistance(opening);
 
   let volume = 0;
   for (let i = 0; i < rings; i += 1) {

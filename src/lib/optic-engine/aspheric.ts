@@ -9,15 +9,14 @@ import {
 import {
   MIN_THICKNESS_MM,
   SurfaceModel,
-  backRadius,
   buildOpening,
   buildSection,
   conicSagitta,
+  farthestRimDistance,
   frontRadius,
   governingMeridian,
   lensVolumeCm3,
   protrusion,
-  rimRadius,
   solveThickness,
 } from "./geometry";
 import { recommendMaterial } from "./recommend";
@@ -107,19 +106,25 @@ export function departureFromSphere(
 function buildSurfaceModel(
   index: number,
   baseCurve: number,
-  sph: number,
-  cyl: number,
-  axis: number,
   front: { conic: number; A2: number; A4: number; A6: number; A8: number },
   back: { conic: number; A2: number; A4: number; A6: number; A8: number },
 ): {
   model: SurfaceModel;
   /** The front radius of the base conic. */
   r1: number;
-  /** The back power of the base conic, in the horizontal meridian. */
-  backPower: number;
-  /** How far the A2 terms move the realised power, in dioptres. */
-  powerShift: number;
+  /** The power the front surface carries once its A2 term is counted in. */
+  frontPower: number;
+  /**
+   * The back surface power of a meridian, as the aspheric surfaces realise
+   * it: the back surface makes up the rest of the prescription, less its own
+   * A2 term.
+   */
+  backPowerFor: (meridianPower: number) => number;
+  /**
+   * How far the realised back surface power sits from the power of its base
+   * conic: the A2 term takes that much power away from the conic.
+   */
+  realisedBackShift: number;
 } {
   const indexFactor = 1000 * (index - 1);
 
@@ -130,12 +135,6 @@ function buildSurfaceModel(
 
   // The power the front surface carries once its A2 term is counted in.
   const frontPower = baseCurve + frontShift;
-
-  // The back surface has to make up the rest of the prescription, less its
-  // own A2 term, so that the lens comes out with the power that was asked
-  // for.
-  const horizontal = Math.sin(((0 - axis) * Math.PI) / 180) ** 2;
-  const backPowerHorizontal = sph + cyl * horizontal - frontPower - backShift;
 
   const r1 = frontRadius(index, baseCurve);
 
@@ -149,8 +148,10 @@ function buildSurfaceModel(
   return {
     model,
     r1,
-    backPower: backPowerHorizontal,
-    powerShift: frontShift + backShift,
+    frontPower,
+    backPowerFor: (meridianPower: number) =>
+      meridianPower - frontPower - backShift,
+    realisedBackShift: backShift,
   };
 }
 
@@ -180,35 +181,13 @@ export function calculateAsphericLens(
     : { conic: 0, A2: 0, A4: 0, A6: 0, A8: 0 };
 
   const opening = buildOpening(frame, patient);
-  const { model, r1, powerShift } = buildSurfaceModel(
-    index,
-    baseCurve,
-    sph,
-    cyl,
-    axis,
-    front,
-    back,
-  );
+  const { model, r1, frontPower, backPowerFor, realisedBackShift } =
+    buildSurfaceModel(index, baseCurve, front, back);
 
-  // The back radius of the base conic depends on the meridian, because the
-  // power does. The shared solver works that out for every direction.
-  const backRadiusFor = (power: number) => {
-    const frontPower = baseCurve + 2 * front.A2 * 1000 * (index - 1);
-    const backPower = power - frontPower - 2 * back.A2 * 1000 * (index - 1);
-    return backRadius(index, backPower);
-  };
-
-  // The shared solver works with a surface model, and the radius of the back
-  // surface changes with the meridian, so the model is rebuilt per meridian
-  // through a small shim.
-  const perMeridianModel = (power: number): SurfaceModel => ({
-    frontConic: model.frontConic,
-    backConic: model.backConic,
-    frontPoly: model.frontPoly,
-    backPoly: model.backPoly,
-  });
-
-  const solved = solveThicknessWithRadii(
+  // The shared solver works out the lens in every meridian, samples the
+  // corners of the shape, and re-solves the back power for the thickness the
+  // lens comes out at.
+  const solved = solveThickness(
     opening,
     index,
     baseCurve,
@@ -217,8 +196,7 @@ export function calculateAsphericLens(
     axis,
     model,
     minThickness,
-    backRadiusFor,
-    perMeridianModel,
+    { backPowerFor, frontPower, realisedBackShift },
   );
 
   if (solved.error) {
@@ -233,8 +211,8 @@ export function calculateAsphericLens(
   const worst = governingMeridian(meridians);
 
   // The section is the vertical meridian through the optical centre, and the
-  // lens is placed in the bevel groove by the meridian that carries the
-  // thickest edge.
+  // lens is placed in the bevel groove by that meridian: the edge at the top
+  // of the opening is the one centred on the groove.
   const section = buildSection({
     opening,
     meridians,
@@ -244,7 +222,9 @@ export function calculateAsphericLens(
     bevelPercent,
   });
 
-  const maxBackOffset = Math.max(...meridians.map((m) => m.backOffset));
+  // The protrusion is measured in the section, because that is the meridian
+  // the lens is placed by.
+  const maxBackOffset = Math.max(section.backOffsetTop, section.backOffsetBottom);
   const { anterior, posterior } = protrusion({
     frameDepth: frame.depth,
     frontApexZ: section.frontApexZ,
@@ -273,8 +253,11 @@ export function calculateAsphericLens(
     );
   }
 
+  // The blank has to hold the shape around the optical centre, so it is
+  // twice the farthest the rim reaches from the pupil, plus the two
+  // millimetres of edging allowance.
   const totalDecentration = Math.abs(frame.a + frame.dbl - patient.pd);
-  const minBlank = frame.ed + totalDecentration + 2;
+  const minBlank = 2 * farthestRimDistance(opening) + 2;
 
   const density = densityOf(index);
   const volume = lensVolumeCm3(
@@ -290,7 +273,10 @@ export function calculateAsphericLens(
   const weight = volume * density;
 
   const edgeAt = (candidate: number): number => {
-    const alt = solveThicknessWithRadii(
+    // The same lens in another material: the A2 terms count against the new
+    // index, so the surfaces have to be rebuilt for it.
+    const factor = 1000 * (candidate - 1);
+    const alt = solveThickness(
       opening,
       candidate,
       baseCurve,
@@ -299,12 +285,12 @@ export function calculateAsphericLens(
       axis,
       model,
       minThickness,
-      (power) => {
-        const frontPower = baseCurve + 2 * front.A2 * 1000 * (candidate - 1);
-        const backPower = power - frontPower - 2 * back.A2 * 1000 * (candidate - 1);
-        return backRadius(candidate, backPower);
+      {
+        frontPower: baseCurve + 2 * front.A2 * factor,
+        backPowerFor: (power: number) =>
+          power - (baseCurve + 2 * front.A2 * factor) - 2 * back.A2 * factor,
+        realisedBackShift: 2 * back.A2 * factor,
       },
-      perMeridianModel,
     );
     if (alt.error) return worst.edge;
     return governingMeridian(alt.meridians).edge;
@@ -329,6 +315,10 @@ export function calculateAsphericLens(
     r1,
     r2: Math.abs(worst.backRadius),
     backPower: worst.backPower,
+    /** The back vertex power of the thickest-edge meridian, in dioptres. */
+    vertexPower: solved.vertexPower,
+    /** How far the vertex power is from the prescribed power, in dioptres. */
+    vertexPowerError: solved.vertexError,
     s1: worst.frontOffset,
     s2: Math.abs(worst.backOffset),
     decentration: totalDecentration / 2,
@@ -354,76 +344,6 @@ export function calculateAsphericLens(
       referenceSavingPercent: recommendation.referenceSavingPercent,
     },
   };
-}
-
-/**
- * The thickness solver with a back radius that depends on the meridian.
- *
- * The spherical engine can use the shared solver as it stands; the aspheric
- * one has to hand in a radius of its own, because the A2 terms move the
- * power of the surfaces they sit on.
- */
-function solveThicknessWithRadii(
-  opening: ReturnType<typeof buildOpening>,
-  index: number,
-  baseCurve: number,
-  sph: number,
-  cyl: number,
-  axis: number,
-  surfaces: SurfaceModel,
-  minThickness: number,
-  backRadiusFor: (power: number) => number,
-  perMeridianModel: (power: number) => SurfaceModel,
-) {
-  const r1 = frontRadius(index, baseCurve);
-  const meridians = [];
-  const samples = 72;
-
-  for (let i = 0; i < samples; i += 1) {
-    const theta = (360 * i) / samples;
-    const radius = rimRadius(opening, theta);
-    if (!Number.isFinite(radius)) {
-      return { meridians, centerThickness: minThickness, error: "rim" as const };
-    }
-
-    const d = ((theta - axis) * Math.PI) / 180;
-    const power = sph + cyl * Math.sin(d) ** 2;
-    const r2 = backRadiusFor(power);
-    const model = perMeridianModel(power);
-
-    const frontOffset =
-      conicSagitta(r1, model.frontConic, radius) + model.frontPoly(radius);
-    const backOffset =
-      conicSagitta(r2, model.backConic, radius) + model.backPoly(radius);
-
-    if (!Number.isFinite(frontOffset) || !Number.isFinite(backOffset)) {
-      return { meridians, centerThickness: minThickness, error: "surface" as const };
-    }
-
-    meridians.push({
-      theta,
-      radius,
-      power,
-      backPower: power - baseCurve,
-      backRadius: r2,
-      frontOffset,
-      backOffset,
-      edge: minThickness,
-    });
-  }
-
-  let tightest = 0;
-  for (const m of meridians) {
-    const slack = m.frontOffset - m.backOffset;
-    if (slack > tightest) tightest = slack;
-  }
-
-  const centerThickness = minThickness + tightest;
-  for (const m of meridians) {
-    m.edge = m.backOffset - m.frontOffset + centerThickness;
-  }
-
-  return { meridians, centerThickness, error: undefined as undefined };
 }
 
 /**

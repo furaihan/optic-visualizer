@@ -9,6 +9,7 @@ import {
 } from '../lib/optic-engine/types';
 import { calculateLens } from '../lib/optic-engine/optical';
 import { validateOpticalParams, ValidationResult } from '../lib/optic-engine/validation';
+import { MIN_THICKNESS_MM } from '../lib/optic-engine/geometry';
 
 export interface OpticalParametersState {
   version?: number;
@@ -17,6 +18,8 @@ export interface OpticalParametersState {
   patient: PatientParameters;
   bevelPercent: number;
   frameType: FrameType;
+  /** The thinnest the lens is allowed to be anywhere, in millimetres. */
+  minThickness: number;
 }
 
 const CURRENT_SCHEMA_VERSION = 1;
@@ -45,7 +48,10 @@ const DEFAULT_STATE: OpticalParametersState = {
     fittingHeight: 22,
   },
   bevelPercent: 0.33,
-  frameType: "full" as FrameType
+  frameType: "full" as FrameType,
+  // A lens that is thinner than a millimetre anywhere has no strength left
+  // in it, so that is the floor the engine works to.
+  minThickness: MIN_THICKNESS_MM,
 };
 
 const STORAGE_KEY = 'amp_optical_session';
@@ -187,6 +193,13 @@ export function useOpticalState() {
     }));
   }, [updateState]);
 
+  const setMinThickness = useCallback((val: number | ((p: number) => number)) => {
+    updateState(prev => ({
+      ...prev,
+      minThickness: typeof val === 'function' ? val(prev.minThickness) : val
+    }));
+  }, [updateState]);
+
   // Reset helper
   const resetSession = useCallback(() => {
     setSession((s) => ({
@@ -234,14 +247,14 @@ export function useOpticalState() {
     }
     // If invalid parameters, calculateLens will fall back gracefully or cap values internally
     return calculateLens(
-      state.lens, 
-      state.frame, 
-      state.patient, 
-      1.0, 
-      state.bevelPercent, 
+      state.lens,
+      state.frame,
+      state.patient,
+      state.minThickness,
+      state.bevelPercent,
       state.frameType
     );
-  }, [state.lens, state.frame, state.patient, state.bevelPercent, state.frameType, validation.isValid]);
+  }, [state.lens, state.frame, state.patient, state.minThickness, state.bevelPercent, state.frameType, validation.isValid]);
 
   const compareResult: CalculationResult | undefined = useMemo(() => {
     if (!compareMode) return undefined;
@@ -250,11 +263,11 @@ export function useOpticalState() {
       { ...state.lens, index: compareIndex },
       state.frame,
       state.patient,
-      1.0,
+      state.minThickness,
       state.bevelPercent,
       state.frameType
     );
-  }, [state.lens, state.frame, state.patient, state.bevelPercent, state.frameType, compareMode, compareIndex, validation.isValid]);
+  }, [state.lens, state.frame, state.patient, state.minThickness, state.bevelPercent, state.frameType, compareMode, compareIndex, validation.isValid]);
 
   return {
     lens: state.lens,
@@ -262,11 +275,13 @@ export function useOpticalState() {
     patient: state.patient,
     bevelPercent: state.bevelPercent,
     frameType: state.frameType,
+    minThickness: state.minThickness,
     setLens,
     setFrame,
     setPatient,
     setBevelPercent,
     setFrameType,
+    setMinThickness,
     
     // Compare Mode
     compareMode,

@@ -62,7 +62,7 @@ A surface of signed radius $R$ stands $s$ behind its own vertex at the semi-aper
 
 ### 5. Center thickness ($CT$) & edge thickness ($ET$)
 
-Minimum thickness $t_{\text{min}} = 1.0\text{mm}$. The material at the rim is the centre thickness plus the difference of the two surface offsets:
+Minimum thickness $t_{\text{min}}$: the thinnest the lens is allowed to be anywhere, an input on the sheet, 1.0 mm by default. The material at the rim is the centre thickness plus the difference of the two surface offsets:
 
 $$t(\theta) = CT + s_2(\theta) - s_1(\theta)$$
 
@@ -73,23 +73,39 @@ $$CT = t_{\text{min}} + \max\left(0,\ \max_\theta \left(s_1(\theta) - s_2(\theta
 - **$ET$** is the thickest material around the rim, $\max_\theta t(\theta)$: the edge the groove has to swallow.
 - **$ET_{\min}$** is the thinnest point of the rim, $\min_\theta t(\theta)$.
 
-### 6. Frame protrusion
+### 6. Vertex power
+
+A lens is not thin, so the power the patient wears is not the sum of the two surface powers. The back vertex power of a lens of centre thickness $t$ and index $n$ is
+
+$$F_v = \frac{F_1}{1 - \frac{t}{n} F_1 \cdot 10^{-3}} + F_2$$
+
+with $F_1$ the front surface power in dioptres and $t$ in millimetres. The engine solves the thickness, computes $F_v$, and **re-solves the back power** so that $F_v$ is the power on the prescription — at most five times, and it reports the vertex power and how far it still is from the prescription. The correction is the same in every meridian, so a cylinder stays a cylinder.
+
+### 7. Frame protrusion
+
+The lens is placed in the bevel groove by the **vertical meridian** through the optical centre: the edge at the top of the opening is the one centred on the groove, and the two vertices follow from there.
 
 - **Groove position**: $x_{\text{groove}} = \text{Frame Depth} \times \text{Bevel Percent}$
-- The lens sits in the groove, so the edge of the vertical meridian is centred on it, and the vertices follow:
-  $x_{\text{front}} = x_{\text{groove}} - \frac{ET_{\text{top}}}{2} - s_1(\text{top})$
+- The vertices follow from the edge at the top of the opening:
+  $x_{\text{front}} = x_{\text{groove}} - \frac{ET_{\text{top}}}{2} - s_1(\text{top})$, $x_{\text{back}} = x_{\text{front}} + CT$
 - **Anterior protrusion**: $\max(0,\ -x_{\text{front}})$
-- **Posterior protrusion**: $\max(0,\ x_{\text{back}} + \max(0, \max_\theta s_2(\theta)) - \text{Frame Depth})$
+- **Posterior protrusion**: $\max(0,\ x_{\text{back}} + \max(0, \max(s_2(\text{top}), s_2(\text{bottom}))) - \text{Frame Depth})$
 
-### 7. Minimum blank size
+Both are measured in that same vertical meridian, because that is the meridian the lens is held in. Measuring the posterior protrusion at the deepest point of the back surface somewhere else around the rim would report a lens standing out of a frame it is not standing out of.
 
-$$MBS = ED + |F_{PD} - PD| + 2$$
+> **The frame is a flat plane.** The model gives the frame no base curve of its own, so the rim that holds the lens is a straight band rather than a curve that follows the lens. The numbers say what they measure: the lens is placed by the vertical meridian, and the protrusion is measured in that plane. A frame with a base curve of its own would report a different figure here.
 
-The shape's own diameter, plus the total decentration, plus two millimetres of edging allowance.
+### 8. Minimum blank size
 
-### 8. Weight
+The blank has to hold the shape *around the optical centre*, and the optical centre does not sit at the boxing centre — the horizontal decentration and the vertical fitting offset both move it. So the blank is twice the farthest the rim reaches from the pupil, plus the edging allowance:
 
-The volume of the lens is the thickness integrated over the opening, and the weight is that volume times the density of the material.
+$$MBS = 2 \cdot d_{\text{far}} + 2$$
+
+where $d_{\text{far}}$ is the exact farthest point of the shape (the $A \times B$ box cut by the circle of diameter $ED$) from the optical centre. It is the greatest of the box's corners that survive the circle, the points where the circle crosses the box, and the point of the circle opposite the optical centre.
+
+### 9. Weight
+
+The volume of the lens is the thickness integrated over the opening, and the weight is that volume times the density of the material. The integration is centred on the optical centre, so the outer ring reaches as far as the shape does from the pupil.
 
 ---
 
@@ -121,15 +137,35 @@ Each surface (front/back) has an independent `isActive` toggle, allowing:
 
 ---
 
+## Clinical Limits
+
+The thresholds the engine's output is judged against live in one file, [`src/data/limits.ts`](./src/data/limits.ts), and every one of them carries where it comes from.
+
+| Measurement | Limit | Rule | Source |
+|---|:---|:---|:---|
+| Edge thickness (ET) | ≤ 6.00 mm | max | guideline |
+| Centre thickness (CT) | ≥ 1.00 mm | min | guideline |
+| Anterior protrusion | ≤ 1.50 mm | max | guideline |
+| Posterior protrusion | ≤ 2.00 mm | max | guideline |
+| Lens weight | ≤ 15.0 g | max | guideline |
+| Prism if not decentred | ≤ 1.00 Δ | reference | guideline |
+| Minimum blank | ≤ 85 mm | max | guideline |
+
+`guideline` means the number is the tool's own working rule, not a figure taken from a published standard. A limit that does come from a standard names it (`standard:ANSI Z80.1`), so the sheet can say where its numbers come from.
+
+The **prism row is a reference, not a limit**. The optical centre is placed on the pupil, so the prism at the pupil is zero by construction; the row reports the prism the lens would carry at the centre of the frame if it were not decentred onto the pupil — Prentice's rule, per principal meridian, so the cylinder, the axis and the vertical offset are in the number. It is never counted as a fault.
+
+---
+
 ## Smart Material Recommendation
 
 | SE Range (D) | Recommended Index | Material Name | Abbe Value | Edge Reduction |
 |:---|---:|:---|:---:|:---|
 | $\le 2.00$ | **1.50** | CR-39 (Standard) | 58 | 0% |
 | $> 2.00$ to $\le 3.00$ | **1.56** | Mid-Index (NK-55) | 38 | ~11% |
-| $> 3.00$ to $\le 5.00$ | **1.60** | High-Index (MR-8) | 42 | ~16% |
-| $> 5.00$ to $\le 8.00$ | **1.67** | Ultra High-Index (MR-10) | 32 | ~24% |
-| $> 8.00$ | **1.74** | Premium Index (MR-174) | 33 | ~30% |
+| $> 3.00$ to $\le 5.00$ | **1.60** | High-Index (MR-8) | 41 | ~16% |
+| $> 5.00$ to $\le 8.00$ | **1.67** | Ultra High-Index (MR-10) | 31 | ~24% |
+| $> 8.00$ | **1.74** | Premium Index (MR-174) | 32 | ~30% |
 
 
 
