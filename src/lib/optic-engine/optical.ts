@@ -81,6 +81,7 @@ export function calculateLens(
 
   const meridians = solved.meridians;
   const worst = governingMeridian(meridians);
+  const backPowerOffset = worst.backPower - (worst.power - baseCurve);
   const frontR = frontRadius(index, baseCurve);
 
   // The section is the vertical meridian through the optical centre, and the
@@ -125,6 +126,9 @@ export function calculateLens(
     cyl,
     axis,
     SPHERICAL,
+    180,
+    360,
+    (power) => power - baseCurve + backPowerOffset,
   );
   const weight = volume * density;
 
@@ -162,6 +166,7 @@ export function calculateLens(
     r1: frontR,
     r2: Math.abs(worst.backRadius),
     backPower: worst.backPower,
+    backPowerOffset,
     /** The back vertex power of the thickest-edge meridian, in dioptres. */
     vertexPower: solved.vertexPower,
     /** How far the vertex power is from the prescribed power, in dioptres. */
@@ -215,6 +220,7 @@ export function invalidResult(message: string): CalculationResult {
     r1: 0,
     r2: 0,
     backPower: 0,
+    backPowerOffset: 0,
     s1: 0,
     s2: 0,
     decentration: 0,

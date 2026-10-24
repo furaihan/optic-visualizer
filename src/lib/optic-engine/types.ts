@@ -94,6 +94,8 @@ export interface CalculationResult {
   /** The cross-section the side elevation draws. */
   section?: SectionGeometry;
   recommendation?: LensRecommendation;
+  /** Back-surface power correction applied to every meridian for vertex power. */
+  backPowerOffset?: number;
 }
 
 export interface AsphericCalculationResult {
@@ -129,6 +131,8 @@ export interface AsphericCalculationResult {
   /** The conic constant of the front surface. */
   conic?: number;
   recommendation?: LensRecommendation;
+  /** Back-conic power correction applied to every meridian for vertex power. */
+  backPowerOffset?: number;
 }
 
 

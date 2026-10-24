@@ -1,5 +1,6 @@
 import React from 'react';
 import {
+  AsphericSurfaceConfig,
   LensParameters,
   FrameParameters,
   PatientParameters,
@@ -8,9 +9,13 @@ import {
 import { Language, translations } from '../../lib/translations';
 import { LensPosition } from './types';
 import { DimH } from './SheetDefs';
+import { backRadius, conicSagitta, powerInMeridian } from '../../lib/optic-engine/geometry';
 
 interface TopDownViewProps {
-  lens: LensParameters;
+  lens: LensParameters & {
+    asphericFront?: AsphericSurfaceConfig;
+    asphericBack?: AsphericSurfaceConfig;
+  };
   frame: FrameParameters;
   patient: PatientParameters;
   result: CalculationResult;
@@ -61,13 +66,58 @@ export const TopDownView: React.FC<TopDownViewProps> = ({
   const depthPx = depth * scale;
 
   const lensPath = (r: CalculationResult, pos: LensPosition, side: 1 | -1) => {
-    const { etX_start, etX_end } = pos;
+    const pt = (lx: number, ly: number) =>
+      `${centerX + lx * side * scale} ${centerY + ly * scale}`;
+
+    const section = r.section;
+    if (section) {
+      const steps = 64;
+      const frontPoints: string[] = [];
+      const backPoints: string[] = [];
+      const decentrationH = (r.decentrationH ?? r.decentration) * side;
+      const opticalCenterX = -decentrationH;
+      const radiusLeft = side === 1 ? section.radiusLeft : section.radiusRight;
+      const radiusRight = side === 1 ? section.radiusRight : section.radiusLeft;
+      const openingLeft = Math.max(-a / 2, opticalCenterX - radiusLeft);
+      const openingRight = Math.min(a / 2, opticalCenterX + radiusRight);
+      const frontConfig = lens.asphericFront?.isActive ? lens.asphericFront : null;
+      const backConfig = lens.asphericBack?.isActive ? lens.asphericBack : null;
+      const indexFactor = 1000 * (lens.index - 1);
+      const frontPower = lens.baseCurve + 2 * (frontConfig?.A2 ?? 0) * indexFactor;
+      const backA2Shift = 2 * (backConfig?.A2 ?? 0) * indexFactor;
+      const sag = (
+        radius: number,
+        R: number,
+        config: AsphericSurfaceConfig | null,
+      ) => {
+        if (!config) return conicSagitta(R, 0, radius);
+        const y2 = radius * radius;
+        const polynomial = config.A2 * y2 + config.A4 * y2 ** 2 +
+          config.A6 * y2 ** 3 + config.A8 * y2 ** 4;
+        return conicSagitta(R, config.conic, radius) + polynomial;
+      };
+      for (let i = 0; i <= steps; i += 1) {
+        const boxingX = openingLeft + ((openingRight - openingLeft) * i) / steps;
+        const dx = boxingX - opticalCenterX;
+        const radius = Math.abs(dx);
+        const theta = dx < 0 ? 180 : 0;
+        const power = powerInMeridian(theta, lens.sph, lens.cyl, lens.axis);
+        const backPower = power - frontPower - backA2Shift + (r.backPowerOffset ?? 0);
+        const r2 = backRadius(lens.index, backPower);
+        const openingX = dbl / 2 + (boxingX + a / 2);
+        frontPoints.push(pt(openingX, section.frontApexZ + sag(radius, r.r1, frontConfig)));
+        backPoints.push(pt(openingX, section.backApexZ + sag(radius, r2, backConfig)));
+      }
+      return `M ${frontPoints.join(' L ')} L ${backPoints.reverse().join(' L ')} Z`;
+    }
+
+    const leftThickness = r.et;
+    const rightThickness = r.et;
+    const etX_start = pos.grooveX - leftThickness / 2;
+    const etX_end = pos.grooveX + rightThickness / 2;
     const r1 = Math.abs(r.r1);
     const r2 = Math.abs(r.r2);
     const sweepBack = r.backPower >= 0 ? 0 : 1;
-
-    const pt = (lx: number, ly: number) =>
-      `${centerX + lx * side * scale} ${centerY + ly * scale}`;
 
     const p1 = pt(dbl / 2, etX_start);
     const p2 = pt(dbl / 2 + a, etX_start);

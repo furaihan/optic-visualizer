@@ -167,6 +167,8 @@ export const Visualizer: React.FC<VisualizerProps> = React.memo(
       },
     ];
 
+    const displayedCalipers = result.error ? [] : calipers;
+
     const active = calipers.find((c) => c.id === target) ?? null;
 
     // On a phone the three drawings cannot sit side by side legibly, so the
@@ -303,7 +305,7 @@ export const Visualizer: React.FC<VisualizerProps> = React.memo(
               <h2 className="text-[13px] font-medium text-sheet-ink">{viewTitle}</h2>
             )}
 
-            {compareResult && view !== 'front' && variant === 'classic' && (
+              {!result.error && compareResult && view !== 'front' && variant === 'classic' && (
               <CompareLegend
                 lang={lang}
                 index={lens.index}
@@ -312,7 +314,7 @@ export const Visualizer: React.FC<VisualizerProps> = React.memo(
                 compareResult={compareResult}
               />
             )}
-            {variant === 'classic' && !(compareResult && view !== 'front') && (
+            {variant === 'classic' && !result.error && !(compareResult && view !== 'front') && (
               <p className="text-[13px] text-sheet-muted">
                 {compareResult && view === 'front' ? t.compareFrontNote : t.scaleNote}
               </p>
@@ -347,7 +349,13 @@ export const Visualizer: React.FC<VisualizerProps> = React.memo(
           >
             <SheetDefs />
 
-            {view === 'side' ? (
+            {result.error ? (
+              <g className="text-sheet-warning">
+                <text x={BOARD_W / 2} y={BOARD_H / 2} textAnchor="middle" fontSize={18}>
+                  {result.errorMessage ?? t.invalidInput}
+                </text>
+              </g>
+            ) : view === 'side' ? (
               <>
                 <FrameProfile
                   frame={frame}
@@ -511,7 +519,7 @@ export const Visualizer: React.FC<VisualizerProps> = React.memo(
               />
             ) : (
               <TopDownView
-                lens={lens}
+                lens={lens as any}
                 frame={frame}
                 patient={patient}
                 result={result}
@@ -536,7 +544,7 @@ export const Visualizer: React.FC<VisualizerProps> = React.memo(
               compact ? 'grid-cols-5' : 'grid-cols-2 sm:grid-cols-3 lg:grid-cols-5'
             }`}
           >
-            {calipers.map((row, index) => {
+            {displayedCalipers.map((row, index) => {
               const isActive = target === row.id;
               return (
                 <button
@@ -610,7 +618,7 @@ export const Visualizer: React.FC<VisualizerProps> = React.memo(
 
           {/* The caption row: the definition of whichever caliper is being
               read, and the scale the sheet is drawn at. */}
-          {variant === 'classic' ? (
+            {variant === 'classic' && !result.error ? (
             <p
               key={active ? active.id : 'hint'}
               className={`caliper-snap mt-2 min-h-[20px] px-1 text-[13px] leading-snug ${

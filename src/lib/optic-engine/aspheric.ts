@@ -209,6 +209,7 @@ export function calculateAsphericLens(
 
   const meridians = solved.meridians;
   const worst = governingMeridian(meridians);
+  const backPowerOffset = worst.backPower - backPowerFor(worst.power);
 
   // The section is the vertical meridian through the optical centre, and the
   // lens is placed in the bevel groove by that meridian: the edge at the top
@@ -269,6 +270,9 @@ export function calculateAsphericLens(
     cyl,
     axis,
     model,
+    180,
+    360,
+    (power) => backPowerFor(power) + backPowerOffset,
   );
   const weight = volume * density;
 
@@ -315,6 +319,7 @@ export function calculateAsphericLens(
     r1,
     r2: Math.abs(worst.backRadius),
     backPower: worst.backPower,
+    backPowerOffset,
     /** The back vertex power of the thickest-edge meridian, in dioptres. */
     vertexPower: solved.vertexPower,
     /** How far the vertex power is from the prescribed power, in dioptres. */
@@ -370,6 +375,7 @@ export function invalidAsphericResult(message: string): AsphericCalculationResul
     r1: 0,
     r2: 0,
     backPower: 0,
+    backPowerOffset: 0,
     s1: 0,
     s2: 0,
     decentration: 0,

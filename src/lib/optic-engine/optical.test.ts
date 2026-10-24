@@ -66,6 +66,7 @@ function gridWeight(
 ): number {
   const opening = buildOpening(f, p);
   const r1 = frontRadius(l.index, l.baseCurve);
+  const backPowerOffset = result.backPowerOffset ?? 0;
   let volume = 0;
 
   for (let x = -opening.halfWidth + step / 2; x <= opening.halfWidth; x += step) {
@@ -77,7 +78,7 @@ function gridWeight(
       const r = Math.hypot(dx, dy);
       const theta = (Math.atan2(dy, dx) * 180) / Math.PI;
       const power = powerInMeridian(theta, l.sph, l.cyl, l.axis);
-      const r2 = backRadius(l.index, power - l.baseCurve);
+      const r2 = backRadius(l.index, power - l.baseCurve + backPowerOffset);
 
       const front = conicSagitta(r1, 0, r);
       const back = conicSagitta(r2, 0, r);
@@ -292,6 +293,24 @@ describe("The thick lens, measured", () => {
     expect(upright.vertexPowerError).toBeCloseTo(0, 3);
     expect(turned.vertexPowerError).toBeCloseTo(0, 3);
   });
+
+  it("captures the continuous edge maximum between one-degree meridians", () => {
+    const result = run(
+      lens({ sph: -10, cyl: -2, axis: 135 }),
+      { a: 55, b: 42, dbl: 20, depth: 6, ed: 60 },
+      { pd: 58, fittingHeight: 20 },
+    );
+    expect(result.et).toBeGreaterThan(32.83);
+    expect(result.et).toBeLessThan(32.85);
+  });
+
+  it("integrates weight using the final vertex-corrected back surface", () => {
+    const prescription = lens({ sph: 12, baseCurve: 10 });
+    const result = run(prescription);
+    const grid = gridWeight(result, prescription, standardFrame, standardPatient, 0.05);
+    expect(result.weight).toBeCloseTo(grid, 1);
+    expect(result.weight).toBeGreaterThan(18.4);
+  });
 });
 
 describe("The material recommendation", () => {
@@ -406,6 +425,73 @@ describe("The aspheric engine", () => {
     // the surface, so the vertex power of the lens the patient wears is
     // still the power that was prescribed.
     expect(Math.abs(aspheric.vertexPowerError ?? 1)).toBeLessThan(0.02);
+  });
+
+  it("includes the back-surface A2 power shift in the aspheric prescription", () => {
+    const result = calculateAsphericLens(
+      {
+        ...asphericLens,
+        asphericBack: { conic: 0, A2: 0.0005, A4: 0, A6: 0, A8: 0, isActive: true },
+      },
+      standardFrame,
+      standardPatient,
+      1,
+      0.33,
+      "full",
+    );
+    expect(result.vertexPower).toBeCloseTo(-4, 5);
+    expect(result.backPower).toBeCloseTo(-8.61, 2);
+    expect(result.backPowerOffset).toBeCloseTo(-0.01, 2);
+  });
+
+  it("keeps the full aspheric aperture above its minimum thickness", () => {
+    const prescription = {
+      ...asphericLens,
+      sph: 4,
+      baseCurve: 6,
+      asphericFront: {
+        conic: 0,
+        A2: 0.0077,
+        A4: -0.0000098,
+        A6: 0,
+        A8: 0,
+        isActive: true,
+      },
+    };
+    const result = calculateAsphericLens(
+      prescription,
+      standardFrame,
+      standardPatient,
+      1,
+      0.33,
+      "full",
+    );
+    expect(result.error).not.toBe(true);
+
+    const opening = buildOpening(standardFrame, standardPatient);
+    const r1 = frontRadius(prescription.index, prescription.baseCurve);
+    const frontPower = prescription.baseCurve +
+      2 * prescription.asphericFront.A2 * 1000 * (prescription.index - 1);
+    const backOffset = result.backPowerOffset ?? 0;
+    let minimum = Infinity;
+    const step = 0.1;
+    for (let x = -opening.halfWidth; x <= opening.halfWidth; x += step) {
+      for (let y = -opening.halfHeight; y <= opening.halfHeight; y += step) {
+        if (x * x + y * y > opening.shapeRadius * opening.shapeRadius) continue;
+        const dx = x - opening.ocX;
+        const dy = y - opening.ocY;
+        const radius = Math.hypot(dx, dy);
+        const theta = (Math.atan2(dy, dx) * 180) / Math.PI;
+        const power = powerInMeridian(theta, prescription.sph, prescription.cyl, prescription.axis);
+        const r2 = backRadius(prescription.index, power - frontPower + backOffset);
+        const front = conicSagitta(r1, 0, radius) +
+          prescription.asphericFront.A2 * radius ** 2 +
+          prescription.asphericFront.A4 * radius ** 4;
+        const back = conicSagitta(r2, 0, radius);
+        minimum = Math.min(minimum, result.ct + back - front);
+      }
+    }
+    expect(minimum).toBeGreaterThanOrEqual(0.999);
   });
 
   it("applies the same frame rules as the spherical engine", () => {

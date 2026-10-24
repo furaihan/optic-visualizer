@@ -47,6 +47,23 @@ export const FrontView: React.FC<FrontViewProps> = ({
 
   const top = originY - openingH / 2;
   const bottom = originY + openingH / 2;
+  const openingPath = (x: number, ed = frame.ed) => {
+    const radius = ed / 2;
+    const halfWidth = frame.a / 2;
+    const halfHeight = frame.b / 2;
+    const points = Array.from({ length: 180 }, (_, i) => {
+      const theta = (2 * Math.PI * i) / 180;
+      const dx = Math.cos(theta);
+      const dy = Math.sin(theta);
+      const boxRadius = Math.min(
+        Math.abs(dx) > 1e-9 ? halfWidth / Math.abs(dx) : Infinity,
+        Math.abs(dy) > 1e-9 ? halfHeight / Math.abs(dy) : Infinity,
+      );
+      const distance = Math.min(radius, boxRadius);
+      return `${x + openingW / 2 + dx * distance * scale} ${originY + dy * distance * scale}`;
+    });
+    return `M ${points.join(' L ')} Z`;
+  };
 
   const warn = 'text-sheet-warning';
   const ink = 'text-sheet-ink';
@@ -59,16 +76,13 @@ export const FrontView: React.FC<FrontViewProps> = ({
     <g key={x}>
       {/* Lens opening: a flat tint of the prescription ink, so the rim reads as
           a band of frame ink around it. */}
-      <rect
-        x={x}
-        y={top}
-        width={openingW}
-        height={openingH}
+      <path
+        d={openingPath(x, frame.ed)}
         className={primary ? 'text-sheet-rx' : 'text-sheet-muted'}
         fill="currentColor"
         fillOpacity={primary ? 0.12 : 0.06}
       />
-      {/* Rim: a drawn band of real thickness. */}
+      {/* Frame boundary remains the A × B boxing rectangle. */}
       <rect
         x={x}
         y={top}

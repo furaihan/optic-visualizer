@@ -223,8 +223,12 @@ export const MeasurementSheet: React.FC<MeasurementSheetProps> = ({
         <h2 id="measurements-title" className="text-[26px] font-medium leading-tight tracking-[-0.02em] text-sheet-ink">
           {t.sheetMeasurements}
         </h2>
-        <p className={`whitespace-nowrap text-[13px] ${flagged.length ? 'text-sheet-warning' : 'text-sheet-muted'}`}>
-          {flagged.length > 0 ? `${flagged.length} × ${t.overLimit}` : t.withinLimit}
+        <p className={`whitespace-nowrap text-[13px] ${result.error || flagged.length ? 'text-sheet-warning' : 'text-sheet-muted'}`}>
+          {result.error
+            ? t.invalidInput
+            : flagged.length > 0
+              ? `${flagged.length} × ${t.overLimit}`
+              : t.withinLimit}
         </p>
       </div>
 
@@ -250,7 +254,7 @@ export const MeasurementSheet: React.FC<MeasurementSheetProps> = ({
           </p>
         )}
 
-      <table className="w-full border-collapse text-left">
+      {!result.error && <table className="w-full border-collapse text-left">
         <thead>
           <tr className="text-[13px] text-sheet-muted">
             <th scope="col" className="pb-2 font-normal">{t.sheetColMeasure}</th>
@@ -324,9 +328,9 @@ export const MeasurementSheet: React.FC<MeasurementSheetProps> = ({
             );
           })}
         </tbody>
-      </table>
+      </table>}
 
-      {flagged.length === 0 && (
+      {!result.error && flagged.length === 0 && (
         <p className="text-[13px] text-sheet-muted">{t.rowOpenHint}</p>
       )}
 

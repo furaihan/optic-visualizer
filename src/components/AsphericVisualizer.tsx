@@ -284,7 +284,9 @@ export const AsphericVisualizer: React.FC<AsphericVisualizerProps> = React.memo(
       },
     ];
 
-    const active = calipers.find((c) => c.id === target) ?? null;
+    const displayedCalipers = result.error ? [] : calipers;
+
+    const active = displayedCalipers.find((c) => c.id === target) ?? null;
 
     // The aspheric surfaces are named on the drawing itself, and their
     // controls are in the inspector, so the sheet does not repeat them.
@@ -365,7 +367,13 @@ export const AsphericVisualizer: React.FC<AsphericVisualizerProps> = React.memo(
           >
             <SheetDefs />
 
-            {view === 'side' ? (
+            {result.error ? (
+              <g className="text-sheet-warning">
+                <text x={BOARD_W / 2} y={BOARD_H / 2} textAnchor="middle" fontSize={18}>
+                  {result.errorMessage ?? t.invalidInput}
+                </text>
+              </g>
+            ) : view === 'side' ? (
               <>
                 <FrameProfile
                   frame={frame}
@@ -583,7 +591,7 @@ export const AsphericVisualizer: React.FC<AsphericVisualizerProps> = React.memo(
               compact ? 'grid-cols-5' : 'grid-cols-2 sm:grid-cols-3 lg:grid-cols-5'
             }`}
           >
-            {calipers.map((row, index) => {
+            {displayedCalipers.map((row, index) => {
               const isActive = target === row.id;
               return (
                 <button

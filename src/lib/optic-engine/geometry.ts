@@ -320,7 +320,7 @@ export function farthestRimDistance(opening: OpeningGeometry): number {
  * the corner of a frame is a corner, and a sample that misses it misses the
  * thickest edge of the lens.
  */
-export function sampleAngles(opening: OpeningGeometry, samples = 72): number[] {
+export function sampleAngles(opening: OpeningGeometry, samples = 360): number[] {
   const angles: number[] = [];
   for (let i = 0; i < samples; i += 1) {
     angles.push((360 * i) / samples);
@@ -331,7 +331,55 @@ export function sampleAngles(opening: OpeningGeometry, samples = 72): number[] {
     if (Math.hypot(dx, dy) <= 1e-9) continue;
     angles.push((Math.atan2(dy, dx) / DEG + 360) % 360);
   }
-  return angles;
+  const unique = new Map<number, number>();
+  for (const angle of angles) {
+    const normalized = (angle % 360 + 360) % 360;
+    unique.set(Math.round(normalized * 1e8), normalized);
+  }
+  return [...unique.values()].sort((a, b) => a - b);
+}
+
+/** Refine a smooth extremum without requiring an analytic derivative. */
+function goldenSectionMin(
+  fn: (value: number) => number,
+  lower: number,
+  upper: number,
+  iterations = 24,
+): { value: number; at: number } {
+  const ratio = (Math.sqrt(5) - 1) / 2;
+  let a = lower;
+  let b = upper;
+  let x1 = b - ratio * (b - a);
+  let x2 = a + ratio * (b - a);
+  let y1 = fn(x1);
+  let y2 = fn(x2);
+
+  for (let i = 0; i < iterations; i += 1) {
+    if (y1 <= y2) {
+      b = x2;
+      x2 = x1;
+      y2 = y1;
+      x1 = b - ratio * (b - a);
+      y1 = fn(x1);
+    } else {
+      a = x1;
+      x1 = x2;
+      y1 = y2;
+      x2 = a + ratio * (b - a);
+      y2 = fn(x2);
+    }
+  }
+
+  return y1 <= y2 ? { value: y1, at: x1 } : { value: y2, at: x2 };
+}
+
+function goldenSectionMax(
+  fn: (value: number) => number,
+  lower: number,
+  upper: number,
+): { value: number; at: number } {
+  const result = goldenSectionMin((value) => -fn(value), lower, upper);
+  return { value: -result.value, at: result.at };
 }
 
 /**
@@ -477,60 +525,125 @@ export function solveThickness(
   const r1 = frontRadius(index, baseCurve);
   const front = options.frontPower ?? baseCurve;
   const baseBackPower = options.backPowerFor ?? ((power: number) => power - baseCurve);
-  const samples = options.samples ?? 72;
-  const maxIterations = options.maxVertexIterations ?? 5;
+  const samples = options.samples ?? 360;
+  const maxIterations = options.maxVertexIterations ?? 20;
 
   const run = (offset: number) => {
     const meridians: Meridian[] = [];
+    const wrap = (theta: number) => (theta % 360 + 360) % 360;
+    const angles = sampleAngles(opening, samples);
+    angles.push(wrap(axis), wrap(axis + 90), wrap(axis + 180), wrap(axis + 270));
+    const uniqueAngles = [...new Set(angles.map((theta) => Math.round(theta * 1e8)))]
+      .map((theta) => theta / 1e8)
+      .sort((a, b) => a - b);
+    let surfaceFailed = false;
 
-    // The uniform samples, plus the corners of the shape: the farthest point
-    // of the rim is often a corner, and a sample that misses it would report
-    // a thinner lens than the frame actually asks for.
-    for (const theta of sampleAngles(opening, samples)) {
-      const radius = rimRadius(opening, theta);
-      if (!Number.isFinite(radius)) {
-        return { meridians, centerThickness: minThickness, error: "rim" as const };
-      }
-
+    const surfaceAt = (theta: number, radius: number) => {
       const power = powerInMeridian(theta, sph, cyl, axis);
       const backPower = baseBackPower(power) + offset;
       const r2 = backRadius(index, backPower);
-
-      const frontOffset =
-        conicSagitta(r1, surfaces.frontConic, radius) + surfaces.frontPoly(radius);
-      const backOffset =
-        conicSagitta(r2, surfaces.backConic, radius) + surfaces.backPoly(radius);
-
+      const frontOffset = conicSagitta(r1, surfaces.frontConic, radius) + surfaces.frontPoly(radius);
+      const backOffset = conicSagitta(r2, surfaces.backConic, radius) + surfaces.backPoly(radius);
       if (!Number.isFinite(frontOffset) || !Number.isFinite(backOffset)) {
-        return { meridians, centerThickness: minThickness, error: "surface" as const };
+        surfaceFailed = true;
+        return null;
       }
+      return { power, backPower, backRadius: r2, frontOffset, backOffset,
+        difference: backOffset - frontOffset };
+    };
 
-      meridians.push({
-        theta,
-        radius,
-        power,
-        backPower,
-        backRadius: r2,
-        frontOffset,
-        backOffset,
-        edge: minThickness,
-      });
+    const boundaryAt = (theta: number) => {
+      const normalized = wrap(theta);
+      const radius = rimRadius(opening, normalized);
+      if (!Number.isFinite(radius)) return null;
+      const surface = surfaceAt(normalized, radius);
+      return surface ? { theta: normalized, radius, ...surface } : null;
+    };
+
+    const hasAsphericProfile = surfaces.frontConic !== 0 || surfaces.backConic !== 0 ||
+      [1, 10, 30].some((radius) => surfaces.frontPoly(radius) !== 0 || surfaces.backPoly(radius) !== 0);
+    const radialSteps = hasAsphericProfile ? 48 : 1;
+    const minimumAlongRay = (theta: number, boundaryRadius: number) => {
+      const values: number[] = [];
+      for (let i = 0; i <= radialSteps; i += 1) {
+        const point = surfaceAt(theta, (boundaryRadius * i) / radialSteps);
+        if (!point) return Infinity;
+        values.push(point.difference);
+      }
+      let minimum = Math.min(...values);
+      for (let i = 1; i < radialSteps; i += 1) {
+        if (values[i] > values[i - 1] || values[i] > values[i + 1]) continue;
+        const lower = (boundaryRadius * (i - 1)) / radialSteps;
+        const upper = (boundaryRadius * (i + 1)) / radialSteps;
+        const refined = goldenSectionMin(
+          (radius) => surfaceAt(theta, radius)?.difference ?? Infinity,
+          lower, upper, 16,
+        );
+        minimum = Math.min(minimum, refined.value);
+      }
+      return minimum;
+    };
+
+    const profiles = uniqueAngles.map((theta) => {
+      const boundary = boundaryAt(theta);
+      if (!boundary) return null;
+      return { theta, edgeDifference: boundary.difference,
+        minimum: minimumAlongRay(theta, boundary.radius) };
+    });
+    if (profiles.some((profile) => profile === null)) {
+      return { meridians, centerThickness: minThickness,
+        error: surfaceFailed ? "surface" as const : "rim" as const };
+    }
+    if (surfaceFailed) return { meridians, centerThickness: minThickness, error: "surface" as const };
+
+    const validProfiles = profiles as { theta: number; edgeDifference: number; minimum: number }[];
+    let minimumDifference = Math.min(0, ...validProfiles.map((profile) => profile.minimum));
+    for (let i = 0; i < validProfiles.length; i += 1) {
+      const previous = validProfiles[(i - 1 + validProfiles.length) % validProfiles.length];
+      const current = validProfiles[i];
+      const next = validProfiles[(i + 1) % validProfiles.length];
+      if (current.minimum > previous.minimum || current.minimum > next.minimum) continue;
+      const lower = i === 0 ? previous.theta - 360 : previous.theta;
+      const upper = i === validProfiles.length - 1 ? next.theta + 360 : next.theta;
+      const refined = goldenSectionMin((theta) => {
+        const wrapped = wrap(theta);
+        const radius = rimRadius(opening, wrapped);
+        return Number.isFinite(radius) ? minimumAlongRay(wrapped, radius) : Infinity;
+      }, lower, upper, 12);
+      minimumDifference = Math.min(minimumDifference, refined.value);
     }
 
-    // The centre thickness has to make the thinnest point of the lens the
-    // minimum thickness: where the surfaces close in the most, the material
-    // between the two vertices is least.
-    let tightest = 0;
-    for (const m of meridians) {
-      const slack = m.frontOffset - m.backOffset;
-      if (slack > tightest) tightest = slack;
+    const refinedAngles: number[] = [];
+    for (let i = 0; i < validProfiles.length; i += 1) {
+      const previous = validProfiles[(i - 1 + validProfiles.length) % validProfiles.length];
+      const current = validProfiles[i];
+      const next = validProfiles[(i + 1) % validProfiles.length];
+      const lower = i === 0 ? previous.theta - 360 : previous.theta;
+      const upper = i === validProfiles.length - 1 ? next.theta + 360 : next.theta;
+      if (current.edgeDifference >= previous.edgeDifference && current.edgeDifference >= next.edgeDifference) {
+        const refined = goldenSectionMax((theta) => boundaryAt(theta)?.difference ?? -Infinity, lower, upper);
+        if (refined.value > current.edgeDifference + 1e-9) refinedAngles.push(wrap(refined.at));
+      }
+      if (current.edgeDifference <= previous.edgeDifference && current.edgeDifference <= next.edgeDifference) {
+        const refined = goldenSectionMin((theta) => boundaryAt(theta)?.difference ?? Infinity, lower, upper);
+        if (refined.value < current.edgeDifference - 1e-9) refinedAngles.push(wrap(refined.at));
+      }
     }
 
-    const centerThickness = minThickness + tightest;
-    for (const m of meridians) {
-      m.edge = m.backOffset - m.frontOffset + centerThickness;
+    const centerThickness = minThickness - minimumDifference;
+    const resultAngles = [...new Set([
+      ...uniqueAngles.map((theta) => Math.round(theta * 1e8)),
+      ...refinedAngles.map((theta) => Math.round(theta * 1e8)),
+    ])].map((theta) => theta / 1e8);
+    for (const theta of resultAngles) {
+      const boundary = boundaryAt(theta);
+      if (!boundary) return { meridians, centerThickness, error: "rim" as const };
+      meridians.push({ theta, radius: boundary.radius, power: boundary.power,
+        backPower: boundary.backPower, backRadius: boundary.backRadius,
+        frontOffset: boundary.frontOffset, backOffset: boundary.backOffset,
+        edge: centerThickness + boundary.difference });
     }
-
+    if (surfaceFailed) return { meridians, centerThickness, error: "surface" as const };
     return { meridians, centerThickness, error: undefined as undefined };
   };
 
@@ -568,7 +681,7 @@ export function solveThickness(
   // Re-solve the back power until the vertex power is the power that was
   // prescribed. The back power shifts by the same amount in every meridian,
   // so the cylinder is untouched.
-  for (let i = 0; i < maxIterations && Math.abs(measured.error) >= 0.01; i += 1) {
+  for (let i = 0; i < maxIterations && Math.abs(measured.error) >= 0.001; i += 1) {
     const d = (solved.centerThickness / index) * front * 0.001;
     offset = front - front / (1 - d);
     solved = run(offset);
@@ -661,6 +774,9 @@ export interface SectionGeometry {
   /** The material at the rim, at the top and at the bottom. */
   edgeTop: number;
   edgeBottom: number;
+  /** Material thickness at the left and right ends of the horizontal meridian. */
+  edgeLeft: number;
+  edgeRight: number;
   /** Where the two vertices sit along the axis, from the front face of the rim. */
   frontApexZ: number;
   backApexZ: number;
@@ -728,6 +844,8 @@ export function buildSection(args: {
     backOffsetRight: right.backOffset,
     edgeTop: args.centerThickness + top.backOffset - top.frontOffset,
     edgeBottom: args.centerThickness + bottom.backOffset - bottom.frontOffset,
+    edgeLeft: args.centerThickness + left.backOffset - left.frontOffset,
+    edgeRight: args.centerThickness + right.backOffset - right.frontOffset,
     frontApexZ,
     backApexZ,
     ocY: args.opening.ocY,
@@ -753,6 +871,7 @@ export function lensVolumeCm3(
   surfaces: SurfaceModel,
   rings = 90,
   spokes = 144,
+  backPowerFor: (meridianPower: number) => number = (power) => power - baseCurve,
 ): number {
   const r1 = frontRadius(index, baseCurve);
   const { halfWidth, halfHeight, shapeRadius, ocX, ocY } = opening;
@@ -782,7 +901,7 @@ export function lensVolumeCm3(
 
       const r = Math.hypot(x - ocX, y - ocY);
       const power = powerInMeridian(theta, sph, cyl, axis);
-      const r2 = backRadius(index, power - baseCurve);
+      const r2 = backRadius(index, backPowerFor(power));
 
       const front = conicSagitta(r1, surfaces.frontConic, r) + surfaces.frontPoly(r);
       const back = conicSagitta(r2, surfaces.backConic, r) + surfaces.backPoly(r);
