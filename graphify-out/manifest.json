@@ -72,10 +72,10 @@
     "semantic_hash": "daaa1982ad5e9213a543ccf6c351ce14"
   },
   "src/components/RootLayout.tsx": {
-    "mtime": 1792497494.7828386,
-    "seen": 1792502554.5805194,
-    "ast_hash": "814c7b3b9e499f30e446af4f469f9068",
-    "semantic_hash": "814c7b3b9e499f30e446af4f469f9068"
+    "mtime": 1792862333.849904,
+    "seen": 1792862338.3115556,
+    "ast_hash": "501251e0bfee79c9905318e2817a15f4",
+    "semantic_hash": ""
   },
   "src/components/Sidebar.tsx": {
     "mtime": 1792591419.361727,
@@ -738,10 +738,10 @@
     "semantic_hash": ""
   },
   "index.html": {
-    "mtime": 1792204185.7363467,
-    "seen": 1792502554.5806231,
-    "ast_hash": "d4536421c85ef057a73c72fb63244cc8",
-    "semantic_hash": "d4536421c85ef057a73c72fb63244cc8"
+    "mtime": 1792862306.894935,
+    "seen": 1792862338.3118134,
+    "ast_hash": "574abd0b63287857e7fe507adba875bb",
+    "semantic_hash": ""
   },
   "src/assets/bench/glasses-for-your-birthday-150525-a-ua479.jpg": {
     "mtime": 1792466818.8022099,
@@ -873,6 +873,12 @@
     "mtime": 1792591247.5687857,
     "seen": 1792591783.463626,
     "ast_hash": "4a682f0566ddfffb532c084433d3ffab",
+    "semantic_hash": ""
+  },
+  "public/robots.txt": {
+    "mtime": 1792862306.8866546,
+    "seen": 1792862338.311816,
+    "ast_hash": "d795ed1f05ce6a419ed110655c7252a0",
     "semantic_hash": ""
   }
 }

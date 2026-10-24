@@ -1,9 +1,9 @@
-# Graph Report - optic-tools  (2026-10-23)
+# Graph Report - optic-tools  (2026-10-25)
 
 ## Corpus Check
-- 140 files · ~197,352 words
+- 140 files · ~179,570 words
 - Verdict: corpus is large enough that graph structure adds value.
-- Unclassified: 5 file(s) not represented in the graph (top: (none) 2, .lock 1, .toml 1)
+- Unclassified: 6 file(s) not represented in the graph (top: (none) 2, .lock 1, .toml 1)
 
 ## Summary
 - 731 nodes · 2260 edges · 31 communities (24 shown, 7 thin omitted)
@@ -11,7 +11,7 @@
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
-- Built from commit: `fe8fa1f8`
+- Built from commit: `ab4adf79`
 - Run `git rev-parse HEAD` and compare to check if the graph is stale.
 - Run `graphify update .` after code changes (no API cost).
 

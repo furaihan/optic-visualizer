@@ -35,6 +35,7 @@ export function RootLayout() {
             : 'flex-col-reverse h-dvh overflow-hidden md:flex-row'
         }`}
       >
+        {!isLanding && <meta name="robots" content="noindex, nofollow" />}
         {isLanding ? <LandingNav lang={lang} /> : <GlobalNav />}
         <main
           className={`flex-1 flex flex-col relative ${
