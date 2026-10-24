@@ -54,9 +54,9 @@
     "semantic_hash": ""
   },
   "src/components/AsphericVisualizer.tsx": {
-    "mtime": 1792578208.3535948,
-    "seen": 1792578328.2303982,
-    "ast_hash": "bdefbd38dcece8f9330af8ccef088441",
+    "mtime": 1792729256.8814647,
+    "seen": 1792729529.5041409,
+    "ast_hash": "e7bdbb1224a0d625478c15e2d90621eb",
     "semantic_hash": ""
   },
   "src/components/BrandRule.tsx": {
@@ -174,9 +174,9 @@
     "semantic_hash": ""
   },
   "src/components/Visualizer/FrontView.tsx": {
-    "mtime": 1792576556.2887366,
-    "seen": 1792578328.2304268,
-    "ast_hash": "fa579961e4b48a4d9cd3a94dd7cfe4e7",
+    "mtime": 1792728501.5633028,
+    "seen": 1792729200.7501621,
+    "ast_hash": "b439497bc945ad16f1e878cf067f16ca",
     "semantic_hash": ""
   },
   "src/components/Visualizer/LensProfile.tsx": {
@@ -186,21 +186,21 @@
     "semantic_hash": ""
   },
   "src/components/Visualizer/SheetDefs.tsx": {
-    "mtime": 1792505269.8998575,
-    "seen": 1792505420.4657543,
-    "ast_hash": "9a1b0dabd05263ec7ccc75db3358b2c0",
+    "mtime": 1792728392.3857913,
+    "seen": 1792729200.7501645,
+    "ast_hash": "2a36642084da73d8585bf1074bfbb188",
     "semantic_hash": ""
   },
   "src/components/Visualizer/TopDownView.tsx": {
-    "mtime": 1792576596.941764,
-    "seen": 1792578328.2304304,
-    "ast_hash": "fce8e5392d168ed0cd2685056bc75c07",
+    "mtime": 1792729461.5279098,
+    "seen": 1792729529.5041714,
+    "ast_hash": "03971751f27cea6314cbf48de9d52935",
     "semantic_hash": ""
   },
   "src/components/Visualizer/index.tsx": {
-    "mtime": 1792591664.2490244,
-    "seen": 1792591783.4635463,
-    "ast_hash": "671ad154c007e16d361706bb0a0f7be2",
+    "mtime": 1792729237.9258265,
+    "seen": 1792729252.7031143,
+    "ast_hash": "d74ab1edc6c5099bdd8ecc712eac4ab8",
     "semantic_hash": ""
   },
   "src/components/Visualizer/types.ts": {
@@ -354,9 +354,9 @@
     "semantic_hash": ""
   },
   "src/components/sheet/MeasurementSheet.tsx": {
-    "mtime": 1792591304.2121322,
-    "seen": 1792591783.4635894,
-    "ast_hash": "c2e72473271c8da6ec00f77e97913ca3",
+    "mtime": 1792728958.0851252,
+    "seen": 1792729200.7502062,
+    "ast_hash": "1ef7a56eda035c83c180a614f4f4126f",
     "semantic_hash": ""
   },
   "src/components/sheet/RecommendationRow.tsx": {
@@ -564,27 +564,27 @@
     "semantic_hash": "9b09fc2bf73407cf4cffc7eab6c94bc6"
   },
   "src/lib/optic-engine/aspheric.ts": {
-    "mtime": 1792591829.1657696,
-    "seen": 1792591856.4767911,
-    "ast_hash": "48fb9c271d497dd1a0b3642e3de8fba9",
+    "mtime": 1792729505.4424253,
+    "seen": 1792729529.504262,
+    "ast_hash": "1696dde96016575260958423361126db",
     "semantic_hash": ""
   },
   "src/lib/optic-engine/optical.test.ts": {
-    "mtime": 1792591841.0450957,
-    "seen": 1792591856.476794,
-    "ast_hash": "2cfa9d2e0c7160e50695c1b4bafb4e15",
+    "mtime": 1792729171.1384804,
+    "seen": 1792729200.7502563,
+    "ast_hash": "7518c9890c48db3b5a53f17c989f63b6",
     "semantic_hash": ""
   },
   "src/lib/optic-engine/optical.ts": {
-    "mtime": 1792591034.8328085,
-    "seen": 1792591783.4636433,
-    "ast_hash": "a12c69ce149197d9f229dfe9f6f1b86b",
+    "mtime": 1792729388.8257198,
+    "seen": 1792729529.5042653,
+    "ast_hash": "b959b3feaeccfcdf9037231e793784af",
     "semantic_hash": ""
   },
   "src/lib/optic-engine/types.ts": {
-    "mtime": 1792591049.7498424,
-    "seen": 1792591783.4636457,
-    "ast_hash": "e7e38ff7413a6f07649a3e46202952a0",
+    "mtime": 1792728448.6850207,
+    "seen": 1792729200.7502596,
+    "ast_hash": "132df88c6cf576404ad830203ab62985",
     "semantic_hash": ""
   },
   "src/lib/optic-engine/validation.ts": {
@@ -636,8 +636,8 @@
     "semantic_hash": ""
   },
   "src/pages/ContactPage.tsx": {
-    "mtime": 1792204185.7613623,
-    "seen": 1792502554.580607,
+    "mtime": 1792692659.216928,
+    "seen": 1792729200.750272,
     "ast_hash": "fe5eacac8f67772eaf1bd496ba206e75",
     "semantic_hash": "fe5eacac8f67772eaf1bd496ba206e75"
   },
@@ -858,9 +858,9 @@
     "semantic_hash": ""
   },
   "src/lib/optic-engine/geometry.ts": {
-    "mtime": 1792591806.25643,
-    "seen": 1792591856.4767928,
-    "ast_hash": "5a3905e1918c8c6f73c314431e091285",
+    "mtime": 1792729500.4662082,
+    "seen": 1792729529.504263,
+    "ast_hash": "3cd99b12629b5f523ad410ac7c088d27",
     "semantic_hash": ""
   },
   "src/lib/optic-engine/recommend.ts": {
