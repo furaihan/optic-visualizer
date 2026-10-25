@@ -8,6 +8,17 @@ import { Toggle } from './ui/toggle';
 import { useTheme } from '../hooks/useTheme';
 import { BrandRule } from './BrandRule';
 import { LandingNav } from './landing/LandingNav';
+import { useAppHotkeys, useHotkey } from '@tanstack/react-hotkeys';
+import { HotkeysCheatSheet } from './HotkeysCheatSheet';
+import { validateActiveTab, validateView, type Language } from '../types/search-params';
+
+function simulatorSearch(current: Record<string, unknown>, lang: Language) {
+  return {
+    lang,
+    activeTab: validateActiveTab(current.activeTab),
+    view: validateView(current.view),
+  };
+}
 
 export function RootLayout() {
   // The landing page is a page that scrolls: the workbench keeps its own
@@ -17,6 +28,18 @@ export function RootLayout() {
   // page 64px off centre.
   const isLanding = useRouterState({ select: (s) => s.location.pathname === '/' });
   const { lang } = useSearch({ from: '__root__' });
+  const navigate = useNavigate();
+  const currentSearch = useRouterState({ select: (s) => s.location.search as Record<string, unknown> });
+  const { toggleTheme } = useTheme();
+  const appHotkeys = useAppHotkeys();
+  const [cheatSheetOpen, setCheatSheetOpen] = useState(false);
+
+  useHotkey(appHotkeys['theme.toggle'], toggleTheme);
+  useHotkey(appHotkeys['help.shortcuts'], () => setCheatSheetOpen(true));
+  useHotkey(appHotkeys['nav.home'], () => navigate({ to: '/', search: { ...currentSearch, lang } }));
+  useHotkey(appHotkeys['nav.lenses'], () => navigate({ to: '/visualizer', search: simulatorSearch(currentSearch, lang) }));
+  useHotkey(appHotkeys['nav.aspheric'], () => navigate({ to: '/aspheric', search: simulatorSearch(currentSearch, lang) }));
+  useHotkey(appHotkeys['nav.contact'], () => navigate({ to: '/contact', search: { ...currentSearch, lang } }));
 
   // The body carries overflow: hidden, which the viewport inherits — the
   // wheel would do nothing on a route that scrolls the document. The class
@@ -45,6 +68,7 @@ export function RootLayout() {
           <Outlet />
         </main>
       </div>
+      <HotkeysCheatSheet lang={lang} open={cheatSheetOpen} onOpenChange={setCheatSheetOpen} />
     </TooltipProvider>
   );
 }

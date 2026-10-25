@@ -199,6 +199,8 @@ export interface AppTranslations {
   sheetScaleSingle: string;
   scaleBarLabel: string;
   inspectorLabel: string;
+  shortcutsTitle: string;
+  shortcutUnbound: string;
   shortIndex: string;
   shortDepth: string;
   shortType: string;

@@ -18,9 +18,9 @@
     "semantic_hash": "279b0c56f21d658d98b448384c72bfa2"
   },
   "package.json": {
-    "mtime": 1792599134.0279455,
-    "seen": 1792599919.2696278,
-    "ast_hash": "3b99e5dbbaedba88eadfba20ab383c44",
+    "mtime": 1792884989.178661,
+    "seen": 1792886370.926705,
+    "ast_hash": "800b68d791377e40d60de4fbf255a8f7",
     "semantic_hash": ""
   },
   "scripts/sync-intent-skills.mjs": {
@@ -72,9 +72,9 @@
     "semantic_hash": "daaa1982ad5e9213a543ccf6c351ce14"
   },
   "src/components/RootLayout.tsx": {
-    "mtime": 1792862333.849904,
-    "seen": 1792862338.3115556,
-    "ast_hash": "501251e0bfee79c9905318e2817a15f4",
+    "mtime": 1792886152.251552,
+    "seen": 1792886370.9267263,
+    "ast_hash": "b946e5b89c24879b1cbc08747cf11161",
     "semantic_hash": ""
   },
   "src/components/Sidebar.tsx": {
@@ -330,9 +330,9 @@
     "semantic_hash": ""
   },
   "src/components/layout/MobileViews.tsx": {
-    "mtime": 1792577885.3151336,
-    "seen": 1792578328.230466,
-    "ast_hash": "6fc89f07aa2858b56f9af7c65f20d792",
+    "mtime": 1792886077.7998366,
+    "seen": 1792886370.9268212,
+    "ast_hash": "88ad87557ab4cb2626a3861efbd2cb08",
     "semantic_hash": ""
   },
   "src/components/layout/SimulatorShell.tsx": {
@@ -534,9 +534,9 @@
     "semantic_hash": ""
   },
   "src/hooks/useAsphericState.ts": {
-    "mtime": 1792591402.280129,
-    "seen": 1792591783.4636288,
-    "ast_hash": "fc3adcc213b29dc392576f0a401b4e6f",
+    "mtime": 1792886018.3108563,
+    "seen": 1792886370.9268777,
+    "ast_hash": "77c61e9647605aaad583dac5f375db12",
     "semantic_hash": ""
   },
   "src/hooks/useMediaQuery.ts": {
@@ -546,9 +546,9 @@
     "semantic_hash": ""
   },
   "src/hooks/useOpticalState.ts": {
-    "mtime": 1792591370.4469533,
-    "seen": 1792591783.463634,
-    "ast_hash": "7f9346428a7475c3ac05ede26354856d",
+    "mtime": 1792886018.3108563,
+    "seen": 1792886370.9268858,
+    "ast_hash": "d2c13bc49f4f3877b4bba7bd1f5b3a8a",
     "semantic_hash": ""
   },
   "src/hooks/useResponsiveViewport.ts": {
@@ -594,15 +594,15 @@
     "semantic_hash": ""
   },
   "src/lib/translations/en.ts": {
-    "mtime": 1792600263.201866,
-    "seen": 1792600281.6160002,
-    "ast_hash": "caefac0d3ed817c8c184c84d0f38edce",
+    "mtime": 1792886315.5763502,
+    "seen": 1792886370.9269104,
+    "ast_hash": "b71f8f631ca72e99382dcc52fa10e641",
     "semantic_hash": ""
   },
   "src/lib/translations/id.ts": {
-    "mtime": 1792600263.2028644,
-    "seen": 1792600281.6160018,
-    "ast_hash": "d8ce36a86a003a1232e44aed05bea2ad",
+    "mtime": 1792886315.5763502,
+    "seen": 1792886370.9269116,
+    "ast_hash": "50ef2415469e901b0c2c06baef95e1b6",
     "semantic_hash": ""
   },
   "src/lib/translations/index.ts": {
@@ -612,9 +612,9 @@
     "semantic_hash": ""
   },
   "src/lib/translations/types.ts": {
-    "mtime": 1792591478.6084836,
-    "seen": 1792591783.4636517,
-    "ast_hash": "ca71c11bffeb318db138079f5432866e",
+    "mtime": 1792886122.9549148,
+    "seen": 1792886370.9269137,
+    "ast_hash": "146fc2a0be9554dd62de641a81887adf",
     "semantic_hash": ""
   },
   "src/lib/utils.ts": {
@@ -624,10 +624,10 @@
     "semantic_hash": "af7c2d37d6b451d832f5d6db92e9bcb4"
   },
   "src/main.tsx": {
-    "mtime": 1792204185.7603617,
-    "seen": 1792502554.5806053,
-    "ast_hash": "3c93bd32889619cb800ff42a6fb8285a",
-    "semantic_hash": "3c93bd32889619cb800ff42a6fb8285a"
+    "mtime": 1792886032.5299854,
+    "seen": 1792886370.9269173,
+    "ast_hash": "54d93f33635cbd42b83e7ed55fc01233",
+    "semantic_hash": ""
   },
   "src/pages/AsphericPage.tsx": {
     "mtime": 1792513866.4196575,
@@ -786,9 +786,9 @@
     "semantic_hash": ""
   },
   "src/components/layout/AsphericMobileViews.tsx": {
-    "mtime": 1792577926.9110658,
-    "seen": 1792578328.2304578,
-    "ast_hash": "32763cae688c97be32964cce2da4b051",
+    "mtime": 1792886077.7998366,
+    "seen": 1792886370.926811,
+    "ast_hash": "cf49d0b85c33325373a3ccc0cdd9aea2",
     "semantic_hash": ""
   },
   "src/components/layout/CopyOrderButton.tsx": {
@@ -798,15 +798,15 @@
     "semantic_hash": ""
   },
   "src/components/layout/InspectorDrawer.tsx": {
-    "mtime": 1792513428.529675,
-    "seen": 1792517147.7102208,
-    "ast_hash": "ab9f8255060314404a42eb67db15c2fe",
+    "mtime": 1792886039.9961405,
+    "seen": 1792886370.926818,
+    "ast_hash": "04603bc937eb8cfea635d04055cc8b7e",
     "semantic_hash": ""
   },
   "src/components/layout/MobileWorkbench.tsx": {
-    "mtime": 1792577844.1181567,
-    "seen": 1792578328.230467,
-    "ast_hash": "d4df07cab918079085a103a4ce1664f0",
+    "mtime": 1792886142.1976776,
+    "seen": 1792886370.9268231,
+    "ast_hash": "1a352867df99b2c2755313e3d228dc64",
     "semantic_hash": ""
   },
   "src/components/layout/ResetButton.tsx": {
@@ -816,9 +816,9 @@
     "semantic_hash": ""
   },
   "src/components/layout/WorkbenchLayout.tsx": {
-    "mtime": 1792577809.661614,
-    "seen": 1792578328.2304716,
-    "ast_hash": "0ae2a0455fa6a249124ee146a2669e7d",
+    "mtime": 1792886342.6114247,
+    "seen": 1792886370.9268303,
+    "ast_hash": "320590e2b6c97597a2e63a25cc811c27",
     "semantic_hash": ""
   },
   "src/hooks/useElementWidth.ts": {
@@ -879,6 +879,42 @@
     "mtime": 1792862306.8866546,
     "seen": 1792862338.311816,
     "ast_hash": "d795ed1f05ce6a419ed110655c7252a0",
+    "semantic_hash": ""
+  },
+  "src/components/HotkeysCheatSheet.tsx": {
+    "mtime": 1792886111.6087382,
+    "seen": 1792886370.9267247,
+    "ast_hash": "3a122fa5b600c39bff55530209e458c6",
+    "semantic_hash": ""
+  },
+  "src/hooks/useWorkbenchHotkeys.ts": {
+    "mtime": 1792885938.0602252,
+    "seen": 1792886370.926892,
+    "ast_hash": "794db93b23ca583b2c170a4f388e6ded",
+    "semantic_hash": ""
+  },
+  "src/lib/hotkeys/app-hotkeys.test.ts": {
+    "mtime": 1792886119.54716,
+    "seen": 1792886370.9268944,
+    "ast_hash": "c43e6d6b3709184d772cd02571596223",
+    "semantic_hash": ""
+  },
+  "src/lib/hotkeys/app-hotkeys.ts": {
+    "mtime": 1792885938.0618474,
+    "seen": 1792886370.926896,
+    "ast_hash": "fb1f002b56d56b0a779f094f522102d2",
+    "semantic_hash": ""
+  },
+  "src/lib/hotkeys/custom-hotkeys.ts": {
+    "mtime": 1792885938.0618474,
+    "seen": 1792886370.926898,
+    "ast_hash": "2d4728191fd343ecdfac468b00daacda",
+    "semantic_hash": ""
+  },
+  "public/og-image.png": {
+    "mtime": 1792862564.2008345,
+    "seen": 1792886370.9269457,
+    "ast_hash": "6ab4e1b994dcfeb2557743acf32bcb83",
     "semantic_hash": ""
   }
 }

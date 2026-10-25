@@ -19,6 +19,7 @@
     "@base-ui/react": "^1.9.0",
     "@fontsource-variable/geist": "^5.3.0",
     "@tailwindcss/vite": "^4.3.3",
+    "@tanstack/react-hotkeys": "0.17.0",
     "@tanstack/react-router": "^1.170.45",
     "@vitejs/plugin-react": "^6.1.2",
     "class-variance-authority": "^0.7.1",

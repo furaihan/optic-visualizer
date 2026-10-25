@@ -1,5 +1,5 @@
 import { useRef, useState, type ReactNode } from 'react';
-import type { ActiveTab, Language } from '../../types/search-params';
+import type { ActiveTab, Language, View } from '../../types/search-params';
 import type { ValidationError } from '../../lib/optic-engine/validation';
 import { ValidationAlerts } from './ValidationAlerts';
 import { AppFooter, type FooterFigures } from './AppFooter';
@@ -9,12 +9,14 @@ import { SessionControls } from './ResetButton';
 import { ScrollArea } from '../ui/scroll-area';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '../ui/tabs';
 import { translations } from '../../lib/translations';
+import { useWorkbenchHotkeys } from '../../hooks/useWorkbenchHotkeys';
 import { useFreeHeight } from '../../hooks/useFreeHeight';
 
 type MobileWorkbenchProps = {
   lang: Language;
   activeTab: ActiveTab;
   onTabChange: (tab: ActiveTab) => void;
+  onViewChange: (view: View) => void;
   /** The title row: a noun, and the finding under it. */
   title: string;
   finding: ReactNode;
@@ -49,6 +51,7 @@ export function MobileWorkbench({
   lang,
   activeTab,
   onTabChange,
+  onViewChange,
   title,
   finding,
   board,
@@ -75,6 +78,14 @@ export function MobileWorkbench({
 
   // The drawing takes the height the scroll area has left after the title.
   const boardHeight = useFreeHeight(scrollRef, [titleRef], 320, [activeTab], 24);
+
+  useWorkbenchHotkeys({
+    onViewChange,
+    onUndo,
+    onRedo,
+    canUndo,
+    canRedo,
+  });
 
   return (
     <div className="flex h-full min-w-0 flex-1 flex-col overflow-hidden bg-sheet-ground">

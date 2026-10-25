@@ -145,23 +145,6 @@ export function useAsphericState() {
     });
   }, []);
 
-  // The keyboard shortcuts the tool offers: Ctrl+Z and Ctrl+Y.
-  useEffect(() => {
-    const onKey = (event: KeyboardEvent) => {
-      if (!(event.ctrlKey || event.metaKey)) return;
-      const key = event.key.toLowerCase();
-      if (key === 'z' && !event.shiftKey) {
-        event.preventDefault();
-        undo();
-      } else if (key === 'y' || (key === 'z' && event.shiftKey)) {
-        event.preventDefault();
-        redo();
-      }
-    };
-    window.addEventListener('keydown', onKey);
-    return () => window.removeEventListener('keydown', onKey);
-  }, [undo, redo]);
-
   const setLens = useCallback((updated: AsphericLensParameters | ((p: AsphericLensParameters) => AsphericLensParameters)) => {
     updateState(prev => ({
       ...prev,

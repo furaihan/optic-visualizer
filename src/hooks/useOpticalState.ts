@@ -140,23 +140,6 @@ export function useOpticalState() {
     });
   }, []);
 
-  // The keyboard shortcuts the tool offers: Ctrl+Z and Ctrl+Y.
-  useEffect(() => {
-    const onKey = (event: KeyboardEvent) => {
-      if (!(event.ctrlKey || event.metaKey)) return;
-      const key = event.key.toLowerCase();
-      if (key === 'z' && !event.shiftKey) {
-        event.preventDefault();
-        undo();
-      } else if (key === 'y' || (key === 'z' && event.shiftKey)) {
-        event.preventDefault();
-        redo();
-      }
-    };
-    window.addEventListener('keydown', onKey);
-    return () => window.removeEventListener('keydown', onKey);
-  }, [undo, redo]);
-
   // Action methods to change specific parameter groups
   const setLens = useCallback((updatedLens: LensParameters | ((p: LensParameters) => LensParameters)) => {
     updateState(prev => ({

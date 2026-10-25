@@ -105,6 +105,7 @@ export function MobileViews() {
       lang={lang}
       activeTab={activeTab}
       onTabChange={(tab) => navigate({ search: { ...search, activeTab: tab } } as any)}
+      onViewChange={(v) => navigate({ search: { ...search, view: v } } as any)}
       title={t.workbenchTitle}
       finding={result.error ? t.workbenchLead : findingSentence(result, lens, t)}
       board={board}

@@ -1,5 +1,6 @@
-import { useEffect, type ReactNode } from 'react';
+import type { ReactNode } from 'react';
 import { XIcon } from 'lucide-react';
+import { HotkeysProvider, useHotkey } from '@tanstack/react-hotkeys';
 import { Button } from '../ui/button';
 
 type InspectorDrawerProps = {
@@ -17,17 +18,22 @@ type InspectorDrawerProps = {
  * sheet aside rather than covering it: the drawing stays visible while a value
  * is changed, which is the whole point of a workbench.
  *
- * Escape closes it, and the button that opened it says whether it is open.
+ * While it is open it is an exclusive scope, so its keys own the keyboard and
+ * the page behind it pauses. Escape and Backspace close it.
  */
 export function InspectorDrawer({ open, onClose, label, children }: InspectorDrawerProps) {
-  useEffect(() => {
-    if (!open) return;
-    const onKey = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') onClose();
-    };
-    window.addEventListener('keydown', onKey);
-    return () => window.removeEventListener('keydown', onKey);
-  }, [open, onClose]);
+  return (
+    <HotkeysProvider scope="inspector" exclusive enabled={open}>
+      <InspectorDrawerBody open={open} onClose={onClose} label={label}>
+        {children}
+      </InspectorDrawerBody>
+    </HotkeysProvider>
+  );
+}
+
+function InspectorDrawerBody({ open, onClose, label, children }: InspectorDrawerProps) {
+  useHotkey('Escape', onClose, { enabled: open });
+  useHotkey('Backspace', onClose, { enabled: open });
 
   return (
     <aside

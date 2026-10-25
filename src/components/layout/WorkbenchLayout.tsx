@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState, type ReactNode } from 'react';
+import { useAppHotkeys, useHotkey } from '@tanstack/react-hotkeys';
 import type { Language, View } from '../../types/search-params';
 import type { ValidationError } from '../../lib/optic-engine/validation';
 import { HeaderBar } from './HeaderBar';
@@ -10,6 +11,7 @@ import { Tabs, TabsList, TabsTrigger, TabsContent } from '../ui/tabs';
 import { translations } from '../../lib/translations';
 import { useFreeHeight } from '../../hooks/useFreeHeight';
 import { useElementSize } from '../../hooks/useElementWidth';
+import { useWorkbenchHotkeys } from '../../hooks/useWorkbenchHotkeys';
 
 type WorkbenchLayoutProps = {
   lang: Language;
@@ -94,6 +96,21 @@ export function WorkbenchLayout({
     360
   );
 
+  useWorkbenchHotkeys({
+    onViewChange,
+    onUndo,
+    onRedo,
+    canUndo,
+    canRedo,
+  });
+
+  const appHotkeys = useAppHotkeys();
+  const toggleInspector = () => {
+    if (window.matchMedia('(min-width: 1024px)').matches) return;
+    setDrawerOpen((open) => !open);
+  };
+  useHotkey(appHotkeys['panel.inspector'], toggleInspector);
+
   // The drawer belongs to a narrow desk. A wide one has the inspector as a
   // column already, and a phone has its own composition.
   useEffect(() => {
@@ -129,7 +146,7 @@ export function WorkbenchLayout({
             canUndo={canUndo}
             canRedo={canRedo}
             order={order}
-            onToggleInspector={() => setDrawerOpen((open) => !open)}
+            onToggleInspector={toggleInspector}
             inspectorOpen={drawerOpen}
           />
         </div>
