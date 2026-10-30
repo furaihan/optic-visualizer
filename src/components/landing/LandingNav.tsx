@@ -167,6 +167,16 @@ export function LandingNav({ lang }: { lang: Language }) {
                 {t.landNavContact}
               </Link>
             </li>
+            <li className="sm:hidden">
+              <Link
+                to="/visualizer"
+                search={{ lang, activeTab: 'visualizer', view: 'side' }}
+                onClick={closeMenu}
+                className="mt-2 flex min-h-11 items-center justify-center rounded-sm bg-sheet-accent px-4 text-[16px] font-medium text-sheet-accent-ink transition-colors hover:bg-sheet-accent/90 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sheet-accent"
+              >
+                {t.landHeroAction}
+              </Link>
+            </li>
             <li className="flex items-center gap-3 pb-3 pt-2">
               <span className="text-[13px] text-sheet-muted">
                 {t.landNavLanguage}

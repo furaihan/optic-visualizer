@@ -218,7 +218,11 @@ export const MeasurementSheet: React.FC<MeasurementSheetProps> = ({
   const flagged = rows.filter((r) => !r.ok);
 
   return (
-    <section data-ui className="@container flex flex-col gap-4" aria-labelledby="measurements-title">
+    <section
+      data-ui
+      className="landing-measurement-sheet @container flex flex-col gap-4"
+      aria-labelledby="measurements-title"
+    >
       <div className="flex flex-wrap items-baseline justify-between gap-x-6 gap-y-2">
         <h2 id="measurements-title" className="text-[26px] font-medium leading-tight tracking-[-0.02em] text-sheet-ink">
           {t.sheetMeasurements}

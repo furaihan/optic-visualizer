@@ -30,10 +30,10 @@
     "semantic_hash": "c34680a849fe4492f69d677769a16478"
   },
   "skills-lock.json": {
-    "mtime": 1792496835.0440423,
-    "seen": 1792502554.5805123,
-    "ast_hash": "5e1f2c51adbb7b1ddcf3ec431717a62b",
-    "semantic_hash": "5e1f2c51adbb7b1ddcf3ec431717a62b"
+    "mtime": 1793163714.2018423,
+    "seen": 1793164227.8590863,
+    "ast_hash": "0b043b12bf3209c4c120fcd8f34b4453",
+    "semantic_hash": ""
   },
   "src/assets/bench/credits.json": {
     "mtime": 1792498113.0854232,
@@ -54,9 +54,9 @@
     "semantic_hash": ""
   },
   "src/components/AsphericVisualizer.tsx": {
-    "mtime": 1792729256.8814647,
-    "seen": 1792729529.5041409,
-    "ast_hash": "e7bdbb1224a0d625478c15e2d90621eb",
+    "mtime": 1793163564.700958,
+    "seen": 1793164227.859093,
+    "ast_hash": "ce9e759c4dba8eb112f9b6da5721f380",
     "semantic_hash": ""
   },
   "src/components/BrandRule.tsx": {
@@ -162,21 +162,21 @@
     "semantic_hash": "2b6729fb6ebaf2ab16919f3fdc277605"
   },
   "src/components/Visualizer/EdgeDetail.tsx": {
-    "mtime": 1792505281.081792,
-    "seen": 1792505420.465738,
-    "ast_hash": "63505c13c34895ca5dd0fbef07e15e3c",
+    "mtime": 1793163564.700958,
+    "seen": 1793164227.8591232,
+    "ast_hash": "4202a713777f2e6342aa9aa339226a99",
     "semantic_hash": ""
   },
   "src/components/Visualizer/FrameProfile.tsx": {
-    "mtime": 1792577227.7876127,
-    "seen": 1792578328.2304256,
+    "mtime": 1793163564.7029572,
+    "seen": 1793164227.8591244,
     "ast_hash": "78f9fab8a0bfab7acce3067578812b89",
     "semantic_hash": ""
   },
   "src/components/Visualizer/FrontView.tsx": {
-    "mtime": 1792728501.5633028,
-    "seen": 1792729200.7501621,
-    "ast_hash": "b439497bc945ad16f1e878cf067f16ca",
+    "mtime": 1793163564.7099564,
+    "seen": 1793164227.859126,
+    "ast_hash": "686899068075086a41ffe9ff95175a9c",
     "semantic_hash": ""
   },
   "src/components/Visualizer/LensProfile.tsx": {
@@ -186,21 +186,21 @@
     "semantic_hash": ""
   },
   "src/components/Visualizer/SheetDefs.tsx": {
-    "mtime": 1792728392.3857913,
-    "seen": 1792729200.7501645,
-    "ast_hash": "2a36642084da73d8585bf1074bfbb188",
+    "mtime": 1793163564.7119572,
+    "seen": 1793164227.8591282,
+    "ast_hash": "9a1b0dabd05263ec7ccc75db3358b2c0",
     "semantic_hash": ""
   },
   "src/components/Visualizer/TopDownView.tsx": {
-    "mtime": 1792729461.5279098,
-    "seen": 1792729529.5041714,
-    "ast_hash": "03971751f27cea6314cbf48de9d52935",
+    "mtime": 1793163564.7119572,
+    "seen": 1793164227.8591294,
+    "ast_hash": "b77b892329bb27efc092e9dd3af817a5",
     "semantic_hash": ""
   },
   "src/components/Visualizer/index.tsx": {
-    "mtime": 1792729237.9258265,
-    "seen": 1792729252.7031143,
-    "ast_hash": "d74ab1edc6c5099bdd8ecc712eac4ab8",
+    "mtime": 1793163564.7129576,
+    "seen": 1793164227.8591304,
+    "ast_hash": "2e44a4810bc237bae1e0eafb52e66043",
     "semantic_hash": ""
   },
   "src/components/Visualizer/types.ts": {
@@ -246,10 +246,10 @@
     "semantic_hash": ""
   },
   "src/components/landing/LandingHowItWorks.tsx": {
-    "mtime": 1792498199.861676,
-    "seen": 1792502554.5805464,
-    "ast_hash": "00dbf8684af3c39dada0ec2be690ed8a",
-    "semantic_hash": "00dbf8684af3c39dada0ec2be690ed8a"
+    "mtime": 1793163564.7184672,
+    "seen": 1793164227.859151,
+    "ast_hash": "50b1f9270561035c60fdd2275e2e6bcf",
+    "semantic_hash": ""
   },
   "src/components/landing/LandingModules.tsx": {
     "mtime": 1792576912.8611834,
@@ -258,10 +258,10 @@
     "semantic_hash": ""
   },
   "src/components/landing/LandingNav.tsx": {
-    "mtime": 1792497797.4631963,
-    "seen": 1792502554.5805485,
-    "ast_hash": "756f462ba268da6ca945d73bd3907ee8",
-    "semantic_hash": "756f462ba268da6ca945d73bd3907ee8"
+    "mtime": 1793164178.9352264,
+    "seen": 1793164227.8591552,
+    "ast_hash": "6aefd303b404cbb526aff9341562da1d",
+    "semantic_hash": ""
   },
   "src/components/landing/LandingProof.tsx": {
     "mtime": 1792576259.2070594,
@@ -306,8 +306,8 @@
     "semantic_hash": ""
   },
   "src/components/layout/AppFooter.tsx": {
-    "mtime": 1792513421.4384336,
-    "seen": 1792517147.7102149,
+    "mtime": 1793130284.0330272,
+    "seen": 1793164227.8591738,
     "ast_hash": "c79c8dc14b37b617ea0c31eb3ae572b3",
     "semantic_hash": ""
   },
@@ -330,9 +330,9 @@
     "semantic_hash": ""
   },
   "src/components/layout/MobileViews.tsx": {
-    "mtime": 1792886077.7998366,
-    "seen": 1792886370.9268212,
-    "ast_hash": "88ad87557ab4cb2626a3861efbd2cb08",
+    "mtime": 1793163564.7194686,
+    "seen": 1793164227.859192,
+    "ast_hash": "f57d4735f0c4e59ab0202056bf6f3f79",
     "semantic_hash": ""
   },
   "src/components/layout/SimulatorShell.tsx": {
@@ -354,14 +354,14 @@
     "semantic_hash": ""
   },
   "src/components/sheet/MeasurementSheet.tsx": {
-    "mtime": 1792728958.0851252,
-    "seen": 1792729200.7502062,
-    "ast_hash": "1ef7a56eda035c83c180a614f4f4126f",
+    "mtime": 1793164404.8107278,
+    "seen": 1793164439.833747,
+    "ast_hash": "889ab9379fec8985a4bb2d7eac4d1b3c",
     "semantic_hash": ""
   },
   "src/components/sheet/RecommendationRow.tsx": {
-    "mtime": 1792576653.7295184,
-    "seen": 1792578328.2304754,
+    "mtime": 1793163564.7254689,
+    "seen": 1793164227.8592098,
     "ast_hash": "3576206d06186fa6d663bfc9062f18dc",
     "semantic_hash": ""
   },
@@ -534,8 +534,8 @@
     "semantic_hash": ""
   },
   "src/hooks/useAsphericState.ts": {
-    "mtime": 1792886018.3108563,
-    "seen": 1792886370.9268777,
+    "mtime": 1793130918.7458637,
+    "seen": 1793164227.8592803,
     "ast_hash": "77c61e9647605aaad583dac5f375db12",
     "semantic_hash": ""
   },
@@ -546,8 +546,8 @@
     "semantic_hash": ""
   },
   "src/hooks/useOpticalState.ts": {
-    "mtime": 1792886018.3108563,
-    "seen": 1792886370.9268858,
+    "mtime": 1793130883.283263,
+    "seen": 1793164227.8592901,
     "ast_hash": "d2c13bc49f4f3877b4bba7bd1f5b3a8a",
     "semantic_hash": ""
   },
@@ -564,21 +564,21 @@
     "semantic_hash": "9b09fc2bf73407cf4cffc7eab6c94bc6"
   },
   "src/lib/optic-engine/aspheric.ts": {
-    "mtime": 1792729505.4424253,
-    "seen": 1792729529.504262,
-    "ast_hash": "1696dde96016575260958423361126db",
+    "mtime": 1793163564.7309775,
+    "seen": 1793164227.8593042,
+    "ast_hash": "28f55cf44a400225b85663d094288ceb",
     "semantic_hash": ""
   },
   "src/lib/optic-engine/optical.test.ts": {
-    "mtime": 1792729171.1384804,
-    "seen": 1792729200.7502563,
-    "ast_hash": "7518c9890c48db3b5a53f17c989f63b6",
+    "mtime": 1793163564.734987,
+    "seen": 1793164227.859307,
+    "ast_hash": "b69647f9b3d80f524a72542f680f9ee4",
     "semantic_hash": ""
   },
   "src/lib/optic-engine/optical.ts": {
-    "mtime": 1792729388.8257198,
-    "seen": 1792729529.5042653,
-    "ast_hash": "b959b3feaeccfcdf9037231e793784af",
+    "mtime": 1793163564.7359862,
+    "seen": 1793164227.8593082,
+    "ast_hash": "25cd3db3221d637bb7bf342753745f3f",
     "semantic_hash": ""
   },
   "src/lib/optic-engine/types.ts": {
@@ -588,21 +588,21 @@
     "semantic_hash": ""
   },
   "src/lib/optic-engine/validation.ts": {
-    "mtime": 1792591406.5550997,
-    "seen": 1792591783.4636467,
+    "mtime": 1793130843.3106904,
+    "seen": 1793164227.8593125,
     "ast_hash": "3c97208a75ee21b08d34598eaa8ce8ae",
     "semantic_hash": ""
   },
   "src/lib/translations/en.ts": {
-    "mtime": 1792886315.5763502,
-    "seen": 1792886370.9269104,
-    "ast_hash": "b71f8f631ca72e99382dcc52fa10e641",
+    "mtime": 1793165128.8630795,
+    "seen": 1793165143.2877321,
+    "ast_hash": "f307153f10ae31fba6993d960b0f2b00",
     "semantic_hash": ""
   },
   "src/lib/translations/id.ts": {
-    "mtime": 1792886315.5763502,
-    "seen": 1792886370.9269116,
-    "ast_hash": "50ef2415469e901b0c2c06baef95e1b6",
+    "mtime": 1793165128.8640795,
+    "seen": 1793165143.2877347,
+    "ast_hash": "b14382e32ccf6471925576617c19427a",
     "semantic_hash": ""
   },
   "src/lib/translations/index.ts": {
@@ -612,8 +612,8 @@
     "semantic_hash": ""
   },
   "src/lib/translations/types.ts": {
-    "mtime": 1792886122.9549148,
-    "seen": 1792886370.9269137,
+    "mtime": 1793163564.7570386,
+    "seen": 1793164227.8593175,
     "ast_hash": "146fc2a0be9554dd62de641a81887adf",
     "semantic_hash": ""
   },
@@ -732,15 +732,15 @@
     "semantic_hash": "9451364a091ad93d7e375932ad2f40a5"
   },
   "README.md": {
-    "mtime": 1792591575.345909,
-    "seen": 1792591783.463679,
+    "mtime": 1793163564.6160405,
+    "seen": 1793164227.8593464,
     "ast_hash": "9ff93ae14e5289d738edff9124a94873",
     "semantic_hash": ""
   },
   "index.html": {
-    "mtime": 1792862306.894935,
-    "seen": 1792862338.3118134,
-    "ast_hash": "574abd0b63287857e7fe507adba875bb",
+    "mtime": 1793164178.9357307,
+    "seen": 1793164227.8593485,
+    "ast_hash": "e810da425f55080e165859f960555f07",
     "semantic_hash": ""
   },
   "src/assets/bench/glasses-for-your-birthday-150525-a-ua479.jpg": {
@@ -780,8 +780,8 @@
     "semantic_hash": ""
   },
   "src/components/Visualizer/sheet.ts": {
-    "mtime": 1792558302.517325,
-    "seen": 1792578328.2304332,
+    "mtime": 1793163564.7139556,
+    "seen": 1793164227.8591328,
     "ast_hash": "a505c32301e2a88417636e879d9a2c16",
     "semantic_hash": ""
   },
@@ -840,15 +840,15 @@
     "semantic_hash": ""
   },
   "src/lib/limits.ts": {
-    "mtime": 1792591286.3913186,
-    "seen": 1792591783.4636388,
-    "ast_hash": "5e1947af9c83c2fba1c32b0b510b5ce8",
+    "mtime": 1793163564.7274685,
+    "seen": 1793164227.8593032,
+    "ast_hash": "bf8997292d94c1d38c506ea58c7e0831",
     "semantic_hash": ""
   },
   "src/lib/verdict.ts": {
-    "mtime": 1792513886.3449657,
-    "seen": 1792517147.7102907,
-    "ast_hash": "d1732ebcd8642597277ca5caea54e909",
+    "mtime": 1793163564.7650373,
+    "seen": 1793164227.8593204,
+    "ast_hash": "4bd317c215e007106983d9270a283b66",
     "semantic_hash": ""
   },
   "opencode.json": {
@@ -858,21 +858,21 @@
     "semantic_hash": ""
   },
   "src/lib/optic-engine/geometry.ts": {
-    "mtime": 1792729500.4662082,
-    "seen": 1792729529.504263,
-    "ast_hash": "3cd99b12629b5f523ad410ac7c088d27",
+    "mtime": 1793163564.7329879,
+    "seen": 1793164227.8593054,
+    "ast_hash": "09d74ff496ac411c5a31b9ab3d307a04",
     "semantic_hash": ""
   },
   "src/lib/optic-engine/recommend.ts": {
-    "mtime": 1792576624.7541811,
-    "seen": 1792578328.2305298,
-    "ast_hash": "d39f2734d9dda4b1f28738c40a7bb29f",
+    "mtime": 1793163564.7429996,
+    "seen": 1793164227.8593102,
+    "ast_hash": "80130cf169c8ea9d0a81406bbed11ef1",
     "semantic_hash": ""
   },
   "src/data/limits.ts": {
-    "mtime": 1792591247.5687857,
-    "seen": 1792591783.463626,
-    "ast_hash": "4a682f0566ddfffb532c084433d3ffab",
+    "mtime": 1793163564.726468,
+    "seen": 1793164227.8592765,
+    "ast_hash": "dba2d58fe1f0e25b9d7acccc1362569b",
     "semantic_hash": ""
   },
   "public/robots.txt": {
@@ -915,6 +915,12 @@
     "mtime": 1792862564.2008345,
     "seen": 1792886370.9269457,
     "ast_hash": "6ab4e1b994dcfeb2557743acf32bcb83",
+    "semantic_hash": ""
+  },
+  "public/favicon.svg": {
+    "mtime": 1793164178.9372678,
+    "seen": 1793164227.8593576,
+    "ast_hash": "59566d49dbe28643c04a06ff5b091269",
     "semantic_hash": ""
   }
 }

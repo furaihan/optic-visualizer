@@ -149,6 +149,56 @@
   scroll-margin-top: 96px;
 }
 
+/* The worked example uses the full measurement table, but its three visible
+   columns need a compact layout on narrow phones. Keep this scoped to the
+   landing-page example; workbench tables retain their existing layout. */
+@media (max-width: 400px) {
+  .landing .landing-measurement-sheet table {
+    width: 100%;
+    table-layout: fixed;
+  }
+
+  .landing .landing-measurement-sheet thead th:first-child,
+  .landing .landing-measurement-sheet tbody th[scope="row"] {
+    width: 42%;
+  }
+
+  .landing .landing-measurement-sheet thead th:nth-child(2),
+  .landing .landing-measurement-sheet tbody td:nth-child(2) {
+    width: 28%;
+  }
+
+  .landing .landing-measurement-sheet thead th:last-child,
+  .landing .landing-measurement-sheet tbody td:last-child {
+    width: 30%;
+  }
+
+  .landing .landing-measurement-sheet tbody th[scope="row"] {
+    white-space: normal;
+    padding-right: 0.25rem;
+    padding-left: 0.375rem;
+  }
+
+  .landing .landing-measurement-sheet tbody td:nth-child(2) {
+    padding-right: 0.25rem;
+    font-size: 18px;
+  }
+
+  .landing .landing-measurement-sheet tbody td:last-child {
+    padding-right: 0.375rem;
+    padding-left: 0.25rem;
+  }
+
+  .landing .landing-measurement-sheet tbody td:last-child span {
+    max-width: 100%;
+    white-space: normal;
+    overflow-wrap: anywhere;
+    padding-right: 0.25rem;
+    padding-left: 0.25rem;
+    text-align: center;
+  }
+}
+
 .landing .reveal {
   transition:
     opacity 0.55s cubic-bezier(0.2, 0.7, 0.2, 1),
