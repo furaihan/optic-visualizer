@@ -5,7 +5,7 @@
       "source": "leonxlnx/taste-skill",
       "sourceType": "github",
       "skillPath": "skills/taste-skill/SKILL.md",
-      "computedHash": "048a9bff8064f1efa51c2733558428ac93a0d8398e33ad11e7b68500f8e0525f"
+      "computedHash": "53590ee9325bee34d7888bf0d81bd3941a108b1e7850df46802d93104e3f2b90"
     },
     "frontend-design": {
       "source": "anthropics/skills",
@@ -17,7 +17,7 @@
       "source": "pbakaus/impeccable",
       "sourceType": "github",
       "skillPath": ".agents/skills/impeccable/SKILL.md",
-      "computedHash": "08c1403e2daff28509af4ca7fc5915cb748b1a6b72181b6142ba35fb2c258d89"
+      "computedHash": "a50f941ad06621638cd19f15d8f3d46729ae166de7985b8c87bf65cf3b834b60"
     },
     "shadcn": {
       "source": "shadcn/ui",
