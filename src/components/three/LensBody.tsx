@@ -34,6 +34,8 @@ export interface LensBodyProps {
   heat?: boolean;
   /** Cutting planes, for a section view. Empty when the body is whole. */
   clipping?: THREE.Plane[];
+  /** The thickness range the map is painted against, shared with its legend. */
+  domain?: { min: number; max: number };
 }
 
 const eased = (t: number) => 1 - Math.pow(1 - t, 3);
@@ -45,6 +47,7 @@ export function LensBody({
   visible = true,
   heat = false,
   clipping,
+  domain,
 }: LensBodyProps) {
   const mesh = useRef<THREE.Mesh>(null);
 
@@ -52,9 +55,9 @@ export function LensBody({
     const body = buildLensGeometry(field);
     // The map is computed once per body: it is a property of that body's
     // shape, so it is rebuilt exactly when the shape is.
-    paintThickness(body, field);
+    paintThickness(body, field, domain);
     return body;
-  }, [field]);
+  }, [field, domain]);
 
   /** Where the body is drawn now, and why. */
   const from = useRef<Float32Array | null>(null);

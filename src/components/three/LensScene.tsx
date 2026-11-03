@@ -8,6 +8,7 @@ import type { LensField } from "../../lib/optic-3d/field";
 import { findThickestMeridian } from "../../lib/optic-3d/field";
 import { LensBody } from "./LensBody";
 import { FrameBody } from "./FrameBody";
+import { Caliper } from "./Caliper";
 
 /**
  * Views the surface offers.
@@ -28,8 +29,16 @@ export interface LensSceneProps {
   preset: ViewPreset;
   /** Whether the body may animate into the new state. */
   motion: boolean;
-  colors: { frame: string; ground: string; stage: string; ink: string };
+  colors: { frame: string; ground: string; stage: string; ink: string; rx: string };
   heat: boolean;
+  /** The rail figure under the pointer, or under the keyboard's focus. */
+  target?: "ct" | "et" | "anterior" | "posterior" | "groove" | "blank" | null;
+  /** The blank diameter the engine reported, for the blank anchor. */
+  blankDiameter?: number;
+  /** The thickness range the map is painted against, shared with its legend. */
+  domain?: { min: number; max: number };
+  /** Bumped when the reader asks to return to the current preset after orbiting. */
+  returnHome?: number;
 }
 
 /** What the surface is being asked to show, and how much room it needs. */
@@ -53,8 +62,20 @@ function pairExtent(field: LensField, frame: FrameParameters): Extent {
   return {
     centre: new THREE.Vector3((left + right) / 2, field.opening.ocY, field.groove),
     halfWidth: (right - left) / 2,
-    halfHeight: field.opening.halfHeight + 4,
+    // The body has depth as well as a silhouette, and for a strong minus that
+    // depth is the whole story: a −9.00 edges to around twenty-four
+    // millimetres. Framing the outline alone runs it off the sides of the
+    // screen and hides the thing the reader came to see.
+    halfHeight: field.opening.halfHeight + Math.max(4, axialDepth(field) * 0.55),
   };
+}
+
+/** How deep the body is along the axis, front vertex to the deepest rim point. */
+function axialDepth(field: LensField): number {
+  const rimRadius = field.rimRadiusAt(90);
+  const back = field.backZ(90, rimRadius);
+  const front = field.frontZ(0, 0);
+  return Math.max(0, back - front);
 }
 
 /**
@@ -64,11 +85,16 @@ function pairExtent(field: LensField, frame: FrameParameters): Extent {
  * hand-tuned distance, so the framing holds at any window size and for any
  * frame the optician enters. The margin leaves room for the orbit.
  */
-function fitDistance(extent: Extent, camera: THREE.PerspectiveCamera, margin = 1.22): number {
+function fitDistance(
+  extent: Extent,
+  camera: THREE.PerspectiveCamera,
+  aspect: number,
+  margin = 1.22,
+): number {
   const fov = (camera.fov * Math.PI) / 180;
-  const aspect = Math.max(camera.aspect, 0.6);
+  const ratio = Math.max(aspect, 0.6);
   const forHeight = (extent.halfHeight * margin) / Math.tan(fov / 2);
-  const forWidth = (extent.halfWidth * margin) / (Math.tan(fov / 2) * aspect);
+  const forWidth = (extent.halfWidth * margin) / (Math.tan(fov / 2) * ratio);
   return Math.max(forHeight, forWidth, 40);
 }
 
@@ -106,6 +132,7 @@ function cameraFor(
   field: LensField,
   frame: FrameParameters,
   camera: THREE.PerspectiveCamera,
+  aspect: number,
 ): { position: THREE.Vector3; target: THREE.Vector3 } {
   const pair = pairExtent(field, frame);
   const lensCentre = new THREE.Vector3(field.opening.ocX, field.opening.ocY, field.groove);
@@ -115,8 +142,11 @@ function cameraFor(
     halfHeight: field.opening.halfHeight + 6,
   };
 
-  const pairDistance = fitDistance(pair, camera);
-  const lensDistance = fitDistance(lensExtent, camera);
+  const pairDistance = fitDistance(pair, camera, aspect);
+  // The oblique looks across the pair on the diagonal, so what has to fit is
+  // wider than the outline the extent describes.
+  const obliqueDistance = fitDistance(pair, camera, aspect, 1.75);
+  const lensDistance = fitDistance(lensExtent, camera, aspect);
   // The section is thin, so it is framed by the lens's height and by how deep
   // the body is along the axis — not by the width the face fills.
   const sectionExtent: Extent = {
@@ -130,7 +160,7 @@ function cameraFor(
   const band = 2.5 + 2;
   const clearance = (field.opening.halfWidth + band + 10) / Math.tan(((camera.fov * Math.PI) / 180) / 2);
   const sectionDistance = Math.max(
-    fitDistance(sectionExtent, camera),
+    fitDistance(sectionExtent, camera, aspect),
     field.opening.halfWidth + band + 26,
     clearance * 0.62,
   );
@@ -196,9 +226,9 @@ function cameraFor(
           .clone()
           .add(
             new THREE.Vector3(
-              pairDistance * 0.5,
-              pairDistance * 0.3,
-              pairDistance * 0.82,
+              obliqueDistance * 0.42,
+              obliqueDistance * 0.26,
+              obliqueDistance * 0.9,
             ),
           ),
         target: pair.centre,
@@ -224,14 +254,30 @@ export function LensScene({
   motion,
   colors,
   heat,
+  target = null,
+  blankDiameter = 0,
+  domain,
+  returnHome = 0,
 }: LensSceneProps) {
   const controls = useRef<any>(null);
   const { camera } = useThree();
 
+  /**
+   * The framing, recomputed when the window's aspect changes.
+   *
+   * The fit distance is worked out from the camera's field of view and aspect,
+   * so it has to be asked again whenever the viewport does. Depending on the
+   * camera object was not enough: its identity never changes, so a smaller
+   * window kept the old distance and cropped the pair mid-opening.
+   */
+  const size = useThree((state) => state.size);
   const framing = useMemo(
-    () => cameraFor(preset, field, frame, camera as THREE.PerspectiveCamera),
-    [preset, field, frame, camera],
+    () => cameraFor(preset, field, frame, camera as THREE.PerspectiveCamera, size.width / Math.max(size.height, 1)),
+    [preset, field, frame, camera, size.width, size.height],
   );
+
+  /** The meridian carrying the thickest edge: the one the rail's figures are read in. */
+  const governingTheta = useMemo(() => findThickestMeridian(field, 360).theta, [field]);
 
   /**
    * The camera travels to a preset, or cuts to it when motion is frozen.
@@ -266,7 +312,8 @@ export function LensScene({
       t: 0,
       duration: 0.55,
     };
-  }, [framing, motion, camera]);
+    // The counter is in the dependencies so a repeat press travels again.
+  }, [framing, motion, camera, returnHome]);
 
   useFrame((_, delta) => {
     const move = travel.current;
@@ -341,7 +388,14 @@ export function LensScene({
       <directionalLight position={[80, -40, -120]} intensity={0.35} />
 
       <group position={[0, 0, 0]}>
-        <LensBody field={field} index={index} duration={motion ? 0.28 : 0} heat={heat} clipping={clipping} />
+        <LensBody
+          field={field}
+          index={index}
+          duration={motion ? 0.28 : 0}
+          heat={heat}
+          clipping={clipping}
+          domain={domain}
+        />
         <FrameBody
           field={field}
           frame={frame}
@@ -352,17 +406,36 @@ export function LensScene({
           secondOpening={viewScope(preset) === "pair"}
           clipping={clipping}
         />
+
+        {/* The rail's figure, located on the body. */}
+        <Caliper
+          field={field}
+          // A section is cut through the vertical meridian, so its figures are
+          // read there: anchoring to the governing meridian in a section would
+          // point at the half that was just cut away.
+          theta={isSection(preset) ? 90 : governingTheta}
+          blankDiameter={blankDiameter}
+          target={target}
+          color={colors.rx}
+          clipping={clipping}
+        />
       </group>
 
       {/* The bench the lens is laid on, not a wall behind it: the plane lies
           under the frame and takes the body's own shadow, which is what makes
-          the protrusion a thing with weight rather than a floating shell. */}
-      <primitive
-        object={ground}
-        position={[0, -field.opening.halfHeight - 34, 0]}
-        rotation={[-Math.PI / 2, 0, 0]}
-        receiveShadow
-      />
+          the protrusion a thing with weight rather than a floating shell.
+
+          It is shown only in the views that look down on it. Head-on, a bench
+          is a hard horizon cutting across the drawing, and in a section it
+          would sit between the camera and the cut. */}
+      {(preset === "oblique" || preset === "plan") && (
+        <primitive
+          object={ground}
+          position={[0, -field.opening.halfHeight - 34, 0]}
+          rotation={[-Math.PI / 2, 0, 0]}
+          receiveShadow
+        />
+      )}
 
       {/* The room the glass bends.
           Built here rather than loaded: a download would put a stranger's

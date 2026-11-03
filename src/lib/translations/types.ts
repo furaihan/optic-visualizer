@@ -382,4 +382,18 @@ export interface AppTranslations {
   view3dLoading: string;
   view3dFallback: string;
   view3dEstimate: string;
+
+  // ---- The prescription the body was built from ----
+  view3dRx: string;
+  view3dRxSphere: string;
+  view3dRxCylinder: string;
+  view3dRxAxis: string;
+  view3dRxIndex: string;
+  view3dRxNominal: string;
+  view3dFrameSize: string;
+  view3dFrameSizeValue: string;
+  view3dNoBodyTitle: string;
+  view3dNoBodyBody: string;
+  view3dDrawingAlt: string;
+  view3dPresentClaim3Note: string;
 }

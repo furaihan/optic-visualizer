@@ -23,6 +23,21 @@ const RAMP: [number, THREE.Color][] = [
   [1.0, new THREE.Color("#156fb5")],
 ];
 
+/**
+ * The ramp as a CSS gradient, for the legend that explains it.
+ *
+ * Derived from the same stops the body is painted with, so the legend can never
+ * drift from the map: a reader who checks the colour against the scale is
+ * checking it against the thing that produced it.
+ */
+export function thicknessRampCss(): string {
+  const stops = RAMP.map(([stop, color]) => {
+    const hex = `#${color.getHexString()}`;
+    return `${hex} ${Math.round(stop * 100)}%`;
+  });
+  return `linear-gradient(90deg, ${stops.join(", ")})`;
+}
+
 /** The colour of a thickness, given the range the lens spans. */
 export function thicknessColor(value: number, min: number, max: number, target = new THREE.Color()): THREE.Color {
   const span = Math.max(max - min, 1e-9);
@@ -48,6 +63,14 @@ export function thicknessColor(value: number, min: number, max: number, target =
 export function paintThickness(
   geometry: THREE.BufferGeometry,
   field: LensField,
+  /**
+   * The range to paint against.
+   *
+   * Passed in rather than sampled here, so the legend and the body are told
+   * the same domain. Sampling on one side and printing the engine's figures on
+   * the other is how a map and its key stop agreeing.
+   */
+  domain?: { min: number; max: number },
 ): { min: number; max: number } {
   const position = geometry.getAttribute("position") as THREE.BufferAttribute;
   const count = position.count;
@@ -80,7 +103,7 @@ export function paintThickness(
   }
 
   geometry.setAttribute("color", new THREE.BufferAttribute(colors, 3));
-  return { min, max };
+  return domain ?? { min, max };
 }
 /**
  * The two figures the map spans, as the rail states them.
@@ -95,8 +118,11 @@ export function thicknessRange(result: {
   et: number;
   etMin?: number;
 }): { min: number; max: number } {
-  return {
-    min: Math.min(result.ct, result.etMin ?? result.ct),
-    max: result.et,
-  };
+  // A minus lens is thinnest at its centre and thickest at the rim; a plus lens
+  // is the other way round, and at high plus the centre is the thickest point
+  // of the whole body. Taking the range as ct..et therefore reverses the ramp
+  // on every plus prescription — the pale end would be the thick end. The range
+  // is the extremes of both, whichever way round they fall.
+  const values = [result.ct, result.et, result.etMin ?? result.ct];
+  return { min: Math.min(...values), max: Math.max(...values) };
 }

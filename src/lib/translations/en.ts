@@ -419,4 +419,33 @@ export const translations_en: AppTranslations = {
   view3dFallback: 'The 3D view could not start on this device. The sheet shows the same lens.',
   view3dEstimate: 'Estimate, for planning. Verify the finished lens with a lensometer.',
 
+
+  // ---- The prescription the body was built from ---------------------------
+  // The 3D surface draws a body; without its prescription on screen the body
+  // is a shape. These are the sheet's own field names, so the two surfaces
+  // are read with one vocabulary.
+  view3dRx: 'Prescription',
+  view3dRxSphere: 'SPH',
+  view3dRxCylinder: 'CYL',
+  view3dRxAxis: 'AXIS',
+  view3dRxIndex: 'INDEX',
+  view3dRxNominal: 'No cylinder',
+  view3dFrameSize: 'Frame',
+  view3dFrameSizeValue: 'A {a} · B {b} · DBL {dbl} · ED {ed}',
+
+
+  /** The engine refused this lens: there is no body to draw. */
+  view3dNoBodyTitle: 'This lens has no body to draw',
+  view3dNoBodyBody:
+    'The engine could not surface this prescription in this frame, so there is nothing to draw. The sheet states the same limit, and the inspector can change the input.',
+
+
+  /** The text alternative for the drawing, for a reader who cannot see it. */
+  view3dDrawingAlt:
+    'A three-dimensional drawing of the lens in its frame. The figures it shows are the same ones listed beside it.',
+
+
+  /** Claim 3's figure is the rim depth, which is what the lens sits in. */
+  view3dPresentClaim3Note: 'The lens sits in this rim, at the groove shown.',
+
 };

@@ -417,4 +417,30 @@ export const translations_id: AppTranslations = {
   view3dFallback: 'Tampilan 3D tidak dapat dimulai di perangkat ini. Lembar kerja menunjukkan lensa yang sama.',
   view3dEstimate: 'Estimasi untuk perencanaan. Verifikasi lensa jadi dengan lensometer.',
 
+
+  // ---- Resep yang membentuk badan lensa ----------------------------------
+  view3dRx: 'Resep',
+  view3dRxSphere: 'SPH',
+  view3dRxCylinder: 'CYL',
+  view3dRxAxis: 'Sumbu',
+  view3dRxIndex: 'Indeks',
+  view3dRxNominal: 'Tanpa silinder',
+  view3dFrameSize: 'Bingkai',
+  view3dFrameSizeValue: 'A {a} · B {b} · DBL {dbl} · ED {ed}',
+
+
+  /** Mesin menolak lensa ini: tidak ada badan untuk digambar. */
+  view3dNoBodyTitle: 'Lensa ini tidak punya badan untuk digambar',
+  view3dNoBodyBody:
+    'Mesin tidak dapat membentuk resep ini pada bingkai ini, jadi tidak ada yang bisa digambar. Lembar menyatakan batas yang sama, dan panel dapat mengubah masukannya.',
+
+
+  /** Alternatif teks untuk gambar, bagi pembaca yang tidak dapat melihatnya. */
+  view3dDrawingAlt:
+    'Gambar tiga dimensi lensa di dalam bingkainya. Angka yang ditampilkan sama dengan yang tertera di sebelahnya.',
+
+
+  /** Angka klaim 3 adalah kedalaman rim, tempat lensa duduk. */
+  view3dPresentClaim3Note: 'Lensa duduk di dalam rim ini, pada alur yang ditunjukkan.',
+
 };
