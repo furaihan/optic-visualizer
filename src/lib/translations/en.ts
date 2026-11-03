@@ -377,4 +377,46 @@ export const translations_en: AppTranslations = {
   landFooterPhotos: 'Photographs',
   landPhotoCredits:
     '“Trial lens set” by Fatimah Bello (CC0); the lensometer and the optical laboratory (public domain, US Navy and US Army); the two trial-frame photographs (public domain, US Air Force) — all via Wikimedia Commons.',
+
+  // ---- The 3D surface (/three) -------------------------------------------
+  // The 3D view is a drawing of the same measurement the sheet prints. Its
+  // words are the workbench's words, so an optician reading either surface
+  // reads the same vocabulary.
+  view3d: '3D View',
+  view3dOpen: 'Open in 3D',
+  view3dBack: 'Back to the sheet',
+  view3dTitle: 'The lens in its frame',
+  view3dOblique: 'Oblique',
+  view3dGoverning: 'Thickest edge',
+  view3dProfile: 'Profile',
+  view3dPlan: 'Plan',
+  view3dFront: 'Front',
+  view3dSection: 'Section',
+  view3dHeat: 'Thickness',
+  view3dHeatLegend: 'Material thickness',
+  view3dCut: 'Cut plane',
+  view3dBlank: 'Blank',
+  view3dBlankLabel: 'Minimum blank {diameter}',
+  view3dCompare: 'Compare',
+  view3dPresent: 'Present',
+  view3dPresentExit: 'Exit',
+  view3dPresentClaim1: 'This is where the lens is thickest.',
+  view3dPresentClaim2: 'This is how far it stands out of the frame.',
+  view3dPresentClaim3: 'This is the lens in the frame it was ordered for.',
+  view3dNext: 'Next',
+  view3dBackStep: 'Back',
+  view3dFreeze: 'Freeze motion',
+  view3dThaw: 'Resume motion',
+  view3dRailTitle: 'Measured',
+  view3dGoverningAt: 'Thickest at {angle}',
+  view3dModelNote:
+    'The model is a flat frame plane: no wrap and no frame base curve are calculated, so the rim is drawn as a straight band.',
+  view3dUnavailableTitle: 'The 3D view needs a larger screen',
+  view3dUnavailableBody:
+    'This view draws the lens body in three dimensions, which needs a wider screen and a graphics context this device does not offer. The sheet shows the same lens, with the same figures.',
+  view3dUnavailableOpen: 'Open the sheet for this lens',
+  view3dLoading: 'Building the lens body',
+  view3dFallback: 'The 3D view could not start on this device. The sheet shows the same lens.',
+  view3dEstimate: 'Estimate, for planning. Verify the finished lens with a lensometer.',
+
 };

@@ -16,6 +16,10 @@ export const simulatorLayoutRoute = createRoute({
 const tabItems = [
   { to: '/visualizer', label: 'Lenses' },
   { to: '/aspheric', label: 'Aspheric' },
+  // The 3D view is gated by capability at the surface itself, so the tab is
+  // always listed: a device that cannot draw it gets the notice and the way
+  // back, rather than a tab that vanishes and a link that dead-ends.
+  { to: '/three', label: '3D' },
 ];
 
 function SimulatorLayout() {

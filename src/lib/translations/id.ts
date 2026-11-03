@@ -376,4 +376,45 @@ export const translations_id: AppTranslations = {
   landFooterPhotos: 'Foto',
   landPhotoCredits:
     '“Trial lens set” oleh Fatimah Bello (CC0); lensometer dan laboratorium optik (domain publik, US Navy dan US Army); dua foto trial frame (domain publik, US Air Force) — semuanya via Wikimedia Commons.',
+
+  // ---- Permukaan 3D (/three) --------------------------------------------
+  // Tampilan 3D adalah gambar dari pengukuran yang sama dengan lembar kerja.
+  // Katanya memakai kata bengkel, supaya optisi membaca kosakata yang sama.
+  view3d: 'Tampilan 3D',
+  view3dOpen: 'Buka dalam 3D',
+  view3dBack: 'Kembali ke lembar',
+  view3dTitle: 'Lensa di dalam bingkainya',
+  view3dOblique: 'Miring',
+  view3dGoverning: 'Tepi tertebal',
+  view3dProfile: 'Profil',
+  view3dPlan: 'Rencana',
+  view3dFront: 'Depan',
+  view3dSection: 'Potongan',
+  view3dHeat: 'Ketebalan',
+  view3dHeatLegend: 'Ketebalan material',
+  view3dCut: 'Bidang potong',
+  view3dBlank: 'Blank',
+  view3dBlankLabel: 'Blank minimum {diameter}',
+  view3dCompare: 'Bandingkan',
+  view3dPresent: 'Presentasi',
+  view3dPresentExit: 'Keluar',
+  view3dPresentClaim1: 'Di sini lensa paling tebal.',
+  view3dPresentClaim2: 'Sejauh ini lensa menonjol keluar dari bingkai.',
+  view3dPresentClaim3: 'Ini lensa di dalam bingkai yang dipesan.',
+  view3dNext: 'Lanjut',
+  view3dBackStep: 'Kembali',
+  view3dFreeze: 'Bekukan gerak',
+  view3dThaw: 'Lanjutkan gerak',
+  view3dRailTitle: 'Terukur',
+  view3dGoverningAt: 'Tertebal pada {angle}',
+  view3dModelNote:
+    'Model ini memakai bidang bingkai datar: lengkung bingkai dan wrap tidak dihitung, jadi rim digambar sebagai pita lurus.',
+  view3dUnavailableTitle: 'Tampilan 3D memerlukan layar lebih besar',
+  view3dUnavailableBody:
+    'Tampilan ini menggambar badan lensa dalam tiga dimensi, yang memerlukan layar lebih lebar dan konteks grafis yang tidak tersedia di perangkat ini. Lembar kerja menunjukkan lensa yang sama, dengan angka yang sama.',
+  view3dUnavailableOpen: 'Buka lembar untuk lensa ini',
+  view3dLoading: 'Menyusun badan lensa',
+  view3dFallback: 'Tampilan 3D tidak dapat dimulai di perangkat ini. Lembar kerja menunjukkan lensa yang sama.',
+  view3dEstimate: 'Estimasi untuk perencanaan. Verifikasi lensa jadi dengan lensometer.',
+
 };

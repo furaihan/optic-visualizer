@@ -346,4 +346,40 @@ export interface AppTranslations {
   landFooterRights: string;
   landFooterPhotos: string;
   landPhotoCredits: string;
+
+  // ---- The 3D surface (/three) ----
+  view3d: string;
+  view3dOpen: string;
+  view3dBack: string;
+  view3dTitle: string;
+  view3dOblique: string;
+  view3dGoverning: string;
+  view3dProfile: string;
+  view3dPlan: string;
+  view3dFront: string;
+  view3dSection: string;
+  view3dHeat: string;
+  view3dHeatLegend: string;
+  view3dCut: string;
+  view3dBlank: string;
+  view3dBlankLabel: string;
+  view3dCompare: string;
+  view3dPresent: string;
+  view3dPresentExit: string;
+  view3dPresentClaim1: string;
+  view3dPresentClaim2: string;
+  view3dPresentClaim3: string;
+  view3dNext: string;
+  view3dBackStep: string;
+  view3dFreeze: string;
+  view3dThaw: string;
+  view3dRailTitle: string;
+  view3dGoverningAt: string;
+  view3dModelNote: string;
+  view3dUnavailableTitle: string;
+  view3dUnavailableBody: string;
+  view3dUnavailableOpen: string;
+  view3dLoading: string;
+  view3dFallback: string;
+  view3dEstimate: string;
 }

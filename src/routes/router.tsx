@@ -5,10 +5,12 @@ import { contactRoute } from './contact';
 import { simulatorLayoutRoute } from './simulator-layout';
 import { visualizerRoute } from './visualizer';
 import { asphericRoute } from './aspheric';
+import { threeRoute } from './three';
 
 const simulatorWithChildren = simulatorLayoutRoute.addChildren([
   visualizerRoute,
   asphericRoute,
+  threeRoute,
 ]);
 
 const routeTree = rootRoute.addChildren([indexRoute, simulatorWithChildren, contactRoute]);

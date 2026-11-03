@@ -49,15 +49,47 @@ export default defineConfig(({mode}) => {
       strictPort,
     },
     build: {
+      modulePreload: {
+        /**
+         * The renderer is preloaded by the route that uses it, not by the
+         * shell. Without this the browser fetches a megabyte of three.js on
+         * the landing page, which is exactly the weight this split exists to
+         * avoid.
+         */
+        resolveDependencies: (_filename, deps) =>
+          deps.filter((dep) => !dep.includes('vendor-three')),
+      },
       rollupOptions: {
         output: {
-          manualChunks(id) {
-            if (id.includes('node_modules')) {
-              if (id.includes('react') || id.includes('@base-ui') || id.includes('@tanstack')) return 'vendor-react';
-              if (id.includes('lucide') || id.includes('motion')) return 'vendor-ui';
-              return 'vendor';
-            }
-          }
+          /**
+           * The 3D renderer gets its own chunk.
+           *
+           * three.js and its React bindings are reachable only from /three, so
+           * grouping them here is what stops the landing page, the sheet and
+           * the aspheric designer from downloading a renderer they never call.
+           * Rolldown does the grouping: this build's chunker decides what is a
+           * module before manualChunks would ever be asked.
+           */
+          advancedChunks: {
+            groups: [
+              {
+                name: 'vendor-three',
+                test: /node_modules[\\/](three|@react-three|three-stdlib|maath|troika)[\\/]/,
+              },
+              {
+                name: 'vendor-react',
+                test: /node_modules[\\/](react|react-dom|scheduler|@base-ui|@tanstack|use-sync-external-store)[\\/]/,
+              },
+              {
+                name: 'vendor-ui',
+                test: /node_modules[\\/](lucide-react|framer-motion|motion|motion-dom|motion-utils|tw-animate-css)[\\/]/,
+              },
+              {
+                name: 'vendor',
+                test: /node_modules[\\/]/,
+              },
+            ],
+          },
         }
       }
     },
