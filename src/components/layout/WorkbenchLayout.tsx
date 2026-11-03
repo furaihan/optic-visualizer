@@ -216,7 +216,10 @@ export function WorkbenchLayout({
             onClose={() => setDrawerOpen(false)}
             label={t.inspectorLabel}
           >
-            {inspector}
+            {/* One inspector at rest. The drawer's copy only exists while it is
+                open: two mounted copies of the same form double the work on
+                every keystroke and put every control in the tree twice. */}
+            {drawerOpen ? inspector : null}
           </InspectorDrawer>
         </div>
 

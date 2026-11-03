@@ -36,6 +36,7 @@ export function DesktopGrid() {
     compareIndex,
     result,
     compareResult,
+    highlightedLimit,
     validation,
     resetSession,
     undo,
@@ -64,7 +65,7 @@ export function DesktopGrid() {
         lang={lang}
         view={view}
         frameType={frameType}
-        highlightedLimit={null}
+        highlightedLimit={highlightedLimit}
         bevelPercent={bevelPercent}
         variant="workbench"
       />

@@ -84,7 +84,7 @@ export const translations_en: AppTranslations = {
 
   // Visualizer
   crossSection: 'Cross-Sectional View',
-  visualSim: 'Visual simulation · 5× scale',
+  visualSim: 'Visual simulation',
   primarySpec: 'Primary Spec',
   comparison: 'Comparison',
   frontView: 'Front View',

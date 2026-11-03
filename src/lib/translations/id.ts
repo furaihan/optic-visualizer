@@ -84,7 +84,7 @@ export const translations_id: AppTranslations = {
 
   // Visualizer
   crossSection: 'Tampilan Potongan Melintang',
-  visualSim: 'Simulasi visual · skala 5×',
+  visualSim: 'Simulasi visual',
   primarySpec: 'Spek Utama',
   comparison: 'Perbandingan',
   frontView: 'Tampilan Depan',

@@ -1,4 +1,5 @@
 import React from 'react';
+import { CHAR_WIDTH } from './sheet';
 
 /**
  * Shared SVG definitions for the drawing board.
@@ -55,7 +56,15 @@ export const SheetDefs: React.FC = () => (
   </defs>
 );
 
-/** A horizontal dimension line with arrows at both ends and its value above it. */
+/**
+ * A horizontal dimension line with arrows at both ends and its value set on it.
+ *
+ * The line breaks behind the value rather than running under it, the way a
+ * drawing is dimensioned: a value sitting six units above a line at this type
+ * size has the line through its middle, and a struck-through measurement is
+ * the one thing a dimension may never look like. When the dimension is too
+ * short to hold its own value the line stays whole and the value lifts clear.
+ */
 export const DimH: React.FC<{
   x1: number;
   x2: number;
@@ -68,27 +77,56 @@ export const DimH: React.FC<{
   const colour =
     tone === 'warning' ? 'text-sheet-warning' : tone === 'muted' ? 'text-sheet-muted' : 'text-sheet-ink';
   const mid = (x1 + x2) / 2;
+  const span = Math.abs(x2 - x1);
+  const gap = label ? label.length * CHAR_WIDTH + 20 : 0;
+  const broken = gap > 0 && span > gap + 30;
+  const stroke = active ? 2 : 1.25;
+
   return (
     <g
       className={`${colour} ${onClick ? 'cursor-help' : ''}`}
       onClick={onClick}
       opacity={active ? 1 : 0.92}
     >
-      <line
-        x1={x1}
-        y1={y}
-        x2={x2}
-        y2={y}
-        stroke="currentColor"
-        strokeWidth={active ? 2 : 1.25}
-        markerStart="url(#sheet-arrow)"
-        markerEnd="url(#sheet-arrow)"
-      />
+      {broken ? (
+        <>
+          <line
+            x1={x1}
+            y1={y}
+            x2={mid - gap / 2}
+            y2={y}
+            stroke="currentColor"
+            strokeWidth={stroke}
+            markerStart="url(#sheet-arrow)"
+          />
+          <line
+            x1={mid + gap / 2}
+            y1={y}
+            x2={x2}
+            y2={y}
+            stroke="currentColor"
+            strokeWidth={stroke}
+            markerEnd="url(#sheet-arrow)"
+          />
+        </>
+      ) : (
+        <line
+          x1={x1}
+          y1={y}
+          x2={x2}
+          y2={y}
+          stroke="currentColor"
+          strokeWidth={stroke}
+          markerStart="url(#sheet-arrow)"
+          markerEnd="url(#sheet-arrow)"
+        />
+      )}
       {label && (
         <text
           x={mid}
-          y={y - 6}
+          y={broken ? y : y - 9}
           textAnchor="middle"
+          dominantBaseline={broken ? 'middle' : undefined}
           fill="currentColor"
           fontSize={16}
           fontWeight={600}

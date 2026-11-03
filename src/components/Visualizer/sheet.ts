@@ -18,9 +18,6 @@ export const SHEET = {
 
 export type SheetVariant = keyof typeof SHEET;
 
-/** Below this width the three views no longer fit side by side legibly. */
-export const NARROW_SHEET = 720;
-
 /**
  * How wide a character is in the sheet's units, at the sheet's type size.
  * Measured off the drawn labels: a label's own width has to be known before
@@ -56,6 +53,116 @@ export type SheetGeometry = {
 
 /** The magnifications the front elevation may be drawn at. */
 const FRONT_SCALES = [2, 3, 4, 5, 6];
+
+/**
+ * The plan view's own proportions.
+ *
+ * It is the one view whose magnification cannot be declared in advance: two
+ * openings and a bridge make it wide and short by nature, so a fixed scale
+ * either clips the temples on a narrow board or prints the values at six
+ * pixels on a wide one. Its scale is chosen from the board it is given, and
+ * the sheet states the scale it landed on.
+ */
+export const TOP_VIEW = {
+  /** How far a temple arm runs back from the hinge, in millimetres. */
+  templeBack: 26,
+  /** How far its end sits outboard of the opening, so the pair splays the way
+      a pair of temples does rather than reading as two parallel bars. */
+  templeOut: 6,
+  /** The frame-depth dimension sits this far under the openings. */
+  dimGap: 26,
+  /** The PD dimension sits at the foot of the drawing, clear of the temples:
+      it is the overall width, and a plan view dimensions overall widths last. */
+  pdGap: 18,
+  /** Half the height of a value set on its own line. */
+  textRoom: 9,
+  /** Below this magnification the PD dimension carries its initials, not its
+      full name: the long name would take the whole width it is measuring. */
+  pdAbbrevBelowMm: 2.5,
+  /** Space inside the sheet's edge. */
+  edge: 14,
+} as const;
+
+/** The magnifications the plan view may be drawn at. */
+const TOP_SCALES = [1, 1.5, 2, 2.5, 3, 3.5, 4, 4.5, 5, 5.5, 6];
+
+export type TopViewGeometry = {
+  width: number;
+  height: number;
+  /** Where the bridge's centre sits, horizontally. */
+  centerX: number;
+  /** The centre line of the openings. */
+  centerY: number;
+  /** The magnification the sheet is drawn at, in sheet units per millimetre. */
+  scale: number;
+};
+
+/**
+ * The plan view's box, and the magnification that fills the board.
+ *
+ * The type on the sheet is set in sheet units, so the magnification and the
+ * type size are the same decision: halve the scale and every value doubles.
+ * The largest magnification whose box still fits the canvas is therefore the
+ * one that keeps the values legible at that width — which is why this is
+ * chosen rather than declared.
+ */
+export function topViewGeometry(
+  frame: { a: number; b: number; dbl: number; depth: number },
+  patient: { pd: number },
+  pdLabels: { long: string; short: string },
+  canvasW: number,
+  canvasH: number
+): TopViewGeometry & { pdLabel: string } {
+  const at = (scale: number): TopViewGeometry & { pdLabel: string } => {
+    // The label the sheet will actually print at this magnification: the box
+    // is measured against what is drawn, never against a longer string the
+    // drawing will not show.
+    const pdLabel = scale < TOP_VIEW.pdAbbrevBelowMm ? pdLabels.short : pdLabels.long;
+    const openingW = frame.a * scale;
+    const halfGap = (frame.dbl / 2) * scale;
+    const depthPx = frame.depth * scale;
+
+    // The PD dimension belongs to the patient, not the frame, and its value is
+    // set across the middle of the line: half of it is the reach the sheet has
+    // to hold on each side, whatever the frame is doing.
+    const half =
+      Math.max(
+        halfGap + openingW + TOP_VIEW.templeOut * scale,
+        (patient.pd / 2) * scale + (pdLabel.length * CHAR_WIDTH) / 2
+      ) + TOP_VIEW.edge;
+
+    // The bridge's crown above the openings, the openings themselves, and the
+    // two dimension rows under them. The temples run back inside that same
+    // foot, which is what keeps this box close to the board's own proportions
+    // instead of a strip with empty air above and below it.
+    const crown = depthPx * 0.6 + TOP_VIEW.edge;
+    const foot =
+      depthPx +
+      Math.max(
+        TOP_VIEW.templeBack * scale,
+        TOP_VIEW.dimGap + TOP_VIEW.textRoom
+      ) +
+      TOP_VIEW.pdGap +
+      TOP_VIEW.textRoom +
+      TOP_VIEW.edge;
+
+    return {
+      width: half * 2,
+      height: crown + depthPx + foot,
+      centerX: half,
+      centerY: crown,
+      scale,
+      pdLabel,
+    };
+  };
+
+  let chosen = at(TOP_SCALES[0]);
+  for (const scale of TOP_SCALES) {
+    const candidate = at(scale);
+    if (candidate.width <= canvasW && candidate.height <= canvasH) chosen = candidate;
+  }
+  return chosen;
+}
 
 type SheetInput = {
   variant: SheetVariant;
@@ -109,6 +216,28 @@ export function frontViewBox(
     width: right - left + 12,
     height: bottom - top + 8,
   };
+}
+
+/**
+ * The elevation drawn on its own, and the magnification that fills the board.
+ *
+ * Alone on a phone the elevation has the whole board to itself, so it takes
+ * the largest magnification whose box still fits instead of the scale the
+ * three-view strip uses — the scale it is drawn at is the size its values
+ * print at, and at the strip's magnification they print at seven pixels.
+ */
+export function frontViewFit(
+  frame: { a: number; b: number; dbl: number },
+  canvasW: number,
+  canvasH: number,
+  scales: number[] = [2, 3, 4, 5, 6]
+) {
+  let chosen = scales[0];
+  for (const scale of scales) {
+    const box = frontViewBox(frame, scale, SHEET.workbench.pad, SHEET.workbench.dimBand);
+    if (box.width <= canvasW && box.height <= canvasH) chosen = scale;
+  }
+  return chosen;
 }
 
 /**

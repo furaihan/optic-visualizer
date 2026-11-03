@@ -13,7 +13,14 @@ import { FrontView } from './Visualizer/FrontView';
 import { TopDownView } from './Visualizer/TopDownView';
 import { EdgeDetail } from './Visualizer/EdgeDetail';
 import { SheetDefs } from './Visualizer/SheetDefs';
-import { sheetGeometry, SHEET, CHAR_WIDTH, frontViewBox } from './Visualizer/sheet';
+import {
+  sheetGeometry,
+  SHEET,
+  CHAR_WIDTH,
+  SECTION_SCALE,
+  frontViewBox,
+  topViewGeometry,
+} from './Visualizer/sheet';
 import { useMediaQuery } from '../hooks/useMediaQuery';
 import { useElementSize } from '../hooks/useElementWidth';
 import { Tabs, TabsList, TabsTrigger } from './ui/tabs';
@@ -134,8 +141,20 @@ export const AsphericVisualizer: React.FC<AsphericVisualizerProps> = React.memo(
       return { etX_start, etX_end, grooveX, frontApexX, backApexX };
     }, [result, frame.depth, bevelPercent]);
 
-    const S = 6;
+    const S = SECTION_SCALE;
     const detailZoom = 13;
+
+    // The plan view is measured the same way on both boards: its type is set in
+    // sheet units, so the magnification it is drawn at is the size its values
+    // print at, and the sheet states the scale it landed on.
+    const top = topViewGeometry(
+      frame,
+      patient,
+      { long: `${t.pd} ${patient.pd}`, short: `PD ${patient.pd}` },
+      width,
+      height
+    );
+    const viewScale = view === 'top' ? top.scale : S;
 
     const halfHeight = (frame.b / 2) * S;
     const minX = -result.anteriorProtrusion;
@@ -313,7 +332,7 @@ export const AsphericVisualizer: React.FC<AsphericVisualizerProps> = React.memo(
                 onValueChange={(v) => onViewChange(v as 'side' | 'top' | 'front')}
               >
                 <TabsList
-                  className={`gap-0 rounded-sm bg-sheet-panel p-0.5 ${
+                  className={`shrink-0 gap-0 rounded-sm bg-sheet-panel p-0.5 ${
                     compact ? 'h-7' : 'h-8'
                   }`}
                 >
@@ -359,11 +378,11 @@ export const AsphericVisualizer: React.FC<AsphericVisualizerProps> = React.memo(
                       const box = frontViewBox(frame, S, PAD, DIM_BAND);
                       return `${box.x} ${box.y} ${box.width} ${box.height}`;
                     })()
-                  : `0 0 ${(frame.a * 2 + frame.dbl) * S + 120} ${(frame.depth + 10) * S + 150}`
+                  : `0 0 ${top.width} ${top.height}`
             }
             preserveAspectRatio="xMidYMid meet"
             role="img"
-            aria-label={`${viewTitle}. ${t.visualSim}`}
+            aria-label={`${viewTitle}. ${t.visualSim}. ${t.sheetScaleSingle.replace('{s}', String(viewScale))}`}
           >
             <SheetDefs />
 
@@ -571,11 +590,12 @@ export const AsphericVisualizer: React.FC<AsphericVisualizerProps> = React.memo(
                 patient={patient}
                 result={result as any}
                 lang={lang}
-                scale={S}
-                centerX={(frame.a + frame.dbl / 2) * S + 50}
-                centerY={(frame.depth + 6) * S}
+                scale={top.scale}
+                centerX={top.centerX}
+                centerY={top.centerY}
                 primaryPos={primaryPos}
                 comparePos={null}
+                pdLabel={top.pdLabel}
                 highlightedLimit={highlightedLimit}
               />
             )}

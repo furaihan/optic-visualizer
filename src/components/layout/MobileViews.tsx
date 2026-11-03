@@ -35,6 +35,7 @@ export function MobileViews() {
     compareIndex,
     result,
     compareResult,
+    highlightedLimit,
     validation,
     resetSession,
     undo,
@@ -63,7 +64,7 @@ export function MobileViews() {
         lang={lang}
         view={view}
         frameType={frameType}
-        highlightedLimit={null}
+        highlightedLimit={highlightedLimit}
         bevelPercent={bevelPercent}
         variant="workbench"
         onViewChange={(v) => navigate({ search: { ...search, view: v } } as any)}

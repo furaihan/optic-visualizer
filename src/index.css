@@ -111,6 +111,16 @@
   animation: caliper-snap 0.18s cubic-bezier(0.2, 0.7, 0.2, 1) both;
 }
 
+/* A dimension on the drawing is a control, so it takes the sheet's focus ring
+   like every other control. The browser's auto ring is drawn round the whole
+   group's box, which on a thin dimension is a tall empty frame; the ink rule
+   below is the mark the rest of the workbench uses. */
+.drawing-target:focus-visible {
+  outline: 2px solid var(--sheet-accent);
+  outline-offset: 4px;
+  border-radius: 2px;
+}
+
 .delay-1 { animation-delay: 0.04s; }
 .delay-2 { animation-delay: 0.08s; }
 .delay-3 { animation-delay: 0.12s; }

@@ -341,7 +341,7 @@ export const MeasurementSheet: React.FC<MeasurementSheetProps> = ({
       {/* What the model assumes, stated where the numbers are read: a frame
           without a base curve of its own, so the lens is placed by the
           vertical meridian and the protrusion is measured in that plane. */}
-      <p className="max-w-[68ch] border-t border-sheet-panel pt-3 text-[13px] leading-relaxed text-sheet-muted">
+      <p className="max-w-[62ch] border-t border-sheet-panel pt-3 text-[13px] leading-relaxed text-sheet-muted">
         {t.flatFrameNote}
       </p>
     </section>

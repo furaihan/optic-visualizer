@@ -11,7 +11,15 @@ import { CompareLegend } from './CompareLegend';
 import { useMediaQuery } from '../../hooks/useMediaQuery';
 import { useElementSize } from '../../hooks/useElementWidth';
 import { LIMITS, limitLabel } from '../../data/limits';
-import { sheetGeometry, SHEET, CHAR_WIDTH, frontViewBox } from './sheet';
+import {
+  sheetGeometry,
+  SHEET,
+  CHAR_WIDTH,
+  SECTION_SCALE,
+  frontViewBox,
+  frontViewFit,
+  topViewGeometry,
+} from './sheet';
 import { Tabs, TabsList, TabsTrigger } from '../ui/tabs';
 
 type CaliperRow = {
@@ -180,12 +188,32 @@ export const Visualizer: React.FC<VisualizerProps> = React.memo(
     // thickness, the edge magnified as a detail, the elevation for the frame.
     // The detail is magnified further in compare mode, because that is where
     // the difference between two indices is a shape and not just a number.
-    const S = 6;
+    const S = SECTION_SCALE;
     const comparing = Boolean(compareResult);
     // The detail is magnified until it is as tall as the section, and no
     // further: the board is height-bound, so a taller detail would only shrink
     // the whole sheet back down again.
     const detailZoom = comparing ? 14 : 13;
+
+    // The plan view is the one drawing whose magnification is chosen rather
+    // than declared: its type is set in sheet units, so the scale it is drawn
+    // at is the size its values print at. It takes the largest magnification
+    // whose box still fits the board, and the sheet then states that scale.
+    const top = topViewGeometry(
+      frame,
+      patient,
+      { long: `${t.pd} ${patient.pd}`, short: `PD ${patient.pd}` },
+      width,
+      height
+    );
+
+    // The elevation alone on a narrow board is the same decision the plan view
+    // makes: the magnification is chosen so the values print at a readable
+    // size, not inherited from the three-view strip that cannot fit beside it.
+    const mainFrontScale =
+      view === 'front' ? frontViewFit(frame, width, height) : S;
+    const viewScale =
+      view === 'top' ? top.scale : view === 'front' ? mainFrontScale : S;
 
     const minX = -Math.max(result.anteriorProtrusion, compareResult?.anteriorProtrusion ?? 0);
     const maxX = Math.max(
@@ -254,6 +282,21 @@ export const Visualizer: React.FC<VisualizerProps> = React.memo(
     const pick = (next: Exclude<CaliperTarget, null>) =>
       setTarget((current) => (current === next ? null : next));
 
+    // What the drawing says, as a sentence. Every figure here is the figure on
+    // the sheet and the scale is the scale it is drawn at, so the description
+    // cannot drift from the picture it describes.
+    const scaleSentence = t.sheetScaleSingle.replace('{s}', String(viewScale));
+    const drawingLabel = result.error
+      ? `${viewTitle}. ${result.errorMessage ?? t.invalidInput}`
+      : [
+          viewTitle,
+          `${t.edgeThick} ${result.et.toFixed(2)} mm`,
+          `${t.center} ${result.ct.toFixed(2)} mm`,
+          scaleSentence,
+        ].join('. ');
+
+    const overLimit = displayedCalipers.filter((row) => !row.ok);
+
     return (
       <div
         data-ui
@@ -276,8 +319,12 @@ export const Visualizer: React.FC<VisualizerProps> = React.memo(
                 value={view}
                 onValueChange={(v) => onViewChange(v as 'side' | 'top' | 'front')}
               >
+                {/* The strip keeps its own width: a control that is squeezed
+                    under its label prints the label over its neighbour, which
+                    is what "Side Profile" did at a tablet's width. The header
+                    row wraps instead. */}
                 <TabsList
-                  className={`gap-0 rounded-sm bg-sheet-panel p-0.5 ${
+                  className={`shrink-0 gap-0 rounded-sm bg-sheet-panel p-0.5 ${
                     compact ? 'h-7' : 'h-8'
                   }`}
                 >
@@ -338,14 +385,14 @@ export const Visualizer: React.FC<VisualizerProps> = React.memo(
                     // view's own name sits below the rim, which needs the same
                     // allowance at the foot.
                     (() => {
-                      const box = frontViewBox(frame, S, PAD, DIM_BAND);
+                      const box = frontViewBox(frame, mainFrontScale, PAD, DIM_BAND);
                       return `${box.x} ${box.y} ${box.width} ${box.height}`;
                     })()
-                  : `0 0 ${(frame.a * 2 + frame.dbl) * S + 120} ${(frame.depth + 10) * S + 150}`
+                  : `0 0 ${top.width} ${top.height}`
             }
             preserveAspectRatio="xMidYMid meet"
-            role="img"
-            aria-label={`${viewTitle}. ${t.visualSim}`}
+            role="group"
+            aria-label={drawingLabel}
           >
             <SheetDefs />
 
@@ -401,10 +448,22 @@ export const Visualizer: React.FC<VisualizerProps> = React.memo(
                     fit, the value moves to the line's start rather than off
                     the sheet. */}
                 <g
-                  className={`cursor-help ${target === 'ct' ? 'text-sheet-warning' : 'text-sheet-ink'}`}
+                  role="button"
+                  tabIndex={0}
+                  aria-pressed={target === 'ct'}
+                  aria-label={`${t.center} ${result.ct.toFixed(2)} mm`}
+                  className={`drawing-target cursor-help ${target === 'ct' ? 'text-sheet-warning' : 'text-sheet-ink'}`}
                   onMouseEnter={() => setTarget('ct')}
                   onMouseLeave={() => setTarget(null)}
                   onClick={() => pick('ct')}
+                  onFocus={() => setTarget('ct')}
+                  onBlur={() => setTarget(null)}
+                  onKeyDown={(event) => {
+                    if (event.key === 'Enter' || event.key === ' ') {
+                      event.preventDefault();
+                      setTarget('ct');
+                    }
+                  }}
                 >
                   <line
                     x1={originX + primaryPos.frontApexX * S}
@@ -511,9 +570,9 @@ export const Visualizer: React.FC<VisualizerProps> = React.memo(
                 patient={patient}
                 result={result}
                 lang={lang}
-                scale={S}
-                originX={PAD + (frame.a + frame.dbl) * S}
-                originY={PAD + DIM_BAND + (frame.b * S) / 2}
+                scale={mainFrontScale}
+                originX={PAD + (frame.a + frame.dbl) * mainFrontScale}
+                originY={PAD + DIM_BAND + (frame.b * mainFrontScale) / 2}
                 isMain
                 highlightedLimit={highlightedLimit}
               />
@@ -526,11 +585,12 @@ export const Visualizer: React.FC<VisualizerProps> = React.memo(
                 compareResult={compareResult}
                 compareLens={compareLens}
                 lang={lang}
-                scale={S}
-                centerX={(frame.a + frame.dbl / 2) * S + 50}
-                centerY={(frame.depth + 6) * S}
+                scale={top.scale}
+                centerX={top.centerX}
+                centerY={top.centerY}
                 primaryPos={primaryPos}
                 comparePos={comparePos}
+                pdLabel={top.pdLabel}
                 highlightedLimit={highlightedLimit}
               />
             )}
@@ -616,27 +676,39 @@ export const Visualizer: React.FC<VisualizerProps> = React.memo(
             })}
           </div>
 
+          {/* A limit crossing is the one change on this board that a reader
+              cannot see coming, so it is announced rather than only coloured. */}
+          <p className="sr-only" aria-live="polite">
+            {overLimit.length > 0
+              ? `${t.overLimit}: ${overLimit.map((row) => `${row.name} ${row.value}`).join(', ')}`
+              : ''}
+          </p>
+
           {/* The caption row: the definition of whichever caliper is being
               read, and the scale the sheet is drawn at. */}
             {variant === 'classic' && !result.error ? (
-            <p
-              key={active ? active.id : 'hint'}
-              className={`caliper-snap mt-2 min-h-[20px] px-1 text-[13px] leading-snug ${
-                active ? 'text-sheet-ink' : 'text-sheet-muted'
-              }`}
-            >
-              {active ? active.note : t.caliperHint}
-            </p>
-          ) : (
-            <div className="mt-1.5 flex min-h-[20px] items-baseline justify-between gap-4 px-1">
+            <div aria-live="polite">
               <p
                 key={active ? active.id : 'hint'}
-                className={`caliper-snap text-[13px] leading-snug ${
+                className={`caliper-snap mt-2 min-h-[20px] px-1 text-[13px] leading-snug ${
                   active ? 'text-sheet-ink' : 'text-sheet-muted'
-                } ${compact ? 'line-clamp-1' : ''}`}
+                }`}
               >
                 {active ? active.note : t.caliperHint}
               </p>
+            </div>
+          ) : (
+            <div className="mt-1.5 flex min-h-[20px] items-baseline justify-between gap-4 px-1">
+              <div aria-live="polite" className="min-w-0">
+                <p
+                  key={active ? active.id : 'hint'}
+                  className={`caliper-snap text-[13px] leading-snug ${
+                    active ? 'text-sheet-ink' : 'text-sheet-muted'
+                  } ${compact ? 'line-clamp-1' : ''}`}
+                >
+                  {active ? active.note : t.caliperHint}
+                </p>
+              </div>
               {compareResult && view !== 'front' ? (
                 <CompareLegend
                   lang={lang}
@@ -651,7 +723,7 @@ export const Visualizer: React.FC<VisualizerProps> = React.memo(
                     ? t.sheetScaleNote
                         .replace('{s}', String(S))
                         .replace('{f}', String(frontScale))
-                    : t.sheetScaleSingle.replace('{s}', String(S))}
+                    : t.sheetScaleSingle.replace('{s}', String(viewScale))}
                 </p>
               ) : null}
             </div>

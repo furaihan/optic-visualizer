@@ -48,7 +48,11 @@ export function HeaderBar({
   const t = translations[lang];
 
   return (
-    <header className="flex min-h-12 shrink-0 items-center justify-between gap-2 bg-sheet-ground px-3 py-1 sm:px-4">
+    // The toolbar holds one row: the switcher on the left, the session's
+    // actions on the right, and the inspector's word only when there is room
+    // for it. Nothing wraps, because a second row here is a row the drawing
+    // does not get — so what gives way is the word, then the actions' labels.
+    <header className="flex min-h-12 shrink-0 items-center justify-start gap-1 bg-sheet-ground px-3 py-1 sm:gap-2 sm:px-4">
       {onToggleInspector && (
         <Button
           variant="ghost"
@@ -59,7 +63,7 @@ export function HeaderBar({
           title={t.inspectorLabel}
         >
           <SlidersIcon size={14} aria-hidden="true" />
-          <span className="hidden sm:inline">{t.inspectorLabel}</span>
+          <span className="sr-only 2xl:not-sr-only">{t.inspectorLabel}</span>
         </Button>
       )}
 
@@ -67,24 +71,24 @@ export function HeaderBar({
         <Tabs
           value={view}
           onValueChange={(v) => onViewChange(v as View)}
-          className="order-2 min-w-0"
+          className="order-2 min-w-0 shrink-0"
         >
           <TabsList className="h-9 w-auto min-w-0 gap-0 rounded-none bg-sheet-panel p-1">
             <TabsTrigger
               value="side"
-              className="h-full min-w-0 rounded-none px-3 text-[13px] font-medium text-sheet-muted data-active:bg-sheet-ground data-active:text-sheet-ink group-data-[variant=default]/tabs-list:data-active:shadow-none"
+              className="h-full flex-none whitespace-nowrap rounded-none px-3 text-[13px] font-medium text-sheet-muted data-active:bg-sheet-ground data-active:text-sheet-ink group-data-[variant=default]/tabs-list:data-active:shadow-none"
             >
               {t.sideProfile}
             </TabsTrigger>
             <TabsTrigger
               value="top"
-              className="h-full min-w-0 rounded-none px-3 text-[13px] font-medium text-sheet-muted data-active:bg-sheet-ground data-active:text-sheet-ink group-data-[variant=default]/tabs-list:data-active:shadow-none"
+              className="h-full flex-none whitespace-nowrap rounded-none px-3 text-[13px] font-medium text-sheet-muted data-active:bg-sheet-ground data-active:text-sheet-ink group-data-[variant=default]/tabs-list:data-active:shadow-none"
             >
               {t.topDown}
             </TabsTrigger>
             <TabsTrigger
               value="front"
-              className="h-full min-w-0 rounded-none px-3 text-[13px] font-medium text-sheet-muted data-active:bg-sheet-ground data-active:text-sheet-ink group-data-[variant=default]/tabs-list:data-active:shadow-none"
+              className="h-full flex-none whitespace-nowrap rounded-none px-3 text-[13px] font-medium text-sheet-muted data-active:bg-sheet-ground data-active:text-sheet-ink group-data-[variant=default]/tabs-list:data-active:shadow-none"
             >
               {t.frontView}
             </TabsTrigger>
@@ -92,7 +96,7 @@ export function HeaderBar({
         </Tabs>
       )}
 
-      <div className="order-3 ml-auto flex shrink-0 items-center gap-1 sm:gap-2">
+      <div className="order-3 ml-auto flex min-w-0 shrink items-center gap-0.5 sm:gap-1">
         <SessionControls
           lang={lang}
           onReset={onReset}

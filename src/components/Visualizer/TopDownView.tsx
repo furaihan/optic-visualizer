@@ -9,6 +9,7 @@ import {
 import { Language, translations } from '../../lib/translations';
 import { LensPosition } from './types';
 import { DimH } from './SheetDefs';
+import { TOP_VIEW } from './sheet';
 import { backRadius, conicSagitta, powerInMeridian } from '../../lib/optic-engine/geometry';
 
 interface TopDownViewProps {
@@ -27,6 +28,8 @@ interface TopDownViewProps {
   centerY: number;
   primaryPos: LensPosition;
   comparePos: LensPosition | null;
+  /** The PD dimension's wording, chosen with the sheet's magnification. */
+  pdLabel: string;
   highlightedLimit?: 'a' | 'b' | 'dbl' | 'ed' | null;
 }
 
@@ -48,6 +51,7 @@ export const TopDownView: React.FC<TopDownViewProps> = ({
   centerY,
   primaryPos,
   comparePos,
+  pdLabel,
   highlightedLimit = null,
 }) => {
   const t = translations[lang];
@@ -136,6 +140,16 @@ export const TopDownView: React.FC<TopDownViewProps> = ({
   // the lens and read as a solid slab.
   const wallPx = Math.max(2, 1.2 * scale);
 
+  // The overall width sits below the temples, which is where a plan view puts
+  // it: the dimensions that measure the parts stay up near the parts. The
+  // wording and the scale are chosen together by the sheet, so the label is
+  // handed in rather than picked here.
+  const pdRow =
+    centerY +
+    depthPx +
+    Math.max(TOP_VIEW.templeBack * scale, TOP_VIEW.dimGap + TOP_VIEW.textRoom) +
+    TOP_VIEW.pdGap;
+
   return (
     <g>
       {/* Bridge: a single drawn arc, the way a plan view shows it. */}
@@ -176,19 +190,25 @@ export const TopDownView: React.FC<TopDownViewProps> = ({
               fillOpacity={highlightedLimit === 'a' ? 0.24 : 0.16}
             />
 
-            {/* Temple arm, drawn once per side as a thin curve. */}
+            {/* Temple arm: a hinge at the outer edge, then the arm running back
+                and a little outboard, which is the direction a temple actually
+                leaves a frame. It is drawn to the sheet's own length so the
+                plan view has the proportions of the frame rather than of a
+                strip. */}
             <path
-              d={
-                side === 1
-                  ? `M ${x + openingW} ${centerY + depthPx * 0.35}
-                     C ${x + openingW + 14 * scale} ${centerY + depthPx * 0.35},
-                       ${x + openingW + 20 * scale} ${centerY + depthPx * 0.9},
-                       ${x + openingW + 12 * scale} ${centerY + 22 * scale}`
-                  : `M ${x} ${centerY + depthPx * 0.35}
-                     C ${x - 14 * scale} ${centerY + depthPx * 0.35},
-                       ${x - 20 * scale} ${centerY + depthPx * 0.9},
-                       ${x - 12 * scale} ${centerY + 22 * scale}`
-              }
+              d={(() => {
+                // The hinge sits on the back outer corner of the rim, which is
+                // where a temple is fixed; the arm then runs back, splaying a
+                // few millimetres outboard.
+                const hingeX = side === 1 ? x + openingW : x;
+                const hingeY = centerY + depthPx * 0.8;
+                const endX = hingeX + side * TOP_VIEW.templeOut * scale;
+                const endY = centerY + depthPx + TOP_VIEW.templeBack * scale;
+                return `M ${hingeX} ${hingeY}
+                        C ${hingeX + side * 1.5 * scale} ${hingeY + 9 * scale},
+                          ${endX} ${endY - 10 * scale},
+                          ${endX} ${endY}`;
+              })()}
               fill="none"
               className={muted}
               stroke="currentColor"
@@ -229,21 +249,21 @@ export const TopDownView: React.FC<TopDownViewProps> = ({
         <DimH
           x1={centerX + halfGap}
           x2={centerX + halfGap + openingW}
-          y={centerY + depthPx + 26}
+          y={centerY + depthPx + TOP_VIEW.dimGap}
           label={`${depth.toFixed(1)}`}
           tone="muted"
         />
       </g>
 
-      {/* PD, the one number that belongs to the patient rather than the
-          frame: dimensioned between the two pupils, which is where it is
-          measured. */}
+      {/* PD, the one number that belongs to the patient rather than the frame:
+          dimensioned between the two pupils, which is where it is measured, and
+          set at the foot of the drawing as an overall width is. */}
       <g className={muted}>
         <DimH
-          x1={centerX - patient.pd / 2 * scale}
+          x1={centerX - (patient.pd / 2) * scale}
           x2={centerX + (patient.pd / 2) * scale}
-          y={centerY + depthPx + 44}
-          label={`${t.pd} ${patient.pd}`}
+          y={pdRow}
+          label={pdLabel}
           tone="muted"
         />
       </g>

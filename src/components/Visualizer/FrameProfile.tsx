@@ -132,10 +132,22 @@ export const FrameProfile: React.FC<FrameProfileProps> = ({
 
       {/* Bevel groove. */}
       <g
-        className={`cursor-help ${activeTarget === 'groove' ? 'text-sheet-warning' : 'text-sheet-muted'}`}
+        role="button"
+        tabIndex={0}
+        aria-pressed={activeTarget === 'groove'}
+        aria-label={`${t.groove} ${Math.round(frame.depth ? (grooveX / frame.depth) * 100 : 0)}%`}
+        className={`drawing-target cursor-help ${activeTarget === 'groove' ? 'text-sheet-warning' : 'text-sheet-muted'}`}
         onMouseEnter={() => onSelectTarget?.('groove')}
         onMouseLeave={() => onSelectTarget?.(null)}
+        onFocus={() => onSelectTarget?.('groove')}
+        onBlur={() => onSelectTarget?.(null)}
         onClick={() => onSelectTarget?.(activeTarget === 'groove' ? null : 'groove')}
+        onKeyDown={(event) => {
+          if (event.key === 'Enter' || event.key === ' ') {
+            event.preventDefault();
+            onSelectTarget?.('groove');
+          }
+        }}
       >
         <line
           x1={grooveX * scale}
@@ -161,7 +173,24 @@ export const FrameProfile: React.FC<FrameProfileProps> = ({
 
       {/* Anterior protrusion, measured from the front face of the rim. */}
       {anterior > 0 && (
-        <g className="text-sheet-warning">
+        <g
+          role="button"
+          tabIndex={0}
+          aria-pressed={activeTarget === 'anterior'}
+          aria-label={`${t.anteriorProt} ${anterior.toFixed(2)} mm`}
+          className="drawing-target cursor-help text-sheet-warning"
+          onMouseEnter={() => onSelectTarget?.('anterior')}
+          onMouseLeave={() => onSelectTarget?.(null)}
+          onFocus={() => onSelectTarget?.('anterior')}
+          onBlur={() => onSelectTarget?.(null)}
+          onClick={() => onSelectTarget?.(activeTarget === 'anterior' ? null : 'anterior')}
+          onKeyDown={(event) => {
+            if (event.key === 'Enter' || event.key === ' ') {
+              event.preventDefault();
+              onSelectTarget?.('anterior');
+            }
+          }}
+        >
           <ExtLine x1={0} y1={top} x2={-anterior * scale} y2={top} />
           <line
             x1={-anterior * scale}
@@ -172,10 +201,6 @@ export const FrameProfile: React.FC<FrameProfileProps> = ({
             strokeWidth={activeTarget === 'anterior' ? 2 : 1.4}
             markerStart="url(#sheet-arrow)"
             markerEnd="url(#sheet-arrow)"
-            className="cursor-help"
-            onMouseEnter={() => onSelectTarget?.('anterior')}
-            onMouseLeave={() => onSelectTarget?.(null)}
-            onClick={() => onSelectTarget?.(activeTarget === 'anterior' ? null : 'anterior')}
           />
           <text
             x={(-anterior * scale) / 2}
@@ -193,7 +218,24 @@ export const FrameProfile: React.FC<FrameProfileProps> = ({
 
       {/* Posterior protrusion, measured from the back face of the rim. */}
       {posterior > 0 && (
-        <g className="text-sheet-warning">
+        <g
+          role="button"
+          tabIndex={0}
+          aria-pressed={activeTarget === 'posterior'}
+          aria-label={`${t.posteriorProt} ${posterior.toFixed(2)} mm`}
+          className="drawing-target cursor-help text-sheet-warning"
+          onMouseEnter={() => onSelectTarget?.('posterior')}
+          onMouseLeave={() => onSelectTarget?.(null)}
+          onFocus={() => onSelectTarget?.('posterior')}
+          onBlur={() => onSelectTarget?.(null)}
+          onClick={() => onSelectTarget?.(activeTarget === 'posterior' ? null : 'posterior')}
+          onKeyDown={(event) => {
+            if (event.key === 'Enter' || event.key === ' ') {
+              event.preventDefault();
+              onSelectTarget?.('posterior');
+            }
+          }}
+        >
           <ExtLine x1={depth} y1={top} x2={depth + posterior * scale} y2={top} />
           <line
             x1={depth}
@@ -204,10 +246,6 @@ export const FrameProfile: React.FC<FrameProfileProps> = ({
             strokeWidth={activeTarget === 'posterior' ? 2 : 1.4}
             markerStart="url(#sheet-arrow)"
             markerEnd="url(#sheet-arrow)"
-            className="cursor-help"
-            onMouseEnter={() => onSelectTarget?.('posterior')}
-            onMouseLeave={() => onSelectTarget?.(null)}
-            onClick={() => onSelectTarget?.(activeTarget === 'posterior' ? null : 'posterior')}
           />
           <text
             x={depth + (posterior * scale) / 2}

@@ -1,28 +1,28 @@
 # Graph Report - optic-tools  (2026-11-03)
 
 ## Corpus Check
-- 153 files · ~191,795 words
+- 153 files · ~193,466 words
 - Verdict: corpus is large enough that graph structure adds value.
 - Unclassified: 7 file(s) not represented in the graph (top: (none) 2, .css 2, .lock 1)
 
 ## Summary
-- 803 nodes · 2466 edges · 27 communities (22 shown, 5 thin omitted)
+- 806 nodes · 2482 edges · 35 communities (28 shown, 7 thin omitted)
 - Extraction: 98% EXTRACTED · 2% INFERRED · 0% AMBIGUOUS · INFERRED: 52 edges (avg confidence: 0.86)
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
-- Built from commit: `83e130d3`
+- Built from commit: `89a11b81`
 - Run `git rev-parse HEAD` and compare to check if the graph is stale.
 - Run `graphify update .` after code changes (no API cost).
 
 ## Community Hubs (Navigation)
 - AsphericSidebar.tsx
 - optical.ts
-- Language
+- react
 - Landing Page & Home
 - Design
 - README Domain Concepts
-- main.tsx
+- useTheme.tsx
 - TypeScript Path Aliases
 - shadcn components.json Config
 - package.json Manifest
@@ -30,18 +30,26 @@
 - AsphericDesktopGrid.tsx
 - Runtime Dependencies
 - index.css (global stylesheet)
-- LandingBench.tsx
+- Trial Lens Set
 - ContactPage.tsx
 - Dev Dependencies
 - Product
 - Vite Build Config
 - npm Scripts
+- item.tsx
+- @base-ui/react
 - Intent Skills Sync Script
 - translations
 - Global CSS Type Shim
 - select.tsx
 - playwright
+- dropdown-menu.tsx
+- Trial Frame Fitting (bench image)
+- US Army Soldiers
 - resizable.tsx
+- US Navy Hospital Eye Examination Photograph (050129-N-6477M-012)
+- Trial Frame Reading Photograph
+- alert.tsx
 
 ## God Nodes (most connected - your core abstractions)
 1. `react` - 76 edges
@@ -62,10 +70,10 @@
   DESIGN.md → src/components/landing/cross/CrossSection.tsx
 - `Motion` --references--> `useReveal()`  [INFERRED]
   DESIGN.md → src/components/landing/useReveal.ts
+- `AsphericSidebarProps` --references--> `Language`  [EXTRACTED]
+  src/components/AsphericSidebar.tsx → src/lib/translations/types.ts
 - `SimulatorLayout()` --calls--> `BrandRule()`  [EXTRACTED]
   src/routes/simulator-layout.tsx → src/components/BrandRule.tsx
-- `LandingFeatures()` --calls--> `GroupMarker()`  [EXTRACTED]
-  src/components/landing/LandingFeatures.tsx → src/components/Sidebar/GroupMarker.tsx
 
 ## Import Cycles
 - None detected.
@@ -75,23 +83,23 @@
 - **Spherical Lens Thickness & Protrusion Calculation Pipeline** — readme_combined_decentration, readme_effective_radius, readme_surface_radii, readme_sagitta_formula, readme_center_edge_thickness, readme_frame_protrusion [EXTRACTED 1.00]
 - **AGENTS.md Agent Workflow Policies** — agents_intent_skill_loading, agents_graphify_knowledge_graph, agents_graphify_query_first_rule [INFERRED 0.85]
 
-## Communities (27 total, 5 thin omitted)
+## Communities (35 total, 7 thin omitted)
 
 ### Community 0 - "AsphericSidebar.tsx"
-Cohesion: 0.06
-Nodes (64): @base-ui/react, cn, AsphericSidebar(), AsphericSurfacePanel(), COEFFICIENT_STEP, BrandRule(), BevelControl(), Control() (+56 more)
+Cohesion: 0.07
+Nodes (64): cn, lucide-react, AsphericSidebar(), AsphericSidebarProps, AsphericSurfacePanel(), COEFFICIENT_STEP, BrandRule(), LandingFeatures() (+56 more)
 
 ### Community 1 - "optical.ts"
-Cohesion: 0.07
-Nodes (66): ASPHERIC_EXAMPLE, LandingModules(), REFERENCE_FRAME, REFERENCE_PATIENT, LandingProof(), REFERENCE_FRAME, REFERENCE_LENS, REFERENCE_PATIENT (+58 more)
+Cohesion: 0.08
+Nodes (61): LandingModules(), LandingProof(), ERGONOMIC_LIMITS, FRAME_TYPE_OVERRIDES, MATERIALS_DB, OpticalMaterial, flaggedCount(), ASPHERIC_ENGINE_VERSION (+53 more)
 
-### Community 2 - "Language"
-Cohesion: 0.07
-Nodes (71): AsphericSidebarProps, asphericPath(), asphericSag(), AsphericVisualizer, AsphericVisualizerProps, LensPosition, SimulatorShellProps, Cell (+63 more)
+### Community 2 - "react"
+Cohesion: 0.09
+Nodes (40): react, trial-lens-set.jpg (open trial lens set case), asphericPath(), asphericSag(), AsphericVisualizer, LensPosition, SimulatorShellProps, CompareLegend() (+32 more)
 
 ### Community 3 - "Landing Page & Home"
-Cohesion: 0.08
-Nodes (49): lucide-react, react, CrossBar(), CrossHero(), ASPHERIC_EXAMPLE, CrossClose(), CrossFooter(), CrossInstruments() (+41 more)
+Cohesion: 0.06
+Nodes (85): AsphericVisualizerProps, CrossBar(), CrossHero(), ASPHERIC_EXAMPLE, CrossClose(), CrossFooter(), CrossInstruments(), CrossQuestions() (+77 more)
 
 ### Community 4 - "Design"
 Cohesion: 0.12
@@ -101,9 +109,9 @@ Nodes (15): Accessibility, Design, Layout, Motion, Palette — dark (`.dark .cro
 Cohesion: 0.08
 Nodes (31): graphify-out Knowledge Graph, AMP - Aktriyo Measuring Project (page title), HTML Entry Point (index.html), Aberration Metrics (SA0, Coma X), Akademi Optometri Yogyakarta (Aktriyo), AMP_ASPH_V1.0.0 Aspheric Engine Core, AMP_V4.2.0 Engine Core, Project Architecture Layout (+23 more)
 
-### Community 6 - "main.tsx"
-Cohesion: 0.12
-Nodes (16): react-dom, vitest, initialState, Theme, ThemeContext, ThemeProvider(), ThemeProviderProps, ThemeProviderState (+8 more)
+### Community 6 - "useTheme.tsx"
+Cohesion: 0.29
+Nodes (6): initialState, Theme, ThemeContext, ThemeProvider(), ThemeProviderProps, ThemeProviderState
 
 ### Community 7 - "TypeScript Path Aliases"
 Cohesion: 0.08
@@ -118,20 +126,20 @@ Cohesion: 0.10
 Nodes (19): engines, bun, intent, skills, name, packageManager, private, type (+11 more)
 
 ### Community 10 - "RootLayout.tsx"
-Cohesion: 0.08
-Nodes (21): class-variance-authority, CheatSheetBody(), HotkeysCheatSheet(), HotkeysCheatSheetProps, LandingNav(), GlobalNav(), NavItem(), RootLayout() (+13 more)
+Cohesion: 0.28
+Nodes (10): CheatSheetBody(), HotkeysCheatSheet(), HotkeysCheatSheetProps, LandingNav(), GlobalNav(), NavItem(), RootLayout(), DropdownMenuItem() (+2 more)
 
 ### Community 11 - "AsphericDesktopGrid.tsx"
-Cohesion: 0.07
-Nodes (56): @tanstack/react-router, AsphericDesktopGrid(), ErrorBoundary, Props, State, AsphericMobileViews(), DesktopGrid(), MobileViews() (+48 more)
+Cohesion: 0.06
+Nodes (62): react-dom, @tanstack/react-router, vitest, AsphericDesktopGrid(), ErrorBoundary, Props, State, AsphericMobileViews() (+54 more)
 
 ### Community 12 - "Runtime Dependencies"
 Cohesion: 0.12
 Nodes (16): dependencies, @base-ui/react, class-variance-authority, cn, @fontsource-variable/geist, lucide-react, react, react-dom (+8 more)
 
-### Community 14 - "LandingBench.tsx"
-Cohesion: 0.08
-Nodes (40): Bench Photo: Soldiers Adjusting an Optical Instrument in a Field Clinic, Mobile Field Optical Clinic Interior, Optical Bench Instrument (Lensometer / Vertexometer Style Device), Optical Instrument Adjustment and Calibration, OWLES Name Tape, UCP Digital Camouflage Army Combat Uniform, US Army Soldiers, Trial Frame Fitting (bench image) (+32 more)
+### Community 14 - "Trial Lens Set"
+Cohesion: 0.36
+Nodes (10): Accessories Compartment (occluders and marking pen), Concave Cylinder Lens Row, Concave Sphere Lens Row, Convex Cylinder Lens Row, Convex Sphere Lens Row, Diopter Power Labels on Lens Rows, Metal Carrying Case with Lens Compartments, Prism Lenses (PRISMS compartment) (+2 more)
 
 ### Community 15 - "ContactPage.tsx"
 Cohesion: 0.22
@@ -153,6 +161,14 @@ Nodes (4): @tailwindcss/vite, vite, @vitejs/plugin-react, root
 Cohesion: 0.29
 Nodes (7): scripts, build, clean, dev, lint, preview, test
 
+### Community 21 - "item.tsx"
+Cohesion: 0.16
+Nodes (9): FieldSeparator(), Item(), ItemGroup(), ItemMedia(), itemMediaVariants, ItemSeparator(), ItemTitle(), itemVariants (+1 more)
+
+### Community 22 - "@base-ui/react"
+Cohesion: 0.24
+Nodes (6): @base-ui/react, class-variance-authority, ToggleGroupContext, ToggleGroupItem(), Toggle(), toggleVariants
+
 ### Community 24 - "translations"
 Cohesion: 0.15
 Nodes (32): @tanstack/react-hotkeys, AppFooter(), FooterFigures, CopyOrderButton(), HeaderBar(), HeaderBarProps, InspectorDrawer(), InspectorDrawerBody() (+24 more)
@@ -165,35 +181,51 @@ Nodes (3): SelectContent(), SelectScrollDownButton(), SelectScrollUpButton()
 Cohesion: 0.29
 Nodes (6): mcp, servers, command, type, $schema, playwright
 
+### Community 29 - "Trial Frame Fitting (bench image)"
+Cohesion: 0.44
+Nodes (9): Trial Frame Fitting (bench image), Trial Frame Axis Scale, Diopter Lens Power, Eye Examination, Optometrist / Eye Care Practitioner, Patient Undergoing Eye Exam, Subjective Refraction, Trial Frame (+1 more)
+
+### Community 30 - "US Army Soldiers"
+Cohesion: 0.48
+Nodes (7): Bench Photo: Soldiers Adjusting an Optical Instrument in a Field Clinic, Mobile Field Optical Clinic Interior, Optical Bench Instrument (Lensometer / Vertexometer Style Device), Optical Instrument Adjustment and Calibration, OWLES Name Tape, UCP Digital Camouflage Army Combat Uniform, US Army Soldiers
+
+### Community 32 - "US Navy Hospital Eye Examination Photograph (050129-N-6477M-012)"
+Cohesion: 0.52
+Nodes (7): US Navy Hospital Eye Examination Photograph (050129-N-6477M-012), Clinician-Patient Eye Contact at the Eyepiece, Corrective Eyewear (Spectacles), Green Fixation Target Light, U.S. Navy Hospital Optometry Clinic, Ophthalmic Examination, Slit Lamp Biomicroscope
+
+### Community 33 - "Trial Frame Reading Photograph"
+Cohesion: 0.67
+Nodes (6): Trial Frame Reading Photograph, Presbyopia and Near-Vision Correction, Near-Vision Reading Card, Subjective Refraction Examination, Ophthalmic Trial Frame, Community Vision Screening Setting
+
 ## Ambiguous Edges - Review These
-- `Accessories Compartment (occluders and marking pen)` → `Trial Lens Set`  [AMBIGUOUS]
-  src/assets/bench/trial-lens-set.jpg · relation: shares_data_with
 - `Presbyopia and Near-Vision Correction` → `Trial Frame Reading Photograph`  [AMBIGUOUS]
   src/assets/bench/trial-frame-reading.jpg · relation: semantically_similar_to
+- `Accessories Compartment (occluders and marking pen)` → `Trial Lens Set`  [AMBIGUOUS]
+  src/assets/bench/trial-lens-set.jpg · relation: shares_data_with
 
 ## Knowledge Gaps
 - **22 isolated node(s):** `@fontsource-variable/geist`, `shadcn`, `tw-animate-css`, `@types/node`, `@types/react` (+17 more)
-  These have ≤1 connection - possible missing edges or undocumented components. (Counts symbols only; 270 node(s) total have ≤1 connection when file, concept and rationale nodes are included.)
-- **5 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
+  These have ≤1 connection - possible missing edges or undocumented components. (Counts symbols only; 269 node(s) total have ≤1 connection when file, concept and rationale nodes are included.)
+- **7 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
 
 ## Suggested Questions
 _Questions this graph is uniquely positioned to answer:_
 
-- **Why does `react` connect `Landing Page & Home` to `AsphericSidebar.tsx`, `optical.ts`, `Language`, `Design`, `main.tsx`, `package.json Manifest`, `RootLayout.tsx`, `AsphericDesktopGrid.tsx`, `LandingBench.tsx`, `ContactPage.tsx`, `popover.tsx`, `translations`, `select.tsx`?**
-  _High betweenness centrality (0.276) - this node is a cross-community bridge._
+- **Why does `react` connect `react` to `AsphericSidebar.tsx`, `alert.tsx`, `Landing Page & Home`, `Design`, `useTheme.tsx`, `package.json Manifest`, `RootLayout.tsx`, `AsphericDesktopGrid.tsx`, `ContactPage.tsx`, `popover.tsx`, `item.tsx`, `@base-ui/react`, `translations`, `select.tsx`, `dropdown-menu.tsx`?**
+  _High betweenness centrality (0.277) - this node is a cross-community bridge._
 - **What connects `@fontsource-variable/geist`, `shadcn`, `tw-animate-css` to the rest of the system?**
   _22 weakly-connected nodes found - possible documentation gaps or missing edges._
 - **Should `AsphericSidebar.tsx` be split into smaller, more focused modules?**
-  _Cohesion score 0.05980292218824329 - nodes in this community are weakly interconnected._
-- **Why does `@tanstack/react-router` connect `AsphericDesktopGrid.tsx` to `optical.ts`, `Landing Page & Home`, `main.tsx`, `package.json Manifest`, `RootLayout.tsx`?**
+  _Cohesion score 0.06767676767676768 - nodes in this community are weakly interconnected._
+- **Why does `@tanstack/react-router` connect `AsphericDesktopGrid.tsx` to `package.json Manifest`, `RootLayout.tsx`, `Landing Page & Home`?**
   _High betweenness centrality (0.045) - this node is a cross-community bridge._
 - **Should `optical.ts` be split into smaller, more focused modules?**
-  _Cohesion score 0.06971975393028025 - nodes in this community are weakly interconnected._
+  _Cohesion score 0.0782608695652174 - nodes in this community are weakly interconnected._
 
 ### Low-confidence Hints
 _AMBIGUOUS edges — the extractor was unsure. Verify before acting on these._
 
-- **What is the exact relationship between `Accessories Compartment (occluders and marking pen)` and `Trial Lens Set`?**
-  _Edge tagged AMBIGUOUS (relation: shares_data_with) - confidence is low._
 - **What is the exact relationship between `Presbyopia and Near-Vision Correction` and `Trial Frame Reading Photograph`?**
   _Edge tagged AMBIGUOUS (relation: semantically_similar_to) - confidence is low._
+- **What is the exact relationship between `Accessories Compartment (occluders and marking pen)` and `Trial Lens Set`?**
+  _Edge tagged AMBIGUOUS (relation: shares_data_with) - confidence is low._
