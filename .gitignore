@@ -9,6 +9,7 @@ coverage/
 deploy-guide.md
 deploy-guide-docker.md
 .taste-skill/
+.impeccable/
 
 # graphify: commit the graph and its docs, ignore machine-local + regenerable files
 graphify-out/cache/
