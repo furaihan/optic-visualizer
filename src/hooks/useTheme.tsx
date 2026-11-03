@@ -10,12 +10,15 @@ type ThemeProviderProps = {
 
 type ThemeProviderState = {
   theme: Theme;
+  /** The theme the page is actually rendering, after 'system' is resolved. */
+  resolved: 'light' | 'dark';
   setTheme: (theme: Theme) => void;
   toggleTheme: () => void;
 };
 
 const initialState: ThemeProviderState = {
   theme: 'system',
+  resolved: 'light',
   setTheme: () => null,
   toggleTheme: () => null,
 };
@@ -50,8 +53,19 @@ export function ThemeProvider({
     root.classList.add(theme);
   }, [theme]);
 
+  // What the page is actually showing: the stored preference may be 'system',
+  // and a control that says DARK on a dark page is lying about its own state.
+  const resolved: 'light' | 'dark' =
+    theme === 'system'
+      ? typeof window !== 'undefined' &&
+        window.matchMedia('(prefers-color-scheme: dark)').matches
+        ? 'dark'
+        : 'light'
+      : theme;
+
   const value = {
     theme,
+    resolved,
     setTheme: (theme: Theme) => {
       localStorage.setItem(storageKey, theme);
       setTheme(theme);

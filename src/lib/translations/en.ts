@@ -296,6 +296,18 @@ export const translations_en: AppTranslations = {
   landHeroReadout: 'Live Optical Simulation Readout',
   landHeroEngine: 'Engine {version}',
   landHeroIndex: 'Refractive Index & Material',
+  /** The plate's own label: what the drawing is a cut through. */
+  landCrossSection: 'Section — bevel {pct}%',
+  landCrossElevation: 'Front elevation',
+  landCrossFlatPlane: 'Flat frame plane',
+  landCrossCheckTitle: 'The check',
+  landCrossCaseStandard: 'Standard case',
+  landCrossCasePushed: 'Pushed past the limit',
+  landCrossOverCount: '{n} of {total} over limit',
+  landCrossCaseNote:
+    'The same frame, measured against two prescriptions. Nothing about the frame changed; only the blank did.',
+  landCrossReadNote:
+    'Every figure on this page is calculated by the engine at render time. Change an input and the drawing, the schedule, and the check move together.',
   landStatement:
     'Enter a prescription¦ and frame measurements.¦ Review the lens profile,¦ bevel position, and calculated fabrication measurements.',
   landHowTitle: 'Three steps to check lens fit',

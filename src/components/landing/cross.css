@@ -1,0 +1,1186 @@
+/* ==================================================================
+   The Optical Cross — the landing page's own world.
+
+   Scoped to .cross so the workbench keeps its sheet roles untouched.
+   A lens is two meridians crossing; the page is built on that cross.
+   Four inks, each with one job. Hairlines, square corners, no shadow.
+   ================================================================== */
+
+.cross {
+  --pad: clamp(20px, 4vw, 56px);
+  --measure: 1280px;
+  --split: 37.2%;
+  /* The track is the measure plus its gutters; the content edge is where a
+     line may start; the meridian is one fixed fraction across the content. */
+  --track-w: min(100%, calc(var(--measure) + var(--pad) * 2));
+  --track-left: calc((100% - var(--track-w)) / 2);
+  --edge: calc(var(--track-left) + var(--pad));
+  --content-w: calc(var(--track-w) - var(--pad) * 2);
+  --meridian: calc(var(--edge) + var(--content-w) * 0.372);
+  /* How far the plate overhangs the content edge. */
+  --plate-bleed: clamp(0px, 4vw, 60px);
+  --plate-inset: clamp(12px, 1.5vw, 20px);
+
+  --cross-paper: #e9e9e4;
+  --cross-paper-2: #e0e0da;
+  --cross-ink: #101211;
+  --cross-ink-soft: #4a504c;
+  --cross-rule: #101211;
+  --cross-pine: #0f3b33;
+  --cross-pine-ink: #e9e9e4;
+  --cross-check: #b0271d;
+  --cross-check-wash: #f2e3df;
+
+  position: relative;
+  overflow-x: clip;
+  background: var(--cross-paper);
+  color: var(--cross-ink);
+  font-family: 'Archivo Variable', ui-sans-serif, system-ui, sans-serif;
+  font-stretch: 100%;
+  -webkit-font-smoothing: antialiased;
+}
+
+.dark .cross {
+  --cross-paper: #0c0f0e;
+  --cross-paper-2: #171d1b;
+  --cross-ink: #e8e9e4;
+  --cross-ink-soft: #a4ada7;
+  --cross-rule: #e8e9e4;
+  --cross-pine: #16594c;
+  --cross-pine-ink: #eef1ea;
+  --cross-check: #f08a7c;
+  --cross-check-wash: #2a1a17;
+}
+
+/* The plate is a surface, not a picture: in dark it keeps its own edge so it
+   never dissolves into the ground behind it. */
+.dark .cross-hero__plate {
+  box-shadow: inset 0 0 0 1px rgb(255 255 255 / 0.07);
+}
+
+.cross ::selection {
+  background: var(--cross-pine);
+  color: var(--cross-pine-ink);
+}
+
+.cross :focus-visible {
+  outline: 2px solid var(--cross-ink);
+  outline-offset: 3px;
+}
+
+/* ------------------------------------------------------------------
+   The spine: one meridian, unbroken from the bar to the footer.
+   ------------------------------------------------------------------ */
+
+.cross-spine {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+}
+
+.cross-spine::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: calc(var(--edge) + 18px);
+  width: 1px;
+  background: var(--cross-rule);
+  opacity: 0.16;
+}
+
+@media (min-width: 1024px) {
+  .cross-spine::before {
+    left: var(--meridian);
+    opacity: 0.22;
+  }
+}
+
+/* ------------------------------------------------------------------
+   Measure and split
+   ------------------------------------------------------------------ */
+
+.cross-track {
+  width: 100%;
+  max-width: var(--track-w);
+  margin-inline: auto;
+  padding-inline: var(--pad);
+  position: relative;
+  z-index: 1;
+}
+
+.cross-split {
+  display: block;
+  padding-left: 18px;
+}
+
+@media (min-width: 1024px) {
+  .cross-split {
+    display: grid;
+    grid-template-columns: var(--split) 1fr;
+    padding-left: 0;
+  }
+  .cross-split > :first-child {
+    padding-right: clamp(16px, 2.4vw, 40px);
+  }
+  .cross-split > :last-child {
+    padding-left: clamp(16px, 2.4vw, 40px);
+  }
+}
+
+/* A band is a full-width row with a hairline at its top: the page's
+   horizontal system. */
+.cross-band {
+  position: relative;
+  border-top: 1px solid color-mix(in srgb, var(--cross-rule) 78%, transparent);
+}
+
+.cross-band--tight {
+  border-top-color: color-mix(in srgb, var(--cross-rule) 40%, transparent);
+}
+
+/* ------------------------------------------------------------------
+   Type
+   ------------------------------------------------------------------ */
+
+.cross-display {
+  font-family: 'Archivo Variable', ui-sans-serif, system-ui, sans-serif;
+  font-stretch: 118%;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: -0.022em;
+  line-height: 0.96;
+  color: var(--cross-ink);
+  text-wrap: balance;
+}
+
+.cross-h2 {
+  font-family: 'Archivo Variable', ui-sans-serif, system-ui, sans-serif;
+  font-stretch: 112%;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: -0.012em;
+  line-height: 1.04;
+  font-size: clamp(1.35rem, 1.9vw, 1.75rem);
+  color: var(--cross-ink);
+  text-wrap: balance;
+}
+
+.cross-h3 {
+  font-family: 'Archivo Variable', ui-sans-serif, system-ui, sans-serif;
+  font-stretch: 108%;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: -0.008em;
+  line-height: 1.1;
+  font-size: clamp(1.05rem, 1.25vw, 1.2rem);
+  color: var(--cross-ink);
+}
+
+.cross-body {
+  font-family: 'Archivo Variable', ui-sans-serif, system-ui, sans-serif;
+  font-size: 1.0625rem;
+  line-height: 1.62;
+  color: var(--cross-ink-soft);
+  max-width: 62ch;
+  text-wrap: pretty;
+}
+
+.cross-fig {
+  font-family: 'Kode Mono Variable', ui-monospace, monospace;
+  font-variant-numeric: tabular-nums;
+  font-weight: 500;
+  letter-spacing: -0.01em;
+  color: var(--cross-ink);
+}
+
+.cross-label {
+  font-family: 'Kode Mono Variable', ui-monospace, monospace;
+  font-size: 0.75rem;
+  line-height: 1.3;
+  letter-spacing: 0.13em;
+  text-transform: uppercase;
+  color: var(--cross-ink-soft);
+}
+
+.cross-label--ink {
+  color: var(--cross-ink);
+}
+
+/* ------------------------------------------------------------------
+   The plate: the one surface that is not paper.
+   ------------------------------------------------------------------ */
+
+.cross-plate {
+  position: relative;
+  background: var(--cross-pine);
+  color: var(--cross-pine-ink);
+}
+
+.cross-plate .cross-label {
+  color: color-mix(in srgb, var(--cross-pine-ink) 82%, var(--cross-pine));
+}
+
+.cross-hero__plate .cross-label {
+  color: color-mix(in srgb, var(--cross-pine-ink) 82%, var(--cross-pine));
+}
+
+/* ------------------------------------------------------------------
+   Controls
+   ------------------------------------------------------------------ */
+
+.cross-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 2.5rem;
+  min-height: 3.25rem;
+  padding: 0 1.25rem;
+  background: var(--cross-ink);
+  color: var(--cross-paper);
+  font-size: 1rem;
+  letter-spacing: 0.01em;
+  border: 1px solid var(--cross-ink);
+  transition: background-color 160ms cubic-bezier(0.16, 1, 0.3, 1),
+    color 160ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.cross-btn:hover {
+  background: var(--cross-pine);
+  border-color: var(--cross-pine);
+  color: var(--cross-pine-ink);
+}
+
+.cross-btn--pine {
+  background: var(--cross-pine);
+  border-color: var(--cross-pine);
+  color: var(--cross-pine-ink);
+}
+
+.cross-btn--pine:hover {
+  background: var(--cross-ink);
+  border-color: var(--cross-ink);
+  color: var(--cross-paper);
+}
+
+.cross-btn__arrow {
+  transition: transform 200ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.cross-btn:hover .cross-btn__arrow {
+  transform: translateX(4px);
+}
+
+.cross-link {
+  color: var(--cross-ink);
+  text-decoration: underline;
+  text-decoration-color: color-mix(in srgb, var(--cross-ink) 35%, transparent);
+  text-underline-offset: 6px;
+  text-decoration-thickness: 1px;
+  transition: text-decoration-color 160ms;
+}
+
+.cross-link:hover {
+  text-decoration-color: var(--cross-ink);
+}
+
+/* The range: a hairline track and one pine stop. */
+.cross-range {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 100%;
+  height: 28px;
+  background: transparent;
+  cursor: ew-resize;
+}
+
+.cross-range::-webkit-slider-runnable-track {
+  height: 1px;
+  background: var(--cross-ink);
+}
+
+.cross-range::-moz-range-track {
+  height: 1px;
+  background: var(--cross-ink);
+}
+
+.cross-range::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 15px;
+  height: 15px;
+  margin-top: -7px;
+  border-radius: 50%;
+  background: var(--cross-pine);
+  border: none;
+}
+
+.cross-range::-moz-range-thumb {
+  width: 15px;
+  height: 15px;
+  border-radius: 50%;
+  background: var(--cross-pine);
+  border: none;
+}
+
+/* The index ladder: five stops, the active one filled. */
+.cross-stop {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 8px 2px;
+  text-align: left;
+  border-top: 1px solid color-mix(in srgb, var(--cross-rule) 30%, transparent);
+  color: var(--cross-ink-soft);
+  transition: color 140ms, border-color 140ms, background-color 140ms;
+}
+
+.cross-stop:hover {
+  color: var(--cross-ink);
+  border-top-color: var(--cross-ink);
+}
+
+.cross-stop[aria-pressed='true'] {
+  background: var(--cross-ink);
+  border-top-color: var(--cross-ink);
+  color: var(--cross-paper);
+  padding-inline: 6px;
+}
+
+/* ------------------------------------------------------------------
+   Rows: the measured table the page is read down.
+   ------------------------------------------------------------------ */
+
+.cross-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: baseline;
+  gap: 0.3rem 1rem;
+  padding: 0.85rem 0;
+  border-bottom: 1px solid color-mix(in srgb, var(--cross-rule) 18%, transparent);
+}
+
+/* On a phone the three figures stack under their own name, each carrying its
+   column label: a table without headers is three unlabelled numbers. */
+@media (max-width: 767px) {
+  .cross-row {
+    grid-template-columns: minmax(0, 1fr) auto;
+  }
+  .cross-row__label {
+    grid-column: 1 / -1;
+  }
+  .cross-row__value,
+  .cross-row__limit,
+  .cross-row__status {
+    display: flex;
+    align-items: baseline;
+    gap: 0.6rem;
+  }
+  .cross-row__value {
+    grid-column: 1;
+  }
+  .cross-row__limit {
+    grid-column: 2;
+  }
+  .cross-row__status {
+    grid-column: 1 / -1;
+  }
+  /* The micro-label must clear 4.5:1 on both grounds: 62% of the ink on
+     paper, 60% on the dark field. */
+  .cross-row__unit {
+    color: color-mix(in srgb, var(--cross-ink) 62%, var(--cross-paper));
+  }
+  .dark .cross-row__unit {
+    color: color-mix(in srgb, var(--cross-ink) 60%, var(--cross-paper));
+  }
+}
+
+@media (min-width: 768px) {
+  .cross-row__unit {
+    display: none;
+  }
+}
+
+@media (min-width: 768px) {
+  .cross-row {
+    grid-template-columns: minmax(0, 1.4fr) 7rem 5.5rem 7rem;
+    gap: 1.5rem;
+  }
+}
+
+.cross-row:last-child {
+  border-bottom: none;
+}
+
+.cross-row--over {
+  color: var(--cross-check);
+}
+
+.cross-row--over .cross-fig,
+.cross-row--over .cross-label {
+  color: var(--cross-check);
+}
+
+/* ------------------------------------------------------------------
+   Questions
+   ------------------------------------------------------------------ */
+
+.cross-q {
+  border-bottom: 1px solid color-mix(in srgb, var(--cross-rule) 22%, transparent);
+}
+
+.cross-q > summary {
+  font-family: 'Archivo Variable', ui-sans-serif, system-ui, sans-serif;
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 1.25rem;
+  padding: 1.35rem 0;
+  cursor: pointer;
+  list-style: none;
+  font-size: 1.0625rem;
+  line-height: 1.4;
+  color: var(--cross-ink);
+}
+
+.cross-q > summary::-webkit-details-marker {
+  display: none;
+}
+
+.cross-q > summary:hover {
+  color: var(--cross-pine);
+}
+
+.cross-q__mark {
+  flex: none;
+  position: relative;
+  width: 14px;
+  height: 14px;
+  margin-top: 0.35em;
+}
+
+.cross-q__mark::before,
+.cross-q__mark::after {
+  content: '';
+  position: absolute;
+  background: currentColor;
+}
+
+.cross-q__mark::before {
+  left: 0;
+  top: 6px;
+  width: 14px;
+  height: 1.5px;
+}
+
+.cross-q__mark::after {
+  left: 6px;
+  top: 0;
+  width: 1.5px;
+  height: 14px;
+  transition: transform 200ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.cross-q[open] .cross-q__mark::after {
+  transform: scaleY(0);
+}
+
+/* ------------------------------------------------------------------
+   Motion: one authored moment. The section redraws when a figure
+   changes, because it is the same measurement.
+   ------------------------------------------------------------------ */
+
+@keyframes cross-redraw {
+  from {
+    opacity: 0.25;
+    transform: translateX(-2px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes cross-settle {
+  from {
+    opacity: 0.2;
+    transform: translateY(-3px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes cross-arrive {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.cross-redraw {
+  animation: cross-redraw 320ms cubic-bezier(0.16, 1, 0.3, 1) both;
+  transform-origin: center;
+}
+
+.cross-settle {
+  animation: cross-settle 260ms cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.cross-arrive {
+  animation: cross-arrive 620ms cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.cross-arrive-2 {
+  animation-delay: 90ms;
+}
+
+.cross-arrive-3 {
+  animation-delay: 170ms;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .cross-redraw,
+  .cross-settle,
+  .cross-arrive {
+    animation: none;
+  }
+  .cross *,
+  .cross *::before,
+  .cross *::after {
+    transition-duration: 0.01ms !important;
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+  }
+}
+
+/* ------------------------------------------------------------------
+   The bar
+   ------------------------------------------------------------------ */
+
+.cross-bar {
+  position: sticky;
+  top: 0;
+  z-index: 30;
+  background: color-mix(in srgb, var(--cross-paper) 96%, transparent);
+  backdrop-filter: blur(6px);
+  border-bottom: 1px solid color-mix(in srgb, var(--cross-rule) 22%, transparent);
+}
+
+.cross-navlink {
+  font-size: 0.9375rem;
+  color: var(--cross-ink-soft);
+  transition: color 140ms;
+  white-space: nowrap;
+}
+
+.cross-navlink:hover {
+  color: var(--cross-ink);
+}
+
+.cross-toggle {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 2.25rem;
+  height: 2.25rem;
+  padding-inline: 0.7rem;
+  white-space: nowrap;
+  font-family: 'Kode Mono Variable', ui-monospace, monospace;
+  font-size: 0.75rem;
+  letter-spacing: 0.1em;
+  color: var(--cross-ink-soft);
+  border: 1px solid color-mix(in srgb, var(--cross-rule) 30%, transparent);
+  transition: color 140ms, border-color 140ms, background-color 140ms;
+}
+
+.cross-toggle:hover {
+  color: var(--cross-ink);
+  border-color: var(--cross-ink);
+}
+
+.cross-toggle[aria-pressed='true'] {
+  background: var(--cross-ink);
+  border-color: var(--cross-ink);
+  color: var(--cross-paper);
+}
+
+/* Anchored sections clear the bar they land under. */
+.cross section[id] {
+  scroll-margin-top: 84px;
+}
+
+/* ------------------------------------------------------------------
+   The hero: the cross, at full scale.
+
+   Row one: the claim in the left cell, the frame's own values at the arm
+   ends of the right cell. Row two: the rule, across the whole measure.
+   Row three: the action and the controls on the left arm, the plate on the
+   right, bleeding past the content edge.
+   ------------------------------------------------------------------ */
+
+.cross-hero {
+  position: relative;
+  padding-top: clamp(26px, 3.4vh, 44px);
+  padding-bottom: clamp(46px, 6.5vh, 84px);
+}
+
+.cross-hero__grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  row-gap: clamp(18px, 2.6vh, 30px);
+}
+
+@media (min-width: 1024px) {
+  .cross-hero__grid {
+    grid-template-columns: var(--split) 1fr;
+    grid-template-rows: auto 1px auto;
+    align-items: stretch;
+    row-gap: 0;
+  }
+}
+
+.cross-hero__head {
+  grid-column: 1;
+  grid-row: 1;
+}
+
+@media (min-width: 1024px) {
+  .cross-hero__head {
+    padding-right: clamp(18px, 2.4vw, 40px);
+    padding-bottom: clamp(20px, 3.4vh, 40px);
+  }
+}
+
+.cross-hero__title {
+  font-family: 'Archivo Variable', ui-sans-serif, system-ui, sans-serif;
+  font-stretch: 118%;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: -0.032em;
+  line-height: 0.88;
+  font-size: clamp(1.9rem, 3.55vw, 3.15rem);
+  color: var(--cross-ink);
+  max-width: 16ch;
+  text-wrap: balance;
+}
+
+.cross-hero__arm {
+  grid-column: 1;
+  grid-row: 3;
+  display: flex;
+  flex-direction: column;
+  gap: clamp(20px, 2.8vh, 30px);
+}
+
+@media (min-width: 1024px) {
+  .cross-hero__arm {
+    grid-column: 1;
+    grid-row: 3;
+    padding-top: clamp(22px, 3vh, 36px);
+    padding-right: clamp(18px, 2.4vw, 40px);
+  }
+}
+
+/* The frame's own values: pinned to the ends of the right arm, above the rule. */
+.cross-hero__labels {
+  display: none;
+}
+
+/* On a phone the two plate labels stack; the second would wrap into three
+   lines above the drawing. */
+@media (max-width: 639px) {
+  .cross-hero__plate-head > :last-child {
+    display: none;
+  }
+  .cross-hero__plate-foot > :last-child {
+    display: none;
+  }
+}
+
+@media (min-width: 1024px) {
+  .cross-hero__labels {
+    grid-column: 2;
+    grid-row: 1;
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 1.5rem;
+    padding-left: clamp(18px, 2.4vw, 40px);
+    padding-bottom: 11px;
+  }
+}
+
+.cross-hero__rule {
+  grid-column: 1 / -1;
+  grid-row: 2;
+  height: 1px;
+  background: var(--cross-rule);
+  margin-top: clamp(18px, 2.6vh, 30px);
+}
+
+@media (min-width: 1024px) {
+  .cross-hero__rule {
+    margin-top: 0;
+  }
+}
+
+.cross-hero__stage {
+  grid-column: 1;
+  grid-row: 4;
+}
+
+@media (min-width: 1024px) {
+  .cross-hero__stage {
+    grid-column: 2;
+    grid-row: 3;
+    padding-top: clamp(22px, 3vh, 36px);
+    padding-left: clamp(18px, 2.4vw, 40px);
+    margin-right: calc(-1 * var(--plate-bleed));
+  }
+}
+
+/* The plate: the one surface that is not paper, bleeding to the edge. */
+.cross-hero__plate {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: clamp(8px, 1.4vw, 16px);
+  padding: var(--plate-inset);
+  background: var(--cross-pine);
+  color: var(--cross-pine-ink);
+}
+
+.cross-hero__plate-head,
+.cross-hero__plate-foot {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.75rem 1rem;
+  flex-wrap: wrap;
+}
+
+.cross-hero__drawing {
+  display: grid;
+  grid-template-rows: minmax(0, 1.15fr) minmax(0, 1fr);
+  gap: clamp(6px, 1vw, 14px);
+  min-height: 0;
+  flex: 1;
+}
+
+@media (min-width: 768px) and (max-width: 1023px) {
+  .cross-hero__drawing {
+    grid-template-rows: none;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  }
+}
+
+@media (min-width: 1024px) {
+  .cross-hero__drawing {
+    grid-template-rows: none;
+    grid-template-columns: minmax(0, 1.1fr) minmax(0, 0.9fr);
+    gap: clamp(10px, 1.2vw, 18px);
+  }
+}
+
+/* Height is declared, never left to the drawings' own aspect: a section is
+   tall and thin, and an unconstrained SVG would take the page over. */
+.cross-hero__stage .cross-hero__plate {
+  height: clamp(430px, 108vw, 560px);
+}
+
+@media (min-width: 768px) {
+  .cross-hero__stage .cross-hero__plate {
+    height: clamp(380px, 46vw, 440px);
+  }
+}
+
+@media (min-width: 1024px) {
+  .cross-hero__stage .cross-hero__plate {
+    height: clamp(330px, calc(100svh - 372px), 452px);
+  }
+}
+
+.cross-hero__drawing > * {
+  min-width: 0;
+  min-height: 0;
+}
+
+.cross-hero__drawing svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+.cross-hero__readout {
+  display: flex;
+  align-items: baseline;
+  gap: 0.5rem;
+  font-family: 'Kode Mono Variable', ui-monospace, monospace;
+  font-variant-numeric: tabular-nums;
+}
+
+.cross-hero__figure {
+  font-family: 'Kode Mono Variable', ui-monospace, monospace;
+  font-variant-numeric: tabular-nums;
+  font-weight: 500;
+  font-size: clamp(1.5rem, 2.4vw, 2.15rem);
+  line-height: 1;
+  letter-spacing: -0.02em;
+}
+
+.cross-hero__control {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.cross-hero__control-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 1rem;
+  min-width: 0;
+}
+
+.cross-hero__control-head > :first-child {
+  min-width: 0;
+  flex: 1 1 auto;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.cross-hero__control-head > :last-child {
+  flex: 0 0 auto;
+  white-space: nowrap;
+}
+
+@media (max-width: 400px) {
+  .cross-hero__control-head {
+    gap: 0.5rem;
+  }
+  .cross-hero__figure {
+    font-size: 1.35rem;
+  }
+}
+
+.cross-hero__ladder {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 4px;
+}
+
+.cross-bar::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: calc(var(--edge) + 18px);
+  width: 1px;
+  background: var(--cross-rule);
+  opacity: 0.16;
+  pointer-events: none;
+}
+
+@media (min-width: 1024px) {
+  .cross-bar::after {
+    left: var(--meridian);
+    opacity: 0.22;
+  }
+}
+
+.cross-note {
+  font-size: 0.8125rem;
+  line-height: 1.5;
+  color: var(--cross-ink-soft);
+  max-width: 34ch;
+}
+
+.cross-bar__inner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  min-height: 68px;
+}
+
+@media (min-width: 1024px) {
+  .cross-bar__inner {
+    display: grid;
+    grid-template-columns: var(--split) 1fr;
+    gap: 0;
+  }
+  .cross-bar__right {
+    padding-left: clamp(18px, 2.4vw, 40px);
+  }
+}
+
+.cross-bar__right {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: clamp(0.75rem, 1.6vw, 1.75rem);
+  min-width: 0;
+}
+
+/* The bar's controls obey the same measure as the page: never past the track
+   edge the rules end on. */
+.cross-bar__inner > * {
+  min-width: 0;
+}
+
+@media (max-width: 400px) {
+  .cross-bar__right {
+    gap: 0.5rem;
+  }
+  .cross-lang .cross-toggle {
+    min-width: 1.85rem;
+    padding-inline: 0.4rem;
+  }
+  .cross-toggle {
+    padding-inline: 0.55rem;
+  }
+}
+
+.cross-btn--bar {
+  min-height: 42px;
+  height: 42px;
+  gap: 1.25rem;
+  padding-inline: 1.05rem;
+  font-size: 0.9375rem;
+}
+
+/* A band opens with space above its heading and less below it. The rule is
+   the band's own wall; the heading hangs from it, not from the previous
+   section. */
+/* A section head is a heading and its note, set as one block: the note hangs
+   off the heading rather than starting a column of its own. */
+.cross-head {
+  display: grid;
+  gap: 1rem clamp(16px, 2.4vw, 40px);
+}
+
+@media (min-width: 900px) {
+  .cross-head {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1.05fr);
+    align-items: start;
+  }
+}
+
+.cross-head > .cross-body {
+  margin-top: 0;
+}
+
+.cross-band > .cross-track > .cross-split > :first-child > .cross-h2 {
+  margin-top: -0.08em;
+}
+
+/* The elevation is labelled by a short rule, not a column divider. */
+.cross-elevation-label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.cross-elevation-label::before {
+  content: '';
+  width: 18px;
+  height: 1px;
+  background: color-mix(in srgb, var(--cross-pine-ink) 55%, var(--cross-pine));
+}
+
+@media (max-width: 1023px) {
+  .cross-hero__drawing {
+    grid-template-columns: 1fr;
+    grid-template-rows: minmax(0, 1.25fr) minmax(0, 1fr);
+  }
+  .cross-hero__drawing > :last-child::before {
+    display: none;
+  }
+}
+
+/* Component classes below set their own display; these keep Tailwind's
+   responsive visibility working beside them. */
+@media (max-width: 767px) {
+  .cross-bar .cross-btn {
+    display: none;
+  }
+}
+
+/* The bar's two responsive controls. Their visibility lives here, beside the
+   display rules that would otherwise beat Tailwind's utilities. */
+.cross-bar__menu {
+  display: inline-flex;
+}
+
+@media (min-width: 1280px) {
+  .cross-bar__menu {
+    display: none;
+  }
+}
+
+.cross-bar__nav {
+  display: none;
+}
+
+@media (min-width: 1280px) {
+  .cross-bar__nav {
+    display: block;
+  }
+}
+
+@media (max-width: 639px) {
+  .cross-bar .cross-lang {
+    display: none;
+  }
+}
+
+/* The verdict is printed twice: at the arm's end where there is room for the
+   frame's own values, and under the controls where there is not. */
+.cross-hero__verdict {
+  display: block;
+}
+
+@media (min-width: 1024px) {
+  .cross-hero__verdict {
+    display: none;
+  }
+}
+
+/* The check's two states read as one control: a segment, not two buttons. */
+.cross-seg {
+  display: inline-flex;
+  flex-wrap: wrap;
+  border: 1px solid color-mix(in srgb, var(--cross-rule) 34%, transparent);
+}
+
+.cross-seg > button {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 2px;
+  padding: 8px 12px;
+  min-height: 44px;
+  color: var(--cross-ink-soft);
+  border-right: 1px solid color-mix(in srgb, var(--cross-rule) 34%, transparent);
+  transition: background-color 140ms, color 140ms;
+}
+
+.cross-seg > button:last-child {
+  border-right: none;
+}
+
+.cross-seg > button:hover {
+  color: var(--cross-ink);
+  background: color-mix(in srgb, var(--cross-rule) 6%, transparent);
+}
+
+.cross-seg > button[aria-pressed='true'] {
+  background: var(--cross-ink);
+  color: var(--cross-paper);
+}
+
+/* The material ladder: five stops stepped down a diagonal, so the row reads
+   as a comparison rather than a set of tiles. */
+.cross-ladder {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 0;
+}
+
+.cross-ladder > div {
+  border-top: 1px solid color-mix(in srgb, var(--cross-rule) 30%, transparent);
+  padding-top: 10px;
+  padding-right: 16px;
+}
+
+.cross-ladder > div:last-child {
+  padding-right: 0;
+}
+
+/* The comparison's own numbers: the edge each index gives, and the share it
+   removes. They are the reason the row exists. */
+.cross-ladder__value {
+  font-family: 'Kode Mono Variable', ui-monospace, monospace;
+  font-variant-numeric: tabular-nums;
+  font-size: 1.0625rem;
+  line-height: 1.2;
+  color: var(--cross-ink);
+}
+
+.cross-ladder__share {
+  font-family: 'Kode Mono Variable', ui-monospace, monospace;
+  font-variant-numeric: tabular-nums;
+  font-size: 0.8125rem;
+  line-height: 1.2;
+  color: var(--cross-ink-soft);
+}
+
+@media (max-width: 639px) {
+  .cross-ladder {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0 20px;
+  }
+}
+
+/* A track that only carries a section head hands over to the content below
+   it: the head's own block ends closer than a full band would. */
+.cross-track--head {
+  padding-block-end: clamp(20px, 2.6vh, 30px);
+}
+
+/* A band's last track closes the band. */
+.cross-band > .cross-track:last-child {
+  padding-block-end: clamp(46px, 7vh, 84px);
+}
+
+/* The three calls: the answer columns keep their own baseline, and the row
+   is separated by the rule the page is built on, not by air alone. */
+.cross-split.cross-step {
+  border-top: 1px solid color-mix(in srgb, var(--cross-rule) 20%, transparent);
+}
+
+/* The check opens on a rule, like every other band, so it reads as a new
+   argument inside the same section. */
+.cross-check {
+  border-top: 1px solid color-mix(in srgb, var(--cross-rule) 55%, transparent);
+}
+
+/* Figures never wrap: a millimetre reading broken across two lines reads as
+   two readings. */
+.cross-ladder .cross-fig,
+.cross-fig {
+  white-space: nowrap;
+}
+
+/* The ladder's own column labels are long in Indonesian; let them take two
+   lines under the number rather than pushing the row apart. */
+.cross-ladder .cross-label {
+  display: block;
+}
+
+/* The opened menu panel shows only below xl, like the button that opens it. */
+.cross-bar__menu-panel {
+  display: block;
+}
+
+@media (min-width: 1280px) {
+  .cross-bar__menu-panel {
+    display: none;
+  }
+}
+
+.cross-lang .cross-toggle {
+  min-width: 2rem;
+  padding-inline: 0.55rem;
+}
+
+.cross-lang .cross-toggle + .cross-toggle {
+  margin-left: -1px;
+}

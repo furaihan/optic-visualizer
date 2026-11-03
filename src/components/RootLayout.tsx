@@ -7,7 +7,6 @@ import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuIte
 import { Toggle } from './ui/toggle';
 import { useTheme } from '../hooks/useTheme';
 import { BrandRule } from './BrandRule';
-import { LandingNav } from './landing/LandingNav';
 import { useAppHotkeys, useHotkey } from '@tanstack/react-hotkeys';
 import { HotkeysCheatSheet } from './HotkeysCheatSheet';
 import { validateActiveTab, validateView, type Language } from '../types/search-params';
@@ -59,7 +58,7 @@ export function RootLayout() {
         }`}
       >
         {!isLanding && <meta name="robots" content="noindex, nofollow" />}
-        {isLanding ? <LandingNav lang={lang} /> : <GlobalNav />}
+        {!isLanding && <GlobalNav />}
         <main
           className={`flex-1 flex flex-col relative ${
             isLanding ? 'min-h-dvh' : 'min-h-0 overflow-hidden'

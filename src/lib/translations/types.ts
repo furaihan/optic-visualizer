@@ -285,6 +285,16 @@ export interface AppTranslations {
   landHeroReadout: string;
   landHeroEngine: string;
   landHeroIndex: string;
+  /** The plate's own label: what the drawing is a cut through. */
+  landCrossSection: string;
+  landCrossElevation: string;
+  landCrossFlatPlane: string;
+  landCrossCheckTitle: string;
+  landCrossCaseStandard: string;
+  landCrossCasePushed: string;
+  landCrossOverCount: string;
+  landCrossCaseNote: string;
+  landCrossReadNote: string;
   landStatement: string;
   landHowTitle: string;
   landHow1: string;

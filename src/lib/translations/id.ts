@@ -295,6 +295,18 @@ export const translations_id: AppTranslations = {
   landHeroReadout: 'Pembacaan Simulasi Optik',
   landHeroEngine: 'Mesin {version}',
   landHeroIndex: 'Indeks Bias & Material',
+  /** The plate's own label: what the drawing is a cut through. */
+  landCrossSection: 'Potongan — bevel {pct}%',
+  landCrossElevation: 'Tampak depan',
+  landCrossFlatPlane: 'Bidang bingkai datar',
+  landCrossCheckTitle: 'Pemeriksaan',
+  landCrossCaseStandard: 'Kasus standar',
+  landCrossCasePushed: 'Melewati batas',
+  landCrossOverCount: '{n} dari {total} melebihi batas',
+  landCrossCaseNote:
+    'Bingkai yang sama, diukur dengan dua resep. Bingkainya tidak berubah; hanya blank-nya.',
+  landCrossReadNote:
+    'Setiap angka di halaman ini dihitung oleh mesin saat halaman ditampilkan. Ubah satu input, dan gambar, tabel, serta pemeriksaan bergerak bersama.',
   landStatement:
     'Masukkan resep¦ dan ukuran bingkai.¦ Tinjau profil lensa,¦ posisi bevel, dan hasil pengukuran untuk fabrikasi.',
   landHowTitle: 'Tiga langkah memeriksa kecocokan lensa',

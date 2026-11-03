@@ -2,109 +2,101 @@
 
 <!-- impeccable:design-schema 1 -->
 
-The landing page for Optical Tools (AKTRIYO). Recorded from the built surface.
+The landing page for AKTRIYO, recorded from the built surface.
 
 ## Surface
 
-- **Route:** `/` (`src/pages/HomePage.tsx`)
-- **Mode:** Persuade. The visitor is an optician at a dispensing bench, mid-job, and the page's one job is to get them into the simulator.
+- **Route:** `/` (`src/routes/index.tsx` → `src/pages/HomePage.tsx` → `src/components/landing/CrossLanding.tsx`)
+- **Mode:** Persuade. The visitor is an optician mid-job; the page's one job is to get them into the simulator.
 - **Scope:** the landing page only. `/visualizer`, `/aspheric` and `/contact` keep their own sheet language and are not described here.
+- **Build path:** code-led. No comp exists; the approved first-viewport artifact is the HTML sketch at `.impeccable/sketches/assigned.html`.
 
-## World
+## World: The Optical Cross
 
-**Cyclorama Dawn.** One curved lighting wall, lit from below: a full-height gradient from day white through dusk rose into cobalt, ending on a hard horizon, with the bench in black beneath it. The lens is drawn across that line, half in ink on daylight and half in light on the dark.
+A lens is two meridians crossing. The page is built on that cross: one vertical meridian runs the entire document — the bar, the hero, every band, the footer's last line — and hairline rules close each band across the full measure. Nothing floats, nothing is rounded, nothing casts a shadow.
 
-The world's premise: on a lit stage you read what is lit. The page opens in dawn and closes in day, and the product's own geometry is what raises the lights — not a decorative theme.
+The claim sits in the top-left cell the meridian creates. The frame's own values hang at the arm ends above the hero rule. The live section takes the pine plate at the crossing, bleeding past the content edge. Everything below is measured down the same two lines.
 
 ## Tokens
 
-All declared in `src/components/landing/cyclorama.css`, scoped to `.cyc`, so the workbench keeps its sheet roles untouched.
+Declared in `src/components/landing/cross.css`, scoped to `.cross`, so the workbench keeps its sheet roles untouched.
 
-### Palette — light (the exposed print)
+### Palette — light
 
 | Token | Value | Job |
 | --- | --- | --- |
-| `--cyc-sky-1` | `#fffef9` | day white: the top of the wall, the CTA's ink-inverse, the light half of the drawing |
-| `--cyc-sky-2` | `#f7ecdf` | warm cream, 40% down the wall |
-| `--cyc-sky-3` | `#e9c9c0` | dusk rose, 66% |
-| `--cyc-sky-4` | `#8d6a8e` | mauve, 84% |
-| `--cyc-sky-5` | `#2c3a72` | cobalt at the horizon |
-| `--cyc-ground` | `#0a0b12` | the bench |
-| `--cyc-ground-2` | `#10131c` | a raised panel on the bench |
-| `--cyc-ink` | `#141821` | text and drawing ink on the lit half |
-| `--cyc-ink-soft` | `#46536a` | secondary prose on the lit half |
-| `--cyc-ink-faint` | `#4f5c72` | tertiary meta on the lit half |
-| `--cyc-accent` | `#7d3a58` | cue marks on the lit half |
-| `--cyc-mark` | `#a8331c` | **the checking colour** — only for a measurement past its limit, and the one edge under inspection |
-| `--cyc-rail-ink` | `#e8eaef` | text on the bench |
-| `--cyc-rail-soft` | `#a7b2c2` | secondary prose on the bench |
-| `--cyc-rail-dim` | `#94a1b3` | labels and limits on the bench |
-| `--cyc-on` | `#ffd9a8` | **lit** — the active cue label, on the bench only |
+| `--cross-paper` | `#e9e9e4` | the ground: chalk paper, the whole page |
+| `--cross-paper-2` | `#e0e0da` | the ticket's frame, one step off the ground |
+| `--cross-ink` | `#101211` | notation ink: type, rules, the primary action |
+| `--cross-ink-soft` | `#4a504c` | prose and secondary labels |
+| `--cross-pine` | `#0f3b33` | **the plate** — the one surface that is not paper; also the range thumb and a hover |
+| `--cross-pine-ink` | `#e9e9e4` | everything printed on the plate |
+| `--cross-check` | `#b0271d` | **the checking colour** — a measurement past its limit, and nothing else |
 
-### Palette — dark (the same wall at night)
+### Palette — dark (`.dark .cross`)
 
-`html.dark .cyc` re-points the same names: the wall loses its height into deep blues (`#10131f` → `#465f9e`), the bench goes to `#05060a`, and the cue marks lift to warm cream so they still read as light. Nothing else changes meaning.
+Same names, re-pointed: ground `#0c0f0e`, paper-2 `#171d1b`, ink `#e8e9e4`, ink-soft `#a4ada7`, plate `#16594c`, checking red lifted to `#f08a7c`. Meaning never changes; only the values. The plate keeps an inset hairline in dark so it stays a surface and never dissolves into the ground.
 
-### The one non-negotiable token
+### The one non-negotiable rule
 
-`--cyc-draw-bench` — the ink the drawing uses once it crosses onto the bench. It is the sky's own light in daylight and stays light at night, because *a drawing that disappears when the page goes dark is a broken drawing*.
+**The checking red appears only where a measurement is past its limit.** It is not a brand accent and not a highlight. The hero's within-limit readout is ink; the same readout turns red the moment the sphere power pushes edge thickness past 6 mm.
 
 ## Type
 
-Self-hosted through Fontsource, no hosted stylesheet.
+Self-hosted through Fontsource; no hosted stylesheet.
 
 | Face | Role |
 | --- | --- |
-| **Kode Mono Variable** (`--font-mono`) | The measuring voice: every figure, dimension, cue name, sheet label, and the display headings. Its fixed advance is the point — values line up down a column. |
-| **Geist Variable** (`--font-sans`) | Reading: body prose, section headings below the fold, UI labels. |
-| **Archivo Variable** (`--font-archivo`) | Available; currently unused. Remove it from `index.css` if nothing claims it. |
+| **Archivo Variable** (`--font` of the world) | everything. Expanded (`font-stretch` 108–120%) and uppercase for display and headings; 100% for prose |
+| **Kode Mono Variable** | every figure, every label, every dimension on the drawing. Its fixed advance is the point — values line up down a column |
 
-Scale on the landing page: display 49px (hero) / 36px (section) / 20px (values) / 15px (lead) / 13.5px (body) / 11px (labels). Tracking stops at −0.035em. Figures always carry `font-variant-numeric: tabular-nums` (the `.tnum` utility).
+Scale: display `clamp(1.9rem, 3.55vw, 3.15rem)` / section head `clamp(1.35rem, 1.9vw, 1.75rem)` / sub-head `clamp(1.05rem, 1.25vw, 1.2rem)` / body `1.0625rem` / label `0.75rem` tracked +0.13em / hero figure `clamp(1.5rem, 2.4vw, 2.15rem)`. Tracking stops at −0.032em.
 
-## Structure
+## Layout
 
-The first viewport is a single lighting state, measured to a 1440 × 900 frame and bound to absolute positions at `lg`:
+Two lines define the page. The meridian sits at `37.2%` of the content measure. The hero's rule closes row one of the hero grid, which lands at roughly a third of the viewport at 1440×900 (measured 34.2%) rather than the sketch's 27.8%: the claim at its real size needs the taller first cell, and the plate takes what is left. The move is recorded here rather than left as drift. `--track-w`, `--edge`, `--content-w` and `--meridian` are computed once on `.cross` so the spine, the bar and the hero split all read the same number.
 
-| Region | Box (of 1440 × 900) |
+| Region | Where |
 | --- | --- |
-| header rule | 0–66px |
-| claim, cue label, lead, CTA | left 3.33%, top 11.78%, width 31% |
-| the plate (section + opening) | right 3.6%, top 19.4%, width 47.5%, height 470px |
-| cue rail (five states) | bottom, height 21.56% |
+| bar | 68px, name left of the meridian, everything else right of it |
+| hero head (the claim) | left cell, row 1 |
+| arm labels (SPH/BC · edge thickness + verdict) | right cell, row 1, pinned to the arm ends |
+| hero rule | across the full measure, row 2 |
+| hero arm (lead, action, controls) | left cell, row 3 |
+| the plate (section + elevation) | right cell, row 3, overhanging the content edge |
 
-The horizon sits at 57.8% of the hero. The plate's internal horizon is 73.5% of its own box, computed so the two lines coincide.
-
-Below the fold each block is a ruled section rather than a card: a top hairline, a heading, then either a set of rows or a table. No equal-size card grid, no icon tiles.
+Below the fold every block is a band with a hairline at its top: a heading and its note, then rows or a drawing. No equal-size card grid, no icon tiles, no nested cards.
 
 ## Signature interaction
 
-The drawing is not an image. `HeroFigure` computes the section path from the engine's own `result.section` — the front radius, the back radius, the two rim offsets — and draws the frame opening from A, B, ED and the optical centre from PD and fitting height. Change the prescription and the geometry changes, because it is the same lens the sheet measures.
+The drawing is not an image. `CrossSection` computes its path from the engine's own `result.section`: the front and back radii, the two rim offsets, the apexes. Move the sphere slider or pick a material and the outline, the two dimension figures, the elevation's pupil offset and the check line all change together, because they are the same measurement.
 
-The plate is drawn **twice from one path set**, clipped at the horizon: ink above, light below. The two halves cannot drift apart because they are the same paths.
+The section redraws with `cross-redraw` (320ms, exponential ease-out, transform + opacity only). `prefers-reduced-motion` disables it.
 
 ## The rule the page holds itself to
 
-**Every figure is computed at entry, against a named limit.** The checks table reads `measureRows()` from `src/lib/limits.ts`; the limits read `src/data/limits.ts`; the over-limit panel recomputes the same frame with `OVERSIZED_RX` and prints what the engine returns (ET 7.90, anterior 0.85). Nothing on the page is a typed number.
+**Every figure is computed at entry.** No number is typed by hand: the section, the elevations, the ladder's edge thicknesses and reductions, the limit rows and the blank all come from `src/lib/optic-engine` reading `src/data/limits.ts`. The limit rows print `limitLabel()`, so a threshold can never differ between the table and the verdict.
 
-Corollary: a limit either names a published standard or says it is the tool's own working rule. The page says the latter.
+Corollary: a limit either names a published standard or says it is the tool's own working rule. `LIMITS` marks every rule `guideline`, and the page prints the flat-frame note verbatim rather than implying a certification.
 
 ## Motion
 
-One authored moment: the cue comes up. `cyc-raise` (12px rise) staggers the claim, then the plate arrives with `cyc-rise`. Reveals fire once per section via `IntersectionObserver`, with an arithmetic sweep as backup. Everything is visible by default; the hiding class is added by script and only below the fold. `prefers-reduced-motion` disables all of it.
+One authored moment: the section redraws when a figure changes. The hero's three blocks arrive once with `cross-arrive` (620ms, 90ms stagger). There is no reveal-on-scroll hiding: content is visible by default, which is why the old `useReveal` script is not used here. `prefers-reduced-motion` disables all of it.
 
 ## Accessibility
 
-- Both themes are first-class; `color-scheme` follows the theme, so native scrollbars and form controls match.
-- Text meets 4.5:1 against its actual ground in both themes, including the mono annotations.
-- `document.documentElement.lang` follows the `lang` search param.
-- The theme control reflects the **resolved** theme, not the stored preference.
-- All interactive elements carry visible focus rings; the plate carries a full text `aria-label` with its measured values.
-- On widths below 640px the plate's annotations are suppressed (they would render under 9px) and the same figures are read from a labelled list beneath the drawing.
+- Both themes are first-class; the theme control names the resolved state (`useTheme().resolved`, so a `system` preference on a dark machine reads `LIGHT`), and every surface is themed from the palette.
+- Body text meets 4.5:1 against its actual ground in both themes; labels on the plate are mixed at 82% of the plate ink to clear it.
+- Language is reachable from the bar at every width, and `id` is verified as a real locale, not a translation afterthought.
+- Every control is a real button, input or link with a visible focus ring (`.cross :focus-visible`), and the range carries a label.
+- The drawings carry `role="img"` and an `aria-label` stating the values they measure.
+- `aria-live="polite"` on the verdict, so a limit crossing is announced.
 
 ## Prohibited here
 
 - Any figure typed by hand instead of computed.
-- The checking colour used decoratively.
-- A second horizon: the page has exactly one, at 57.8% of the hero.
-- Cards. Sections are ruled, not boxed.
-- A decorative cue label above a heading (removed from all below-fold sections; it survives only on the hero, where it names the actual lighting state).
+- The checking red used decoratively, or for a value that is within its limit.
+- Cards, rounded corners, gradients, glass, and shadows: the page is rules and one flat plate.
+- A kicker or eyebrow above a heading.
+- A second plate: the pine surface belongs to the section, and the close reuses a paper frame around the ticket instead.
+- Hiding content behind an entrance animation.
