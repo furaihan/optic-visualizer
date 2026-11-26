@@ -18,4 +18,5 @@ graphify-out/graph.html
 graphify-out/.graphify_python
 graphify-out/.graphify_root
 graphify-out/.graphify_build.json
+graphify-out/[0-9][0-9][0-9][0-9]-[0-9][0-9]-[0-9][0-9]/
 .playwright-mcp/
