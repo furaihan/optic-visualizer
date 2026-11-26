@@ -18,9 +18,9 @@
     "semantic_hash": "279b0c56f21d658d98b448384c72bfa2"
   },
   "package.json": {
-    "mtime": 1793729303.5323932,
-    "seen": 1793730718.871038,
-    "ast_hash": "a9e7878178d021577e79003ba2f457c7",
+    "mtime": 1795688711.7794054,
+    "seen": 1795688742.0040956,
+    "ast_hash": "f0e99a5c2e47b870d98646c53280512d",
     "semantic_hash": ""
   },
   "scripts/sync-intent-skills.mjs": {
@@ -30,9 +30,9 @@
     "semantic_hash": "c34680a849fe4492f69d677769a16478"
   },
   "skills-lock.json": {
-    "mtime": 1793703150.3556006,
-    "seen": 1793715532.3775678,
-    "ast_hash": "f02daf76fc9a142d90534485120a508c",
+    "mtime": 1795688094.1536174,
+    "seen": 1795688742.0041056,
+    "ast_hash": "03ad0a169241137dccd7e9487a9b0c82",
     "semantic_hash": ""
   },
   "src/assets/bench/credits.json": {
@@ -66,10 +66,10 @@
     "semantic_hash": "62ea70bf3dae9f37efc41f5541d352c3"
   },
   "src/components/ErrorBoundary.tsx": {
-    "mtime": 1792257989.3021727,
-    "seen": 1792502554.5805185,
-    "ast_hash": "daaa1982ad5e9213a543ccf6c351ce14",
-    "semantic_hash": "daaa1982ad5e9213a543ccf6c351ce14"
+    "mtime": 1795688690.1976776,
+    "seen": 1795688742.0041318,
+    "ast_hash": "3492d6d8e5d01f13ddfabffb0da06979",
+    "semantic_hash": ""
   },
   "src/components/RootLayout.tsx": {
     "mtime": 1793707220.6577785,
@@ -132,10 +132,10 @@
     "semantic_hash": "4c108e8cd36f59fba10ee6847cb53ec9"
   },
   "src/components/Sidebar/LabelWithTooltip.tsx": {
-    "mtime": 1792251102.1533227,
-    "seen": 1792502554.5805292,
-    "ast_hash": "958f983961bde5dcdeb412fbd0416a40",
-    "semantic_hash": "958f983961bde5dcdeb412fbd0416a40"
+    "mtime": 1795688690.1976776,
+    "seen": 1795688742.0041568,
+    "ast_hash": "6ac5bb30326e51123178d6955116c3b6",
+    "semantic_hash": ""
   },
   "src/components/Sidebar/LensParametersSection.tsx": {
     "mtime": 1792591413.5321164,
@@ -144,10 +144,10 @@
     "semantic_hash": ""
   },
   "src/components/Sidebar/LimitAlertButton.tsx": {
-    "mtime": 1792251102.154182,
-    "seen": 1792502554.580531,
-    "ast_hash": "17fb71facd5b9ecf92e3f3d5c72a5f98",
-    "semantic_hash": "17fb71facd5b9ecf92e3f3d5c72a5f98"
+    "mtime": 1795688690.1976776,
+    "seen": 1795688742.0041595,
+    "ast_hash": "4cfac07874218bedff0547b6ffb37d95",
+    "semantic_hash": ""
   },
   "src/components/Sidebar/RefractiveIndexDropdown.tsx": {
     "mtime": 1792307209.1728818,
@@ -636,10 +636,10 @@
     "semantic_hash": ""
   },
   "src/pages/ContactPage.tsx": {
-    "mtime": 1792692659.216928,
-    "seen": 1792729200.750272,
-    "ast_hash": "fe5eacac8f67772eaf1bd496ba206e75",
-    "semantic_hash": "fe5eacac8f67772eaf1bd496ba206e75"
+    "mtime": 1795688696.6519704,
+    "seen": 1795688742.0043666,
+    "ast_hash": "5d508259ce470e3370bd4de88d833af9",
+    "semantic_hash": ""
   },
   "src/pages/HomePage.tsx": {
     "mtime": 1793707069.7299216,

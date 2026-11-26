@@ -1,5 +1,5 @@
 import React from 'react';
-import { HelpCircleIcon } from "lucide-react";
+import { CircleHelpIcon } from "lucide-react";
 import { Language, getTooltipByLabel } from '../../lib/translations';
 import { Tooltip, TooltipTrigger, TooltipContent } from '../ui/tooltip';
 
@@ -45,7 +45,7 @@ export const LabelWithTooltip: React.FC<LabelWithTooltipProps> = ({
       >
         {icon && <span className="shrink-0" aria-hidden="true">{icon}</span>}
         <span>{label}</span>
-        <HelpCircleIcon size={12} className="shrink-0 text-sheet-muted" aria-hidden="true" />
+        <CircleHelpIcon size={12} className="shrink-0 text-sheet-muted" aria-hidden="true" />
       </TooltipTrigger>
       <TooltipContent className="max-w-[240px] rounded-sm bg-sheet-ink p-2.5 text-[13px] leading-snug text-sheet-ground">
         {tooltipText}

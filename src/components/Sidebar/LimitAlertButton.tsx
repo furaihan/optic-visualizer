@@ -1,5 +1,5 @@
 import { cn } from "@/src/lib/utils";
-import { AlertCircleIcon } from "lucide-react";
+import { CircleAlertIcon } from "lucide-react";
 
 /**
  * The mark next to a frame dimension that is outside its ergonomic range.
@@ -42,6 +42,6 @@ export const LimitAlertButton: React.FC<LimitAlertButtonProps> = ({
     aria-label={`${fieldName}: ${title}`}
     aria-pressed={isHighlighted}
   >
-    <AlertCircleIcon size={13} aria-hidden="true" />
+    <CircleAlertIcon size={13} aria-hidden="true" />
   </button>
 );

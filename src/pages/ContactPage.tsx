@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { ArrowLeftIcon, ZapIcon, SparklesIcon, Code2Icon, RocketIcon, StarIcon, HeartIcon, AlertCircleIcon, CheckCircle2Icon, MailIcon, PhoneIcon, MapPinIcon, GlobeIcon, Share2Icon, MessageCircleIcon } from "lucide-react";
+import { ArrowLeftIcon, ZapIcon, SparklesIcon, CodeXmlIcon, RocketIcon, StarIcon, HeartIcon, CircleAlertIcon, CircleCheckIcon, MailIcon, PhoneIcon, MapPinIcon, GlobeIcon, Share2Icon, MessageCircleIcon } from "lucide-react";
 import { Button } from "@components/ui/button";
 import { Badge } from "@components/ui/badge";
 import { ScrollArea } from "@components/ui/scroll-area";
@@ -155,7 +155,7 @@ export function ContactPage() {
           <SparklesIcon size={24} />
         </div>
         <div className="absolute top-1/3 right-12 text-cyan-500/20 animate-pulse">
-          <Code2Icon size={28} />
+          <CodeXmlIcon size={28} />
         </div>
         <div className="absolute bottom-1/3 left-1/4 text-purple-500/20 animate-bounce" style={{ animationDuration: '4s' }}>
           <RocketIcon size={26} />
@@ -266,11 +266,11 @@ export function ContactPage() {
             >
               <CardContent className="pt-4 sm:pt-6 px-4 sm:px-6">
                 <div className="flex flex-col sm:flex-row items-start gap-3 sm:gap-4 text-left">
-                  <AlertCircleIcon size={28} className="text-yellow-500 shrink-0" />
+                  <CircleAlertIcon size={28} className="text-yellow-500 shrink-0" />
 
                   <div className="min-w-0 flex-1">
                     <h3 className="font-mono font-bold text-xs sm:text-sm uppercase tracking-wider mb-2 text-primary flex items-center gap-2">
-                      <Code2Icon size={16} />
+                      <CodeXmlIcon size={16} />
                       Placeholder Route
                     </h3>
 
@@ -391,7 +391,7 @@ export function ContactPage() {
               opacity: 0,
             }}
           >
-            <CheckCircle2Icon size={16} className="text-green-500" />
+            <CircleCheckIcon size={16} className="text-green-500" />
             <span>Page status: Ready for development</span>
           </div>
         </div>

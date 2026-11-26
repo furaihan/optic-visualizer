@@ -1,5 +1,5 @@
 import React, { Component, ErrorInfo, ReactNode } from 'react';
-import { AlertTriangleIcon, RotateCcwIcon, CopyIcon, CheckIcon } from "lucide-react";
+import { TriangleAlertIcon, RotateCcwIcon, CopyIcon, CheckIcon } from "lucide-react";
 import { Card } from './ui/card';
 import { Button } from './ui/button';
 
@@ -64,7 +64,7 @@ export class ErrorBoundary extends Component<Props, State> {
           <Card className="w-full max-w-md space-y-6 rounded-sm bg-sheet-panel p-6 md:p-8">
             <div className="flex items-start gap-4">
               <div className="shrink-0 rounded-sm bg-sheet-alert p-3 text-sheet-warning">
-                <AlertTriangleIcon size={24} />
+                <TriangleAlertIcon size={24} />
               </div>
               <div className="space-y-1">
                 <h2 className="text-[18px] font-medium leading-tight text-sheet-ink">
